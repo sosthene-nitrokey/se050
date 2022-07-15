@@ -1,5 +1,19 @@
-use core::convert::{Into, TryFrom};
+use core::convert::{From, Into, TryFrom};
 use embedded_hal::blocking::delay::DelayMs;
+
+pub struct DelayWrapper<'a> {
+    pub inner: &'a mut dyn DelayMs<u32>,
+}
+impl<'a, T> From<&'a mut T> for DelayWrapper<'a>
+where
+    T: DelayMs<u32> + 'a,
+{
+    fn from(delay: &'a mut T) -> Self {
+        Self { inner: delay }
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 pub enum Iso7816Error {
     ValueError,
@@ -118,22 +132,14 @@ pub enum T1Error {
 }
 
 pub trait T1Proto {
-    fn send_apdu(
-        &mut self,
-        apdu: &CApdu,
-        le: u8,
-        delay: &mut impl DelayMs<u32>,
-    ) -> Result<(), T1Error>;
+    fn send_apdu(&mut self, apdu: &CApdu, le: u8, delay: &mut DelayWrapper) -> Result<(), T1Error>;
     fn receive_apdu<'a, 'b>(
         &mut self,
         buf: &'b mut [u8],
         apdu: &'a mut RApdu<'b>,
-        delay: &mut impl DelayMs<u32>,
+        delay: &mut DelayWrapper,
     ) -> Result<(), T1Error>;
-    fn interface_soft_reset(
-        &mut self,
-        delay: &mut impl DelayMs<u32>,
-    ) -> Result<AnswerToReset, T1Error>;
+    fn interface_soft_reset(&mut self, delay: &mut DelayWrapper) -> Result<AnswerToReset, T1Error>;
 }
 
 //////////////////////////////////////////////////////////////////////////////

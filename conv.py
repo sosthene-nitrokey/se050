@@ -51,11 +51,10 @@ for ln in infile:
 		tname = fields[2]
 		vRev = {}
 		mask = None
-		for f in fields:
-			if f.startswith("mask:"):
-				mask = f[5:]
 	elif tname is not None:
-		if "=" in ln:
+		if ln.startswith("    /* mask:"):
+			mask = ln[12:-4]
+		elif "=" in ln:
 			fn, _, vn = ln.strip().split(" ")
 			vn = vn.strip(",")
 			vRev[vn] = fn
@@ -63,6 +62,7 @@ for ln in infile:
 			emit_convs(tname, vRev, mask)
 			tname = None
 		else:
+			print("// not emitting %s, bogus line: %s" % (tname, ln))
 			# suppress emitting this enum, probably not meant to be?
 			tname = None
 

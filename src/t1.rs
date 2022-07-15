@@ -1,6 +1,5 @@
 use crate::types::*;
 use core::convert::{Into, TryInto};
-use embedded_hal::blocking::delay::DelayMs;
 
 pub struct T1overI2C<TWI>
 where
@@ -33,14 +32,14 @@ where
         }
     }
 
-    fn twi_write(&mut self, data: &[u8], delay: &mut impl DelayMs<u32>) -> Result<(), T1Error> {
+    fn twi_write(&mut self, data: &[u8], delay: &mut DelayWrapper) -> Result<(), T1Error> {
         for _i in 0..TWI_RETRIES {
             let e = self.twi.write(self.se_address as u8, data);
             if e.is_ok() {
                 trace!("t1w ok({})", i);
                 return Ok(());
             }
-            delay.delay_ms(TWI_RETRY_DELAY_MS);
+            delay.inner.delay_ms(TWI_RETRY_DELAY_MS);
             // TODO: we should only loop on AddressNack errors
             // but the existing traits don't provide an API for that
         }
@@ -48,14 +47,14 @@ where
         return Err(T1Error::TransmitError);
     }
 
-    fn twi_read(&mut self, data: &mut [u8], delay: &mut impl DelayMs<u32>) -> Result<(), T1Error> {
+    fn twi_read(&mut self, data: &mut [u8], delay: &mut DelayWrapper) -> Result<(), T1Error> {
         for _i in 0..TWI_RETRIES {
             let e = self.twi.read(self.se_address as u8, data);
             if e.is_ok() {
                 trace!("t1r ok({})", i);
                 return Ok(());
             }
-            delay.delay_ms(TWI_RETRY_DELAY_MS);
+            delay.inner.delay_ms(TWI_RETRY_DELAY_MS);
             // TODO: we should only loop on AddressNack errors
             // but the existing traits don't provide an API for that
         }
@@ -67,7 +66,7 @@ where
         &mut self,
         code: T1SCode,
         data: &[u8],
-        delay: &mut impl DelayMs<u32>,
+        delay: &mut DelayWrapper,
     ) -> Result<(), T1Error> {
         let mut buf: [u8; 260] = [0u8; 260];
 
@@ -88,7 +87,7 @@ where
         &mut self,
         code: T1SCode,
         data: &mut [u8],
-        delay: &mut impl DelayMs<u32>,
+        delay: &mut DelayWrapper,
     ) -> Result<(), T1Error> {
         self.twi_read(&mut data[0..3], delay)?;
         trace!("T1 R S H {}", hexstr!(&data[0..3]));
@@ -127,12 +126,7 @@ where
     TWI: embedded_hal::blocking::i2c::Read + embedded_hal::blocking::i2c::Write,
 {
     #[inline(never)]
-    fn send_apdu(
-        &mut self,
-        apdu: &CApdu,
-        le: u8,
-        delay: &mut impl DelayMs<u32>,
-    ) -> Result<(), T1Error> {
+    fn send_apdu(&mut self, apdu: &CApdu, le: u8, delay: &mut DelayWrapper) -> Result<(), T1Error> {
         let mut apdubuf: [u8; 260] = [0u8; 260];
         if apdu.data.len() > 248 {
             todo!();
@@ -165,7 +159,7 @@ where
         &mut self,
         buf: &'b mut [u8],
         apdu: &'a mut RApdu<'b>,
-        delay: &mut impl DelayMs<u32>,
+        delay: &mut DelayWrapper,
     ) -> Result<(), T1Error> {
         self.twi_read(&mut buf[0..3], delay)?;
         trace!("T1 R I H {}", hexstr!(&buf[0..3]));
@@ -204,10 +198,7 @@ where
     }
 
     #[inline(never)]
-    fn interface_soft_reset(
-        &mut self,
-        delay: &mut impl DelayMs<u32>,
-    ) -> Result<AnswerToReset, T1Error> {
+    fn interface_soft_reset(&mut self, delay: &mut DelayWrapper) -> Result<AnswerToReset, T1Error> {
         let mut atrbuf: [u8; 64] = [0u8; 64];
         self.send_s(T1SCode::InterfaceSoftReset, &[], delay)?;
         self.receive_s(T1SCode::InterfaceSoftReset, &mut atrbuf, delay)?;

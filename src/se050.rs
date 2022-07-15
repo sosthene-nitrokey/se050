@@ -1,6 +1,5 @@
 use crate::types::*;
 use core::convert::{Into, TryFrom};
-use embedded_hal::blocking::delay::DelayMs;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Se050Error {
@@ -188,23 +187,15 @@ include!("se050_convs.rs");
 //////////////////////////////////////////////////////////////////////////////
 
 pub trait Se050Device {
-    fn enable(&mut self, delay: &mut impl DelayMs<u32>) -> Result<(), Se050Error>;
-    fn disable(&mut self, delay: &mut impl DelayMs<u32>);
-    fn get_random(
-        &mut self,
-        buf: &mut [u8],
-        delay: &mut impl DelayMs<u32>,
-    ) -> Result<(), Se050Error>;
-    fn write_aes_key(
-        &mut self,
-        key: &[u8],
-        delay: &mut impl DelayMs<u32>,
-    ) -> Result<(), Se050Error>;
+    fn enable(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error>;
+    fn disable(&mut self, _delay: &mut DelayWrapper);
+    fn get_random(&mut self, buf: &mut [u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
+    fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
     fn encrypt_aes_oneshot(
         &mut self,
         data: &[u8],
         enc: &mut [u8],
-        delay: &mut impl DelayMs<u32>,
+        delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error>;
 }
 
@@ -242,7 +233,7 @@ impl<T> Se050Device for Se050<T>
 where
     T: T1Proto,
 {
-    fn enable(&mut self, delay: &mut impl DelayMs<u32>) -> Result<(), Se050Error> {
+    fn enable(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
         /* Step 1: perform interface soft reset, parse ATR */
         let r = self.t1_proto.interface_soft_reset(delay);
         if r.is_err() {
@@ -291,18 +282,14 @@ where
         Ok(())
     }
 
-    fn disable(&mut self, delay: &mut impl DelayMs<u32>) {
+    fn disable(&mut self, _delay: &mut DelayWrapper) {
         // send S:EndApduSession
         // receive ACK
         // power down
     }
 
     #[inline(never)]
-    fn get_random(
-        &mut self,
-        buf: &mut [u8],
-        delay: &mut impl DelayMs<u32>,
-    ) -> Result<(), Se050Error> {
+    fn get_random(&mut self, buf: &mut [u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
         if buf.len() > 250 {
             todo!();
         }
@@ -357,11 +344,7 @@ where
 
     #[inline(never)]
     /* no support yet for rfc3394 key wrappings, policies or max attempts */
-    fn write_aes_key(
-        &mut self,
-        key: &[u8],
-        delay: &mut impl DelayMs<u32>,
-    ) -> Result<(), Se050Error> {
+    fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
         if key.len() != 16 {
             todo!();
         }
@@ -423,7 +406,7 @@ where
         &mut self,
         data: &[u8],
         enc: &mut [u8],
-        delay: &mut impl DelayMs<u32>,
+        delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         if data.len() > 240 || (data.len() % 16 != 0) {
             error!("Input data too long or unaligned");
