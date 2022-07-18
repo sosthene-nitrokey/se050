@@ -1,14 +1,14 @@
 use core::convert::{From, Into, TryFrom};
 use embedded_hal::blocking::delay::DelayMs;
 
-pub struct DelayWrapper<'a> {
-    pub inner: &'a mut dyn DelayMs<u32>,
+pub struct DelayWrapper {
+    pub inner: &'static mut dyn DelayMs<u32>,
 }
-impl<'a, T> From<&'a mut T> for DelayWrapper<'a>
+impl<T> From<&'static mut T> for DelayWrapper
 where
-    T: DelayMs<u32> + 'a,
+    T: DelayMs<u32>,
 {
-    fn from(delay: &'a mut T) -> Self {
+    fn from(delay: &'static mut T) -> Self {
         Self { inner: delay }
     }
 }
