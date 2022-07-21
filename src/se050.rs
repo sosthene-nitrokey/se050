@@ -268,7 +268,7 @@ where
         let adata = appid_apdu.data;
         let asw = appid_apdu.sw;
         if asw != 0x9000 || adata.len() != 7 {
-            error!("SE050 GP SELECT Err: {:?} {:x}", hexstr!(adata), asw);
+            error!("SE050 GP SELECT Err: {:?} {:x}", delog::hex_str!(adata), asw);
             return Err(Se050Error::UnknownError);
         }
 
@@ -325,6 +325,7 @@ where
             for i in 0..rcvlen {
                 buf[i] = rapdu.data[4 + i];
             }
+            debug!("SE050 GetRandom OK");
             Ok(())
         } else if rapdu.data[1] < 0x80 {
             let rcvlen: usize = rapdu.data[1] as usize;
@@ -335,6 +336,7 @@ where
             for i in 0..rcvlen {
                 buf[i] = rapdu.data[2 + i];
             }
+            debug!("SE050 GetRandom OK");
             Ok(())
         } else {
             error!("SE050 GetRandom Invalid R-APDU Length");
