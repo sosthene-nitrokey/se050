@@ -147,7 +147,7 @@ where
     TWI: embedded_hal::blocking::i2c::Read + embedded_hal::blocking::i2c::Write,
 {
     #[inline(never)]
-    fn send_apdu(&mut self, apdu: &CApdu, le: u8, delay: &mut DelayWrapper) -> Result<(), T1Error> {
+    fn send_apdu(&mut self, apdu: &CApdu, delay: &mut DelayWrapper) -> Result<(), T1Error> {
         let mut peek: Option<u8> = None;
         let mut buf: heapless::Vec<u8, MAX_IFSC> = heapless::Vec::new();
         let mut apdu_iter = apdu.byte_iter();

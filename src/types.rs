@@ -262,6 +262,7 @@ pub enum T1SCode {
     InterfaceSoftReset = 15,
 }
 
+#[derive(Debug)]
 pub enum T1Error {
     TransmitError,
     ReceiveError,
@@ -273,7 +274,7 @@ pub enum T1Error {
 }
 
 pub trait T1Proto {
-    fn send_apdu(&mut self, apdu: &CApdu, le: u8, delay: &mut DelayWrapper) -> Result<(), T1Error>;
+    fn send_apdu(&mut self, apdu: &CApdu, delay: &mut DelayWrapper) -> Result<(), T1Error>;
     fn receive_apdu_raw<'a>(
         &mut self,
         buf: &'a mut [u8],

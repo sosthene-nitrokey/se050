@@ -1,5 +1,6 @@
 use crate::types::*;
 use core::convert::{Into, TryFrom};
+use byteorder::{ByteOrder, BE, LE};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Se050Error {
