@@ -140,17 +140,9 @@ where
         }
     }
 
-}
-
-impl<TWI> T1Proto for T1overI2C<TWI>
-where
-    TWI: embedded_hal::blocking::i2c::Read + embedded_hal::blocking::i2c::Write,
-{
-    #[inline(never)]
-    fn send_apdu(&mut self, apdu: &CApdu, delay: &mut DelayWrapper) -> Result<(), T1Error> {
+    fn send_apdu_from_iter(&mut self, apdu_iter: &mut CApduByteIterator, delay: &mut DelayWrapper) -> Result<(), T1Error> {
         let mut peek: Option<u8> = None;
         let mut buf: heapless::Vec<u8, MAX_IFSC> = heapless::Vec::new();
-        let mut apdu_iter = apdu.byte_iter();
 
         loop {
             buf.clear();
@@ -171,6 +163,21 @@ where
         }
 
         Ok(())
+    }
+}
+
+impl<TWI> T1Proto for T1overI2C<TWI>
+where
+    TWI: embedded_hal::blocking::i2c::Read + embedded_hal::blocking::i2c::Write,
+{
+    #[inline(never)]
+    fn send_apdu(&mut self, apdu: &CApdu, delay: &mut DelayWrapper) -> Result<(), T1Error> {
+        self.send_apdu_from_iter(&mut apdu.byte_iter(), delay)
+    }
+
+    #[inline(never)]
+    fn send_apdu_raw(&mut self, apdu: &RawCApdu, delay: &mut DelayWrapper) -> Result<(), T1Error> {
+        self.send_apdu_from_iter(&mut apdu.byte_iter(), delay)
     }
 
     #[inline(never)]

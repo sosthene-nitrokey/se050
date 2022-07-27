@@ -249,14 +249,15 @@ where
             0xA0, 0x00, 0x00, 0x03, 0x96, 0x54, 0x53, 0x00, 0x00, 0x00, 0x01, 0x03, 0x00, 0x00,
             0x00, 0x00,
         ];
-        let app_select_apdu = CApdu::new(
-            ApduClass::StandardPlain,
-            ApduStandardInstruction::SelectFile.into(),
-            0x04,
-            0x00,
-            Some(0) // TODO: RAW PAYLOAD -> &app_id,
-        );
-        self.t1_proto.send_apdu(&app_select_apdu, delay).map_err(|_| Se050Error::UnknownError)?;
+        let app_select_apdu = RawCApdu {
+            cla: ApduClass::StandardPlain,
+            ins: ApduStandardInstruction::SelectFile.into(),
+            p1: 0x04,
+            p2: 0x00,
+            data: &app_id,
+            le: Some(0),
+        };
+        self.t1_proto.send_apdu_raw(&app_select_apdu, delay).map_err(|_| Se050Error::UnknownError)?;
 
         let mut appid_data: [u8; 11] = [0; 11];
         let mut appid_apdu = self.t1_proto

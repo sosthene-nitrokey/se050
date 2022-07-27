@@ -2,7 +2,7 @@ use core::convert::{From, Into, TryFrom};
 use embedded_hal::blocking::delay::DelayMs;
 
 // SE050 T1 mandates a single-byte LEN field, so IFS is strictly limited
-pub const MAX_IFSC: usize = 255;
+pub const MAX_IFSC: usize = 254;
 
 // T1 frame is NAD+PCB+LEN, IFS (up to IFSC), CRC16 (2)
 pub const MAX_T1_FRAME_SIZE: usize = 3 + MAX_IFSC + 2;
@@ -118,6 +118,32 @@ impl<'a> RApdu<'a> {
 
 //////////////////////////////////////////////////////////////////////////////
 
+pub struct RawCApdu<'a> {
+    pub cla: ApduClass,
+    pub ins: u8,
+    pub p1: u8,
+    pub p2: u8,
+    pub data: &'a [u8],
+    pub le: Option<usize>,
+}
+
+impl<'a> RawCApdu<'a> {
+    pub fn new(cla: ApduClass, ins: u8, p1: u8, p2: u8, data: &'a [u8], le: Option<usize>) -> Self {
+        Self {
+            cla,
+            ins,
+            p1,
+            p2,
+            data,
+            le,
+        }
+    }
+
+    pub fn byte_iter(&self) -> CApduByteIterator<'_> {
+        CApduByteIterator::from_capdu_raw(self)
+    }
+}
+
 pub struct CApdu<'a> {
     pub cla: ApduClass,
     pub ins: u8,
@@ -126,70 +152,6 @@ pub struct CApdu<'a> {
     tlvs: heapless::Vec<SimpleTlv<'a>, MAX_TLVS>,
     payload_len: usize,
     pub le: Option<usize>,
-}
-
-pub struct CApduByteIterator<'a> {
-    capdu: &'a CApdu<'a>,
-    extended: bool,
-    capdu_header: heapless::Vec<u8, 7>,
-    capdu_trailer: heapless::Vec<u8, 3>,
-    section: usize,
-    off: usize,
-}
-
-impl<'a> CApduByteIterator<'a> {
-    fn new(capdu: &'a CApdu<'a>) -> Self {
-        let is_extended = capdu.payload_len > 255 || capdu.le.map_or(false, |le| le > 255);
-        let mut header = heapless::Vec::from_slice(&[capdu.cla.into(), capdu.ins, capdu.p1, capdu.p2]).unwrap();
-        let mut trailer = heapless::Vec::new();
-        if capdu.payload_len > 0 {
-            if is_extended {
-                header.extend_from_slice(&[0x00, (capdu.payload_len >> 8) as u8, capdu.payload_len as u8]).unwrap();
-            } else {
-                header.push(capdu.payload_len as u8).unwrap();
-            }
-        }
-        if let Some(le) = capdu.le {
-            if is_extended {
-                trailer.extend_from_slice(&[0x00, (le >> 8) as u8, le as u8]).unwrap();
-            } else {
-                trailer.push(le as u8).unwrap();
-            }
-        }
-
-        Self { capdu: capdu, extended: is_extended, capdu_header: header, capdu_trailer: trailer, section: 0, off: 0 }
-    }
-
-    fn current_slice(&self) -> Option<&[u8]> {
-        match self.section {
-        0 => { Some(&self.capdu_header) },
-        i if i <= 2*self.capdu.tlvs.len() && i % 2 == 1 => { Some(&self.capdu.tlvs[i>>1].header) },
-        i if i <= 2*self.capdu.tlvs.len() => { Some(&self.capdu.tlvs[(i-1)>>1].data) },
-        i if i == 2*MAX_TLVS+1 => { Some(&self.capdu_trailer) },
-        _ => { None },
-        }
-    }
-}
-
-impl<'a> Iterator for CApduByteIterator<'a> {
-    type Item = u8;
-
-    fn next(&mut self) -> Option<u8> {
-        let slice = self.current_slice();
-        if slice.is_none() { return None; }
-        let ret = slice.unwrap()[self.off];
-
-        self.off += 1;
-        loop {
-            if let Some(slice) = self.current_slice() {
-                if self.off < slice.len() { break; }
-            }
-            self.off = 0;
-            self.section += 1;
-            if self.section > 2*MAX_TLVS+1 { break; }
-        }
-        Some(ret)
-    }
 }
 
 impl<'a> CApdu<'a> {
@@ -211,7 +173,114 @@ impl<'a> CApdu<'a> {
     }
 
     pub fn byte_iter(&self) -> CApduByteIterator<'_> {
-        CApduByteIterator::new(self)
+        CApduByteIterator::from_capdu(self)
+    }
+}
+
+pub struct CApduByteIterator<'a> {
+    // capdu: &'a CApdu<'a>,
+    capdu_header: heapless::Vec<u8, 7>,
+    body: heapless::Deque<&'a [u8], {2*MAX_TLVS}>,
+    capdu_trailer: heapless::Vec<u8, 3>,
+    area: usize,
+    off: usize,
+}
+
+impl<'a> CApduByteIterator<'a> {
+    fn from_capdu_common(cla: ApduClass, ins: u8, p1: u8, p2: u8, lc: usize, le: Option<usize>) -> Self {
+        let is_extended = lc > 255 || le.map_or(false, |le| le > 255);
+
+        let mut obj = Self {
+            // capdu: capdu,
+            capdu_header: heapless::Vec::from_slice(&[cla.into(), ins, p1, p2]).unwrap(),
+            body: heapless::Deque::new(),
+            capdu_trailer: heapless::Vec::new(),
+            area: 0,
+            off: 0
+        };
+
+
+
+        if lc > 0 {
+            if is_extended {
+                obj.capdu_header.extend_from_slice(&[0x00, (lc >> 8) as u8, lc as u8]).unwrap();
+            } else {
+                obj.capdu_header.push(lc as u8).unwrap();
+            }
+        }
+        if let Some(le) = le {
+            if is_extended {
+                obj.capdu_trailer.extend_from_slice(&[0x00, (le >> 8) as u8, le as u8]).unwrap();
+            } else {
+                obj.capdu_trailer.push(le as u8).unwrap();
+            }
+        }
+
+        obj
+    }
+
+    fn from_capdu(capdu: &'a CApdu<'a>) -> Self {
+        let mut obj = Self::from_capdu_common(capdu.cla, capdu.ins, capdu.p1, capdu.p2, capdu.payload_len, capdu.le);
+
+        for tlv in &capdu.tlvs {
+            obj.body.push_back(tlv.header.as_slice()).unwrap();
+            obj.body.push_back(tlv.data).unwrap();
+        }
+
+        obj
+    }
+
+    fn from_capdu_raw(capdu: &'a RawCApdu<'a>) -> Self {
+        let mut obj = Self::from_capdu_common(capdu.cla, capdu.ins, capdu.p1, capdu.p2, capdu.data.len(), capdu.le);
+
+        if capdu.data.len() > 0 {
+            obj.body.push_back(capdu.data).unwrap();
+        }
+
+        obj
+    }
+}
+
+impl<'a> Iterator for CApduByteIterator<'a> {
+    type Item = u8;
+
+    fn next(&mut self) -> Option<u8> {
+        match self.area {
+        0 => {
+            let ret = self.capdu_header[self.off];
+            self.off += 1;
+            if self.off == self.capdu_header.len() {
+                self.area = 1;
+                self.off = 0;
+            }
+            Some(ret)
+        },
+        1 => {
+            let curr = self.body.front().unwrap();
+            let ret = curr[self.off];
+            self.off += 1;
+            loop {
+                if self.off < curr.len() { break; }
+                self.off = 0;
+                self.body.pop_front();
+                if self.body.front().is_none() {
+                    self.area = 2;
+                }
+                break;
+            }
+            Some(ret)
+        },
+        2 => {
+            let ret = self.capdu_trailer[self.off];
+            self.off += 1;
+            if self.off == self.capdu_trailer.len() {
+                self.area = 3;
+                self.off = 0;
+            }
+            Some(ret)
+        },
+        _ => { None }
+        }
     }
 }
 
@@ -290,6 +359,7 @@ pub enum T1Error {
 
 pub trait T1Proto {
     fn send_apdu(&mut self, apdu: &CApdu, delay: &mut DelayWrapper) -> Result<(), T1Error>;
+    fn send_apdu_raw(&mut self, apdu: &RawCApdu, delay: &mut DelayWrapper) -> Result<(), T1Error>;
     fn receive_apdu_raw<'a>(
         &mut self,
         buf: &'a mut [u8],
