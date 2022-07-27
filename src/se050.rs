@@ -273,9 +273,9 @@ where
         }
 
         self.app_info = Some(Se050AppInfo {
-            applet_version: get_u24_be(&adata[0..3]),
-            features: get_u16_be(&adata[3..5]),
-            securebox_version: get_u16_be(&adata[5..7]),
+            applet_version: BE::read_uint(&adata[0..3], 3),
+            features: BE::read_u16(&adata[3..5]),
+            securebox_version: BE::read_u16(&adata[5..7]),
         });
         debug!("SE050 App: {:?}", self.app_info.as_ref().unwrap());
 
@@ -317,7 +317,7 @@ where
         }
 
         if rapdu.data[1] == 0x82 {
-            let rcvlen = get_u16_be(&rapdu.data[2..4]) as usize;
+            let rcvlen = BE::read_u16(&rapdu.data[2..4]) as usize;
             if rcvlen != buf.len() {
                 error!("SE050 GetRandom Length Mismatch");
                 return Err(Se050Error::UnknownError);
@@ -456,7 +456,7 @@ where
         }
 
         if rapdu.data[1] == 0x82 {
-            let rcvlen = get_u16_be(&rapdu.data[2..4]) as usize;
+            let rcvlen = BE::read_u16(&rapdu.data[2..4]) as usize;
             if rcvlen != enc.len() {
                 error!("SE050 EncryptAESOneshot Length Mismatch");
                 return Err(Se050Error::UnknownError);

@@ -1,6 +1,15 @@
 use core::convert::{From, Into, TryFrom};
 use embedded_hal::blocking::delay::DelayMs;
 
+// SE050 T1 mandates a single-byte LEN field, so IFS is strictly limited
+pub const MAX_IFSC: usize = 255;
+
+// T1 frame is NAD+PCB+LEN, IFS (up to IFSC), CRC16 (2)
+pub const MAX_T1_FRAME_SIZE: usize = 3 + MAX_IFSC + 2;
+
+// 8 TLV payload objects should be enough for every request?
+pub const MAX_TLVS: usize = 8;
+
 pub struct DelayWrapper {
     pub inner: &'static mut dyn DelayMs<u32>,
 }
@@ -54,52 +63,140 @@ pub enum ApduStandardInstruction {
 
 //////////////////////////////////////////////////////////////////////////////
 
+#[derive(Debug)]
 pub struct SimpleTlv<'a> {
     tag: u8,
+    header: heapless::Vec<u8, 3>,
     data: &'a [u8],
 }
+
+impl<'a> SimpleTlv<'a> {
+    pub fn new(tag: u8, data: &'a [u8]) -> Self {
+        let header = if data.len() < 128 {
+            heapless::Vec::from_slice(&[tag, data.len() as u8]).unwrap()
+        } else { 
+            heapless::Vec::from_slice(&[tag, 0x82, (data.len() >> 8) as u8, data.len() as u8]).unwrap()
+        };
+        Self { tag, header, data }
+    }
+
+    pub fn len(&self) -> usize {
+        self.header.len() + self.data.len()
+    }
+
+    pub fn get_header(&self) -> &heapless::Vec<u8, 3> {
+        &self.header
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+pub struct RawRApdu<'a> {
+    pub data: &'a [u8],
+    pub sw: u16,
+}
+
+pub struct RApdu<'a> {
+    pub tlvs: heapless::Vec<SimpleTlv<'a>, MAX_TLVS>,
+    pub sw: u16,
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 pub struct CApdu<'a> {
     pub cla: ApduClass,
     pub ins: u8,
     pub p1: u8,
     pub p2: u8,
-    pub data: &'a [u8],
+    tlvs: heapless::Vec<SimpleTlv<'a>, MAX_TLVS>,
+    payload_len: usize,
+    pub le: Option<usize>,
 }
 
-pub struct RApdu<'a> {
-    pub data: &'a [u8],
-    pub sw: u16,
+pub struct CApduByteIterator<'a> {
+    capdu: &'a CApdu<'a>,
+    extended: bool,
+    capdu_header: heapless::Vec<u8, 7>,
+    capdu_trailer: heapless::Vec<u8, 3>,
+    section: usize,
+    off: usize,
+}
+
+impl<'a> CApduByteIterator<'a> {
+    fn new(capdu: &'a CApdu<'a>) -> Self {
+        let is_extended = capdu.payload_len > 255 || capdu.le.map_or(false, |le| le > 255);
+        let mut header = heapless::Vec::from_slice(&[capdu.cla.into(), capdu.ins, capdu.p1, capdu.p2]).unwrap();
+        let mut trailer = heapless::Vec::new();
+        if capdu.payload_len > 0 {
+            if is_extended {
+                header.extend_from_slice(&[0x00, (capdu.payload_len >> 8) as u8, capdu.payload_len as u8]).unwrap();
+            } else {
+                header.push(capdu.payload_len as u8).unwrap();
+            }
+        }
+        if let Some(le) = capdu.le {
+            if is_extended {
+                trailer.extend_from_slice(&[0x00, (le >> 8) as u8, le as u8]).unwrap();
+            } else {
+                trailer.push(le as u8).unwrap();
+            }
+        }
+
+        Self { capdu: capdu, extended: is_extended, capdu_header: header, capdu_trailer: trailer, section: 0, off: 0 }
+    }
+
+    fn current_slice(&self) -> Option<&[u8]> {
+        match self.section {
+        0 => { Some(&self.capdu_header) },
+        i if i <= 2*self.capdu.tlvs.len() && i % 2 == 1 => { Some(&self.capdu.tlvs[i>>1].header) },
+        i if i <= 2*self.capdu.tlvs.len() => { Some(&self.capdu.tlvs[(i-1)>>1].data) },
+        i if i == 2*MAX_TLVS+1 => { Some(&self.capdu_trailer) },
+        _ => { None },
+        }
+    }
+}
+
+impl<'a> Iterator for CApduByteIterator<'a> {
+    type Item = u8;
+
+    fn next(&mut self) -> Option<u8> {
+        let slice = self.current_slice();
+        if slice.is_none() { return None; }
+        let ret = slice.unwrap()[self.off];
+
+        self.off += 1;
+        loop {
+            if let Some(slice) = self.current_slice() {
+                if self.off < slice.len() { break; }
+            }
+            self.off = 0;
+            self.section += 1;
+            if self.section > 2*MAX_TLVS+1 { break; }
+        }
+        Some(ret)
+    }
 }
 
 impl<'a> CApdu<'a> {
-    pub fn new(cla: ApduClass, ins: u8, p1: u8, p2: u8, data: &'a [u8]) -> Self {
+    pub fn new(cla: ApduClass, ins: u8, p1: u8, p2: u8, le: Option<usize>) -> Self {
         Self {
             cla,
             ins,
             p1,
             p2,
-            data,
+            tlvs: heapless::Vec::new(),
+            payload_len: 0,
+            le,
         }
     }
 
-    pub fn blank() -> Self {
-        Self {
-            cla: ApduClass::StandardPlain,
-            ins: 0,
-            p1: 0,
-            p2: 0,
-            data: &[],
-        }
+    pub fn push(&mut self, tlv: SimpleTlv<'a>) {
+        self.payload_len += tlv.len();
+        self.tlvs.push(tlv).unwrap();
     }
-}
 
-impl<'a> RApdu<'a> {
-    pub fn blank() -> Self {
-        Self {
-            data: &[],
-            sw: 0x0000,
-        }
+    pub fn byte_iter(&self) -> CApduByteIterator<'_> {
+        CApduByteIterator::new(self)
     }
 }
 
@@ -111,6 +208,49 @@ pub const T1_S_RESPONSE_CODE: u8 = 0b1110_0000;
 pub const T1_R_CODE_MASK: u8 = 0b1110_1100;
 pub const T1_R_CODE: u8 = 0b1000_0000;
 
+pub struct T1Header {
+    pub nad: u8,
+    pub pcb: T1PCB,
+    pub len: u8,
+    pub crc: u16,
+}
+
+#[derive(PartialEq)]
+pub enum T1PCB {
+    I(u8, bool),		// seq, multi
+    S(T1SCode, bool),		// code, response?
+    R(u8, u8),			// seq, err
+}
+
+impl core::convert::TryFrom<u8> for T1PCB {
+    type Error = Iso7816Error;
+
+    fn try_from(val: u8) -> Result<Self, Self::Error> {
+        if (val & T1_R_CODE_MASK) == T1_R_CODE {
+            return Ok(T1PCB::R((val & 0x10) >> 4, val & 0x3));
+        } else if (val & T1_S_REQUEST_CODE) == T1_S_REQUEST_CODE {
+            let s_code = T1SCode::try_from(val & !T1_S_RESPONSE_CODE)?;
+            return Ok(T1PCB::S(s_code, (val & 0x20) != 0));
+        } else if (val & 0b1001_1111u8) == 0 {
+            return Ok(T1PCB::I((val & 0x40) >> 6, (val & 0x20) != 0));
+        } else {
+            return Err(Iso7816Error::ValueError);
+        }
+    }
+}
+
+impl core::convert::Into<u8> for T1PCB {
+    fn into(self) -> u8 {
+        match self {
+        T1PCB::I(seq, multi) => (seq << 6) | { if multi { 0x20 } else { 0 }},
+        T1PCB::R(seq, err) => T1_R_CODE | (seq << 5) | err,
+        T1PCB::S(code, false) => T1_S_REQUEST_CODE | <T1SCode as Into<u8>>::into(code),
+        T1PCB::S(code, true) => T1_S_RESPONSE_CODE | <T1SCode as Into<u8>>::into(code),
+        }
+    }
+}
+
+#[derive(PartialEq)]
 pub enum T1SCode {
     Resync = 0,
     IFS = 1,
@@ -129,16 +269,21 @@ pub enum T1Error {
     ChecksumError,
     ProtocolError,
     RCodeReceived(u8),
+    TlvParseError,
 }
 
 pub trait T1Proto {
     fn send_apdu(&mut self, apdu: &CApdu, le: u8, delay: &mut DelayWrapper) -> Result<(), T1Error>;
-    fn receive_apdu<'a, 'b>(
+    fn receive_apdu_raw<'a>(
         &mut self,
-        buf: &'b mut [u8],
-        apdu: &'a mut RApdu<'b>,
+        buf: &'a mut [u8],
         delay: &mut DelayWrapper,
-    ) -> Result<(), T1Error>;
+    ) -> Result<RawRApdu<'a>, T1Error>;
+    fn receive_apdu<'a>(
+        &mut self,
+        buf: &'a mut [u8],
+        delay: &mut DelayWrapper,
+    ) -> Result<RApdu<'a>, T1Error>;
     fn interface_soft_reset(&mut self, delay: &mut DelayWrapper) -> Result<AnswerToReset, T1Error>;
 }
 
@@ -179,75 +324,7 @@ pub struct I2CParameters {
 
 //////////////////////////////////////////////////////////////////////////////
 
-const CRC16_CCITT_XORLUT: [u16; 256] = [
-    0x0000, 0x1189, 0x2312, 0x329b, 0x4624, 0x57ad, 0x6536, 0x74bf, 0x8c48, 0x9dc1, 0xaf5a, 0xbed3,
-    0xca6c, 0xdbe5, 0xe97e, 0xf8f7, 0x1081, 0x0108, 0x3393, 0x221a, 0x56a5, 0x472c, 0x75b7, 0x643e,
-    0x9cc9, 0x8d40, 0xbfdb, 0xae52, 0xdaed, 0xcb64, 0xf9ff, 0xe876, 0x2102, 0x308b, 0x0210, 0x1399,
-    0x6726, 0x76af, 0x4434, 0x55bd, 0xad4a, 0xbcc3, 0x8e58, 0x9fd1, 0xeb6e, 0xfae7, 0xc87c, 0xd9f5,
-    0x3183, 0x200a, 0x1291, 0x0318, 0x77a7, 0x662e, 0x54b5, 0x453c, 0xbdcb, 0xac42, 0x9ed9, 0x8f50,
-    0xfbef, 0xea66, 0xd8fd, 0xc974, 0x4204, 0x538d, 0x6116, 0x709f, 0x0420, 0x15a9, 0x2732, 0x36bb,
-    0xce4c, 0xdfc5, 0xed5e, 0xfcd7, 0x8868, 0x99e1, 0xab7a, 0xbaf3, 0x5285, 0x430c, 0x7197, 0x601e,
-    0x14a1, 0x0528, 0x37b3, 0x263a, 0xdecd, 0xcf44, 0xfddf, 0xec56, 0x98e9, 0x8960, 0xbbfb, 0xaa72,
-    0x6306, 0x728f, 0x4014, 0x519d, 0x2522, 0x34ab, 0x0630, 0x17b9, 0xef4e, 0xfec7, 0xcc5c, 0xddd5,
-    0xa96a, 0xb8e3, 0x8a78, 0x9bf1, 0x7387, 0x620e, 0x5095, 0x411c, 0x35a3, 0x242a, 0x16b1, 0x0738,
-    0xffcf, 0xee46, 0xdcdd, 0xcd54, 0xb9eb, 0xa862, 0x9af9, 0x8b70, 0x8408, 0x9581, 0xa71a, 0xb693,
-    0xc22c, 0xd3a5, 0xe13e, 0xf0b7, 0x0840, 0x19c9, 0x2b52, 0x3adb, 0x4e64, 0x5fed, 0x6d76, 0x7cff,
-    0x9489, 0x8500, 0xb79b, 0xa612, 0xd2ad, 0xc324, 0xf1bf, 0xe036, 0x18c1, 0x0948, 0x3bd3, 0x2a5a,
-    0x5ee5, 0x4f6c, 0x7df7, 0x6c7e, 0xa50a, 0xb483, 0x8618, 0x9791, 0xe32e, 0xf2a7, 0xc03c, 0xd1b5,
-    0x2942, 0x38cb, 0x0a50, 0x1bd9, 0x6f66, 0x7eef, 0x4c74, 0x5dfd, 0xb58b, 0xa402, 0x9699, 0x8710,
-    0xf3af, 0xe226, 0xd0bd, 0xc134, 0x39c3, 0x284a, 0x1ad1, 0x0b58, 0x7fe7, 0x6e6e, 0x5cf5, 0x4d7c,
-    0xc60c, 0xd785, 0xe51e, 0xf497, 0x8028, 0x91a1, 0xa33a, 0xb2b3, 0x4a44, 0x5bcd, 0x6956, 0x78df,
-    0x0c60, 0x1de9, 0x2f72, 0x3efb, 0xd68d, 0xc704, 0xf59f, 0xe416, 0x90a9, 0x8120, 0xb3bb, 0xa232,
-    0x5ac5, 0x4b4c, 0x79d7, 0x685e, 0x1ce1, 0x0d68, 0x3ff3, 0x2e7a, 0xe70e, 0xf687, 0xc41c, 0xd595,
-    0xa12a, 0xb0a3, 0x8238, 0x93b1, 0x6b46, 0x7acf, 0x4854, 0x59dd, 0x2d62, 0x3ceb, 0x0e70, 0x1ff9,
-    0xf78f, 0xe606, 0xd49d, 0xc514, 0xb1ab, 0xa022, 0x92b9, 0x8330, 0x7bc7, 0x6a4e, 0x58d5, 0x495c,
-    0x3de3, 0x2c6a, 0x1ef1, 0x0f78,
-];
-
-pub fn crc16_ccitt_oneshot(buf: &[u8]) -> u16 {
-    let mut crc: u16 = crc16_ccitt_init();
-    crc = crc16_ccitt_update(crc, buf);
-    crc16_ccitt_final(crc)
-}
-
-pub fn crc16_ccitt_init() -> u16 {
-    0xffff
-}
-
-pub fn crc16_ccitt_update(mut crc: u16, buf: &[u8]) -> u16 {
-    for i in 0..buf.len() {
-        let lutbyte: u8 = (crc ^ (buf[i] as u16)) as u8;
-        crc = (crc >> 8) ^ CRC16_CCITT_XORLUT[lutbyte as usize];
-    }
-    crc
-}
-
-pub fn crc16_ccitt_final(crc: u16) -> u16 {
-    crc ^ 0xffff
-}
-
-pub fn get_u16_le(buf: &[u8]) -> u16 {
-    (buf[0] as u16) | ((buf[1] as u16) << 8)
-}
-
-pub fn set_u16_le(buf: &mut [u8], crc: u16) {
-    buf[0] = crc as u8;
-    buf[1] = (crc >> 8) as u8;
-}
-
-pub fn get_u16_be(buf: &[u8]) -> u16 {
-    (buf[1] as u16) | ((buf[0] as u16) << 8)
-}
-
-#[allow(dead_code)]
-pub fn set_u16_be(buf: &mut [u8], crc: u16) {
-    buf[1] = crc as u8;
-    buf[0] = (crc >> 8) as u8;
-}
-
-pub fn get_u24_be(buf: &[u8]) -> u32 {
-    (buf[2] as u32) | ((buf[1] as u32) << 8) | ((buf[0] as u32) << 16)
-}
+pub type Se050CRC = crc16::State<crc16::X_25>;
 
 //////////////////////////////////////////////////////////////////////////////
 

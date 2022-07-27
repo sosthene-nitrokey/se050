@@ -1,5 +1,6 @@
 use crate::types::*;
 use core::convert::{Into, TryInto};
+use byteorder::{ByteOrder, LE, BE};
 
 pub struct T1overI2C<TWI>
 where
@@ -62,25 +63,66 @@ where
         return Err(T1Error::ReceiveError);
     }
 
+    #[inline(never)]
+    fn receive_frame(
+        &mut self,
+        buf: &mut [u8],
+        delay: &mut DelayWrapper,
+    ) -> Result<T1Header, T1Error> {
+        if 3 > buf.len() {
+            return Err(T1Error::BufferOverrunError(3));
+        }
+        // read T1 frame header
+        self.twi_read(&mut buf[0..3], delay)?;
+        let pcb = buf[1].try_into().map_err(|_| T1Error::ProtocolError)?;
+        let mut header = T1Header { nad: buf[0], pcb, len: buf[2], crc: 0 };
+        if header.nad != self.nad_se2hd {
+            return Err(T1Error::ProtocolError);
+        }
+        let dlen = header.len as usize;
+        if dlen + 2 > buf.len() {
+            return Err(T1Error::BufferOverrunError(dlen+2));
+        }
+        let mut crc_state = Se050CRC::new();
+        crc_state.update(&buf[0..3]);
+
+        // read T1 frame payload
+        self.twi_read(&mut buf[0..dlen + 2], delay)?;
+        header.crc = LE::read_u16(&buf[dlen..dlen + 2]);
+
+        crc_state.update(&buf[0..dlen]);
+        let calculated_crc = crc_state.get();
+
+        if calculated_crc != header.crc {
+            return Err(T1Error::ChecksumError);
+        }
+
+        Ok(header)
+    }
+
+    #[inline(never)]
+    fn send_frame(&mut self, pcb: T1PCB, data: &[u8], delay: &mut DelayWrapper) -> Result<(), T1Error> {
+        if data.len() > MAX_IFSC {
+            return Err(T1Error::BufferOverrunError(data.len()));
+        }
+
+        let mut buf = heapless::Vec::<u8, MAX_T1_FRAME_SIZE>::new();
+        buf.extend_from_slice(&[self.nad_hd2se, pcb.into(), data.len() as u8]).unwrap();
+        buf.extend_from_slice(data).unwrap();
+        let crc = Se050CRC::calculate(buf.as_slice());
+        let mut crcbuf: [u8; 2] = [0, 0];
+        LE::write_u16(&mut crcbuf, crc);
+        buf.extend_from_slice(&crcbuf).unwrap();
+        self.twi_write(buf.as_slice(), delay)
+    }
+
     fn send_s(
         &mut self,
         code: T1SCode,
         data: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), T1Error> {
-        let mut buf: [u8; 260] = [0u8; 260];
-
-        buf[0] = self.nad_hd2se;
-        buf[1] = T1_S_REQUEST_CODE | <T1SCode as Into<u8>>::into(code);
-        buf[2] = data.len() as u8;
-        for i in 0..data.len() {
-            buf[3 + i] = data[i];
-        }
-        let crc: u16 = crc16_ccitt_oneshot(&buf[0..3 + data.len()]);
-        set_u16_le(&mut buf[3 + data.len()..3 + data.len() + 2], crc);
-
-        trace!("T1 W S {}", hexstr!(&buf[0..3 + data.len() + 2]));
-        self.twi_write(&buf[0..3 + data.len() + 2], delay)
+        self.send_frame(T1PCB::S(code, false), data, delay)
     }
 
     fn receive_s(
@@ -89,36 +131,15 @@ where
         data: &mut [u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), T1Error> {
-        self.twi_read(&mut data[0..3], delay)?;
-        trace!("T1 R S H {}", hexstr!(&data[0..3]));
-        if data[0] != self.nad_se2hd {
-            return Err(T1Error::ProtocolError);
+        let header = self.receive_frame(data, delay)?;
+        match header.pcb {
+        T1PCB::S(scode, true) if code == scode => { Ok(()) },
+        T1PCB::S(_, _) => { Err(T1Error::ProtocolError) },
+        T1PCB::R(_, r) => { Err(T1Error::RCodeReceived(r)) },
+        _ => { Err(T1Error::ProtocolError) }
         }
-        if data[1] != T1_S_RESPONSE_CODE | <T1SCode as Into<u8>>::into(code) {
-            if (data[1] & T1_R_CODE_MASK) == T1_R_CODE {
-                return Err(T1Error::RCodeReceived(data[1]));
-            }
-            return Err(T1Error::ProtocolError);
-        }
-        let dlen: usize = data[2] as usize;
-        let mut crc: u16 = crc16_ccitt_init();
-        crc = crc16_ccitt_update(crc, &data[0..3]);
-
-        if dlen + 2 > data.len() {
-            return Err(T1Error::BufferOverrunError(dlen));
-        }
-
-        self.twi_read(&mut data[0..dlen + 2], delay)?;
-        trace!("T1 R S B {}", hexstr!(&data[0..dlen + 2]));
-        crc = crc16_ccitt_update(crc, &data[0..dlen]);
-        crc = crc16_ccitt_final(crc);
-
-        if crc != get_u16_le(&data[dlen..dlen + 2]) {
-            return Err(T1Error::ChecksumError);
-        }
-
-        Ok(())
     }
+
 }
 
 impl<TWI> T1Proto for T1overI2C<TWI>
@@ -127,74 +148,84 @@ where
 {
     #[inline(never)]
     fn send_apdu(&mut self, apdu: &CApdu, le: u8, delay: &mut DelayWrapper) -> Result<(), T1Error> {
-        let mut apdubuf: [u8; 260] = [0u8; 260];
-        if apdu.data.len() > 248 {
-            todo!();
-        }
-        apdubuf[0] = self.nad_hd2se;
-        apdubuf[1] = self.iseq_snd << 6;
-        apdubuf[2] = (4 + apdu.data.len() + 2) as u8;
-        apdubuf[3] = apdu.cla.into();
-        apdubuf[4] = apdu.ins;
-        apdubuf[5] = apdu.p1;
-        apdubuf[6] = apdu.p2;
-        apdubuf[7] = apdu.data.len() as u8;
-        for i in 0..apdu.data.len() {
-            apdubuf[8 + i] = apdu.data[i];
-        }
-        apdubuf[8 + apdu.data.len()] = le;
-        let crc = crc16_ccitt_oneshot(&apdubuf[0..8 + apdu.data.len() + 1]);
-        set_u16_le(
-            &mut apdubuf[8 + apdu.data.len() + 1..8 + apdu.data.len() + 3],
-            crc,
-        );
+        let mut peek: Option<u8> = None;
+        let mut buf: heapless::Vec<u8, MAX_IFSC> = heapless::Vec::new();
+        let mut apdu_iter = apdu.byte_iter();
 
-        self.iseq_snd ^= 1;
-        trace!("T1 W I {}", hexstr!(&apdubuf[0..8 + apdu.data.len() + 3]));
-        self.twi_write(&apdubuf[0..8 + apdu.data.len() + 3], delay)
+        loop {
+            buf.clear();
+            loop {
+                let v = apdu_iter.next();
+                if v.is_none() { break; }
+                buf.push(v.unwrap()).ok();
+                if buf.len() == MAX_IFSC {
+                    peek = apdu_iter.next();
+                    break;
+                }
+            }
+            self.send_frame(T1PCB::I(self.iseq_snd, peek.is_some()), buf.as_slice(), delay)?;
+            if peek.is_none() { break; }
+        }
+
+        Ok(())
     }
 
     #[inline(never)]
-    fn receive_apdu<'a, 'b>(
+    fn receive_apdu<'a>(
         &mut self,
-        buf: &'b mut [u8],
-        apdu: &'a mut RApdu<'b>,
+        buf: &'a mut [u8],
         delay: &mut DelayWrapper,
-    ) -> Result<(), T1Error> {
-        self.twi_read(&mut buf[0..3], delay)?;
-        trace!("T1 R I H {}", hexstr!(&buf[0..3]));
-        if buf[0] != self.nad_se2hd {
-            return Err(T1Error::ProtocolError);
-        }
-        if buf[1] != self.iseq_rcv << 6 {
-            if buf[1] == T1_S_REQUEST_CODE | <T1SCode as Into<u8>>::into(T1SCode::WTX) {
-                // TODO: if found to be S:WTX, directly respond and wait again?
-                todo!();
+    ) -> Result<RApdu<'a>, T1Error> {
+        let rapdu = self.receive_apdu_raw(buf, delay)?;
+
+        let mut tlvs = heapless::Vec::new();
+        let mut buf_offset: usize = 0;
+
+        loop {
+            if buf_offset == rapdu.data.len() { break; }
+            let tag = rapdu.data[buf_offset];
+            let len: usize;
+            if buf_offset+1 >= rapdu.data.len() { return Err(T1Error::TlvParseError); }
+            if rapdu.data[buf_offset+1] == 0x82 {
+                if buf_offset+3 >= rapdu.data.len() { return Err(T1Error::TlvParseError); }
+                len = BE::read_u16(&rapdu.data[buf_offset+2..buf_offset+4]) as usize;
+                if buf_offset+4+len >= rapdu.data.len() { return Err(T1Error::TlvParseError); }
+                tlvs.push(SimpleTlv::new(tag, &rapdu.data[buf_offset+4..buf_offset+4+len])).map_err(|_| T1Error::TlvParseError)?;
+                buf_offset += 4 + len;
+            } else if rapdu.data[buf_offset+1] < 0x80 {
+                len = rapdu.data[buf_offset+1] as usize;
+                tlvs.push(SimpleTlv::new(tag, &rapdu.data[buf_offset+2..buf_offset+2+len])).map_err(|_| T1Error::TlvParseError)?;
+                buf_offset += 2 + len;
             }
-            return Err(T1Error::ProtocolError);
-        }
-        self.iseq_rcv ^= 1;
-        let dlen: usize = buf[2] as usize;
-        let mut crc: u16 = crc16_ccitt_init();
-        crc = crc16_ccitt_update(crc, &buf[0..3]);
-
-        if dlen + 2 > buf.len() {
-            return Err(T1Error::BufferOverrunError(dlen));
         }
 
-        self.twi_read(&mut buf[0..dlen + 2], delay)?;
-        trace!("T1 R I B {}", hexstr!(&buf[0..dlen + 2]));
-        crc = crc16_ccitt_update(crc, &buf[0..dlen]);
-        crc = crc16_ccitt_final(crc);
+        Ok(RApdu { sw: rapdu.sw, tlvs })
+    }
 
-        if crc != get_u16_le(&buf[dlen..dlen + 2]) {
-            return Err(T1Error::ChecksumError);
+    #[inline(never)]
+    fn receive_apdu_raw<'a>(
+        &mut self,
+        buf: &'a mut [u8],
+        delay: &mut DelayWrapper,
+    ) -> Result<RawRApdu<'a>, T1Error> {
+        let buf_len: usize = buf.len();
+        let mut buf_offset: usize = 0;
+        loop {
+            let header = self.receive_frame(&mut buf[buf_offset..buf_len], delay)?;
+            if let T1PCB::I(seq, multi) = header.pcb {
+                if seq != self.iseq_rcv {
+                    return Err(T1Error::ProtocolError);
+                }
+                self.iseq_rcv ^= 1;
+                buf_offset += header.len as usize;
+                if multi { break; }
+                // TODO: send R(N(S)) and keep receiving
+            }
         }
 
-        apdu.data = &buf[0..dlen - 2];
-        apdu.sw = get_u16_be(&buf[dlen - 2..dlen]);
-
-        Ok(())
+        if buf_offset < 2 { return Err(T1Error::ProtocolError); }
+        let sw = BE::read_u16(&buf[buf_offset-2..buf_offset]);
+        Ok(RawRApdu { sw, data: &buf[0..buf_offset-2] })
     }
 
     #[inline(never)]
@@ -219,16 +250,16 @@ where
             protocol_version: atr_pv,
             vendor_id: atrbuf[1..6].try_into().unwrap(),
             dllp: DataLinkLayerParameters {
-                bwt_ms: get_u16_be(&atrbuf[7..9]),
-                ifsc: get_u16_be(&atrbuf[9..11]),
+                bwt_ms: BE::read_u16(&atrbuf[7..9]),
+                ifsc: BE::read_u16(&atrbuf[9..11]),
             },
             plp: PhysicalLayerParameters::I2C(I2CParameters {
-                mcf: get_u16_be(&atrbuf[13..15]),
+                mcf: BE::read_u16(&atrbuf[13..15]),
                 configuration: atrbuf[15],
                 mpot_ms: atrbuf[16],
                 rfu: atrbuf[17..20].try_into().unwrap(),
-                segt_us: get_u16_be(&atrbuf[20..22]),
-                wut_us: get_u16_be(&atrbuf[22..24]),
+                segt_us: BE::read_u16(&atrbuf[20..22]),
+                wut_us: BE::read_u16(&atrbuf[22..24]),
             }),
             historical_bytes: atrbuf[25..40].try_into().unwrap(),
         })
