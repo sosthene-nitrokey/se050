@@ -1,6 +1,6 @@
 use crate::types::*;
 use core::convert::{Into, TryFrom};
-use byteorder::{ByteOrder, BE, LE};
+use byteorder::{ByteOrder, BE};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Se050Error {
@@ -254,16 +254,13 @@ where
             ApduStandardInstruction::SelectFile.into(),
             0x04,
             0x00,
-            &app_id,
+            Some(0) // TODO: RAW PAYLOAD -> &app_id,
         );
-        self.t1_proto
-            .send_apdu(&app_select_apdu, 0, delay)
-            .map_err(|_| Se050Error::UnknownError)?;
+        self.t1_proto.send_apdu(&app_select_apdu, delay).map_err(|_| Se050Error::UnknownError)?;
 
         let mut appid_data: [u8; 11] = [0; 11];
-        let mut appid_apdu = RApdu::blank();
-        self.t1_proto
-            .receive_apdu(&mut appid_data, &mut appid_apdu, delay)
+        let mut appid_apdu = self.t1_proto
+            .receive_apdu_raw(&mut appid_data, delay)
             .map_err(|_| Se050Error::UnknownError)?;
 
         let adata = appid_apdu.data;
@@ -274,7 +271,7 @@ where
         }
 
         self.app_info = Some(Se050AppInfo {
-            applet_version: BE::read_uint(&adata[0..3], 3),
+            applet_version: BE::read_uint(&adata[0..3], 3) as u32,
             features: BE::read_u16(&adata[3..5]),
             securebox_version: BE::read_u16(&adata[5..7]),
         });
@@ -291,58 +288,40 @@ where
 
     #[inline(never)]
     fn get_random(&mut self, buf: &mut [u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
-        if buf.len() > 250 {
-            todo!();
-        }
-        let tlv1: [u8; 4] = [Se050TlvTag::Tag1.into(), 0x02, 0x00, buf.len() as u8];
-        let capdu = CApdu::new(
+        let mut buflen: [u8; 2] = [0, 0];
+        BE::write_u16(&mut buflen, buf.len() as u16);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &buflen);
+        let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Se050ApduInstruction::Mgmt.into(),
             Se050ApduP1CredType::Default.into(),
             Se050ApduP2::Random.into(),
-            &tlv1,
+            Some(0)
         );
-        self.t1_proto
-            .send_apdu(&capdu, 0, delay)
-            .map_err(|_| Se050Error::UnknownError)?;
+        capdu.push(tlv1);
+        self.t1_proto.send_apdu(&capdu, delay).map_err(|_| Se050Error::UnknownError)?;
 
         let mut rapdu_buf: [u8; 260] = [0; 260];
-        let mut rapdu = RApdu::blank();
-        self.t1_proto
-            .receive_apdu(&mut rapdu_buf, &mut rapdu, delay)
+        let rapdu = self.t1_proto
+            .receive_apdu(&mut rapdu_buf, delay)
             .map_err(|_| Se050Error::UnknownError)?;
 
-        if rapdu.sw != 0x9000 || rapdu.data[0] != Se050TlvTag::Tag1.into() {
+        if rapdu.sw != 0x9000 {
             error!("SE050 GetRandom Failed: {:x}", rapdu.sw);
             return Err(Se050Error::UnknownError);
         }
 
-        if rapdu.data[1] == 0x82 {
-            let rcvlen = BE::read_u16(&rapdu.data[2..4]) as usize;
-            if rcvlen != buf.len() {
-                error!("SE050 GetRandom Length Mismatch");
-                return Err(Se050Error::UnknownError);
-            }
-            for i in 0..rcvlen {
-                buf[i] = rapdu.data[4 + i];
-            }
-            debug!("SE050 GetRandom OK");
-            Ok(())
-        } else if rapdu.data[1] < 0x80 {
-            let rcvlen: usize = rapdu.data[1] as usize;
-            if rcvlen != buf.len() {
-                error!("SE050 GetRandom Length Mismatch");
-                return Err(Se050Error::UnknownError);
-            }
-            for i in 0..rcvlen {
-                buf[i] = rapdu.data[2 + i];
-            }
-            debug!("SE050 GetRandom OK");
-            Ok(())
-        } else {
-            error!("SE050 GetRandom Invalid R-APDU Length");
-            Err(Se050Error::UnknownError)
+        let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or({
+            error!("SE050 GetRandom Return TLV Missing");
+            Se050Error::UnknownError })?;
+
+        if tlv1_ret.get_data().len() != buf.len() {
+            error!("SE050 GetRandom Length Mismatch");
+            return Err(Se050Error::UnknownError);
         }
+        buf.copy_from_slice(tlv1_ret.get_data());
+        debug!("SE050 GetRandom OK");
+        Ok(())
     }
 
     #[inline(never)]
@@ -351,48 +330,24 @@ where
         if key.len() != 16 {
             todo!();
         }
-        let mut tlvs: [u8; 2 + 4 + 2 + 16] = [
-            Se050TlvTag::Tag1.into(),
-            0x04,
-            /* ObjID */ 0xae,
-            0x50,
-            0xae,
-            0x50,
-            Se050TlvTag::Tag3.into(),
-            0x10,
-            /* key data */ 0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-        ];
-        tlvs[8..].clone_from_slice(key);
-        let capdu = CApdu::new(
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x50, 0xae, 0x50]);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), key);
+        let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
             Se050ApduP1CredType::AES.into(),
             Se050ApduP2::Default.into(),
-            &tlvs,
+            Some(0)
         );
+        capdu.push(tlv1);
+        capdu.push(tlv3);
         self.t1_proto
-            .send_apdu(&capdu, 0, delay)
+            .send_apdu(&capdu, delay)
             .map_err(|_| Se050Error::UnknownError)?;
 
         let mut rapdu_buf: [u8; 260] = [0; 260];
-        let mut rapdu = RApdu::blank();
-        self.t1_proto
-            .receive_apdu(&mut rapdu_buf, &mut rapdu, delay)
+        let rapdu = self.t1_proto
+            .receive_apdu(&mut rapdu_buf, delay)
             .map_err(|_| Se050Error::UnknownError)?;
 
         if rapdu.sw != 0x9000 {
@@ -419,66 +374,43 @@ where
             error!("Insufficient output buffer");
             return Err(Se050Error::UnknownError);
         }
-        let mut tlvs: [u8; 254] = [0; 254];
-        tlvs[0..11].clone_from_slice(&[
-            Se050TlvTag::Tag1.into(),
-            0x04,
-            /* ObjID */ 0xae,
-            0x50,
-            0xae,
-            0x50,
-            Se050TlvTag::Tag2.into(),
-            0x01,
-            /* CipherMode */ 0x0d, /* AES CBC NOPAD */
-            Se050TlvTag::Tag3.into(),
-            data.len() as u8,
-        ]);
-        tlvs[11..(11 + data.len())].clone_from_slice(data);
-        let capdu = CApdu::new(
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x50, 0xae, 0x50]);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x0d]);	// AES CBC NOPAD
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), data);
+        let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Se050ApduInstruction::Crypto.into(),
             Se050ApduP1CredType::Cipher.into(),
             Se050ApduP2::EncryptOneshot.into(),
-            &tlvs[0..(data.len() + 11)],
+            Some(0)
         );
+        capdu.push(tlv1);
+        capdu.push(tlv2);
+        capdu.push(tlv3);
         self.t1_proto
-            .send_apdu(&capdu, 0, delay)
+            .send_apdu(&capdu, delay)
             .map_err(|_| Se050Error::UnknownError)?;
 
         let mut rapdu_buf: [u8; 260] = [0; 260];
-        let mut rapdu = RApdu::blank();
-        self.t1_proto
-            .receive_apdu(&mut rapdu_buf, &mut rapdu, delay)
+        let rapdu = self.t1_proto
+            .receive_apdu(&mut rapdu_buf, delay)
             .map_err(|_| Se050Error::UnknownError)?;
 
-        if rapdu.sw != 0x9000 || rapdu.data[0] != Se050TlvTag::Tag1.into() {
+        if rapdu.sw != 0x9000 {
             error!("SE050 EncryptAESOneshot Failed: {:x}", rapdu.sw);
             return Err(Se050Error::UnknownError);
         }
 
-        if rapdu.data[1] == 0x82 {
-            let rcvlen = BE::read_u16(&rapdu.data[2..4]) as usize;
-            if rcvlen != enc.len() {
-                error!("SE050 EncryptAESOneshot Length Mismatch");
-                return Err(Se050Error::UnknownError);
-            }
-            for i in 0..rcvlen {
-                enc[i] = rapdu.data[4 + i];
-            }
-            Ok(())
-        } else if rapdu.data[1] < 0x80 {
-            let rcvlen: usize = rapdu.data[1] as usize;
-            if rcvlen != enc.len() {
-                error!("SE050 EncryptAESOneshot Length Mismatch");
-                return Err(Se050Error::UnknownError);
-            }
-            for i in 0..rcvlen {
-                enc[i] = rapdu.data[2 + i];
-            }
-            Ok(())
-        } else {
-            error!("SE050 EncryptAESOneshot Invalid R-APDU Length");
-            Err(Se050Error::UnknownError)
+        let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or({
+            error!("SE050 EncryptAESOneshot Return TLV Missing");
+            Se050Error::UnknownError })?;
+
+        if tlv1_ret.get_data().len() != enc.len() {
+            error!("SE050 EncryptAESOneshot Length Mismatch");
+            return Err(Se050Error::UnknownError);
         }
+        enc.copy_from_slice(tlv1_ret.get_data());
+        debug!("SE050 EncryptAESOneshot OK");
+        Ok(())
     }
 }

@@ -80,12 +80,16 @@ impl<'a> SimpleTlv<'a> {
         Self { tag, header, data }
     }
 
-    pub fn len(&self) -> usize {
+    pub fn total_len(&self) -> usize {
         self.header.len() + self.data.len()
     }
 
     pub fn get_header(&self) -> &heapless::Vec<u8, 3> {
         &self.header
+    }
+
+    pub fn get_data(&self) -> &'a [u8] {
+        &self.data
     }
 }
 
@@ -99,6 +103,17 @@ pub struct RawRApdu<'a> {
 pub struct RApdu<'a> {
     pub tlvs: heapless::Vec<SimpleTlv<'a>, MAX_TLVS>,
     pub sw: u16,
+}
+
+impl<'a> RApdu<'a> {
+    pub fn get_tlv(&self, tag: u8) -> Option<&SimpleTlv<'a>> {
+        for tlv in self.tlvs.iter() {
+            if tlv.tag == tag {
+                return Some(&tlv);
+            }
+        }
+        None
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -191,7 +206,7 @@ impl<'a> CApdu<'a> {
     }
 
     pub fn push(&mut self, tlv: SimpleTlv<'a>) {
-        self.payload_len += tlv.len();
+        self.payload_len += tlv.total_len();
         self.tlvs.push(tlv).unwrap();
     }
 

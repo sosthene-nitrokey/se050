@@ -164,7 +164,10 @@ where
                 }
             }
             self.send_frame(T1PCB::I(self.iseq_snd, peek.is_some()), buf.as_slice(), delay)?;
+            self.iseq_snd ^= 1;
             if peek.is_none() { break; }
+            // receive R(N(R))
+            todo!();
         }
 
         Ok(())
@@ -218,8 +221,8 @@ where
                 }
                 self.iseq_rcv ^= 1;
                 buf_offset += header.len as usize;
-                if multi { break; }
-                // TODO: send R(N(S)) and keep receiving
+                if !multi { break; }
+                self.send_frame(T1PCB::R(self.iseq_rcv, 0), &[], delay)?;
             }
         }
 
