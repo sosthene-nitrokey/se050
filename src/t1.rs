@@ -34,6 +34,7 @@ where
     }
 
     fn twi_write(&mut self, data: &[u8], delay: &mut DelayWrapper) -> Result<(), T1Error> {
+        debug!("T1 W: {:?}", data);
         for _i in 0..TWI_RETRIES {
             let e = self.twi.write(self.se_address as u8, data);
             if e.is_ok() {
@@ -52,6 +53,7 @@ where
         for _i in 0..TWI_RETRIES {
             let e = self.twi.read(self.se_address as u8, data);
             if e.is_ok() {
+                debug!("T1 R: {:?}", data);
                 trace!("t1r ok({})", i);
                 return Ok(());
             }
