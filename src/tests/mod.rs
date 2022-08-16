@@ -66,7 +66,7 @@ fn test_se050_init() {
     xtwi.push_in(T1FC_GP_SELECT_SE050);
     xtwi.push_out(T1FRH_GP_SELECT_SE050);
     xtwi.push_out(T1F_APP_VERSION);
-    let mut t1 = T1overI2C::new(xtwi, 0x48, 0x5a);
+    let t1 = T1overI2C::new(xtwi, 0x48, 0x5a);
     let mut se050 = Se050::new(t1);
     let r = se050.enable(&mut delay);
     assert!(r.is_ok());

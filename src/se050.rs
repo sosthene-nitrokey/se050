@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::convert::{Into, TryFrom};
+use core::convert::{From, TryFrom};
 use byteorder::{ByteOrder, BE};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -32,7 +32,7 @@ pub enum Se050ApduP1KeyType {
     PublicKey = 0x20,
 }
 
-#[allow(dead_code)]
+#[allow(dead_code, clippy::upper_case_acronyms)]
 #[repr(u8)]
 pub enum Se050ApduP1CredType {
     Default = 0x00,
@@ -53,7 +53,7 @@ pub enum Se050ApduP1CredType {
     CryptoObj = 0x10,
 }
 
-#[allow(dead_code, non_camel_case_types)]
+#[allow(dead_code, non_camel_case_types, clippy::upper_case_acronyms)]
 #[repr(u8)]
 pub enum Se050ApduP2 {
     Default = 0x00,
@@ -126,7 +126,7 @@ pub enum Se050ApduP2 {
     AuthNonfirstPart1 = 0x54,
 }
 
-#[allow(dead_code)]
+#[allow(dead_code, clippy::upper_case_acronyms)]
 #[repr(u8)]
 pub enum Se050ApduSecObjType {
     ECKeyPair = 0x01,
@@ -260,7 +260,7 @@ where
         self.t1_proto.send_apdu_raw(&app_select_apdu, delay).map_err(|_| Se050Error::UnknownError)?;
 
         let mut appid_data: [u8; 11] = [0; 11];
-        let mut appid_apdu = self.t1_proto
+        let appid_apdu = self.t1_proto
             .receive_apdu_raw(&mut appid_data, delay)
             .map_err(|_| Se050Error::UnknownError)?;
 

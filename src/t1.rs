@@ -46,7 +46,7 @@ where
             // but the existing traits don't provide an API for that
         }
         trace!("t1w err");
-        return Err(T1Error::TransmitError);
+        Err(T1Error::TransmitError)
     }
 
     fn twi_read(&mut self, data: &mut [u8], delay: &mut DelayWrapper) -> Result<(), T1Error> {
@@ -62,7 +62,7 @@ where
             // but the existing traits don't provide an API for that
         }
         trace!("t1r err");
-        return Err(T1Error::ReceiveError);
+        Err(T1Error::ReceiveError)
     }
 
     #[inline(never)]

@@ -89,7 +89,7 @@ impl<'a> SimpleTlv<'a> {
     }
 
     pub fn get_data(&self) -> &'a [u8] {
-        &self.data
+        self.data
     }
 }
 
@@ -109,7 +109,7 @@ impl<'a> RApdu<'a> {
     pub fn get_tlv(&self, tag: u8) -> Option<&SimpleTlv<'a>> {
         for tlv in self.tlvs.iter() {
             if tlv.tag == tag {
-                return Some(&tlv);
+                return Some(tlv);
             }
         }
         None
@@ -233,7 +233,7 @@ impl<'a> CApduByteIterator<'a> {
     fn from_capdu_raw(capdu: &'a RawCApdu<'a>) -> Self {
         let mut obj = Self::from_capdu_common(capdu.cla, capdu.ins, capdu.p1, capdu.p2, capdu.data.len(), capdu.le);
 
-        if capdu.data.len() > 0 {
+        if !capdu.data.is_empty() {
             obj.body.push_back(capdu.data).unwrap();
         }
 
@@ -259,14 +259,12 @@ impl<'a> Iterator for CApduByteIterator<'a> {
             let curr = self.body.front().unwrap();
             let ret = curr[self.off];
             self.off += 1;
-            loop {
-                if self.off < curr.len() { break; }
+            if self.off >= curr.len() {
                 self.off = 0;
                 self.body.pop_front();
                 if self.body.front().is_none() {
                     self.area = 2;
                 }
-                break;
             }
             Some(ret)
         },
@@ -299,7 +297,7 @@ pub struct T1Header {
     pub crc: u16,
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq)]
 pub enum T1PCB {
     I(u8, bool),		// seq, multi
     S(T1SCode, bool),		// code, response?
@@ -311,21 +309,21 @@ impl core::convert::TryFrom<u8> for T1PCB {
 
     fn try_from(val: u8) -> Result<Self, Self::Error> {
         if (val & T1_R_CODE_MASK) == T1_R_CODE {
-            return Ok(T1PCB::R((val & 0x10) >> 4, val & 0x3));
+            Ok(T1PCB::R((val & 0x10) >> 4, val & 0x3))
         } else if (val & T1_S_REQUEST_CODE) == T1_S_REQUEST_CODE {
             let s_code = T1SCode::try_from(val & !T1_S_RESPONSE_CODE)?;
-            return Ok(T1PCB::S(s_code, (val & 0x20) != 0));
+            Ok(T1PCB::S(s_code, (val & 0x20) != 0))
         } else if (val & 0b1001_1111u8) == 0 {
-            return Ok(T1PCB::I((val & 0x40) >> 6, (val & 0x20) != 0));
+            Ok(T1PCB::I((val & 0x40) >> 6, (val & 0x20) != 0))
         } else {
-            return Err(Iso7816Error::ValueError);
+            Err(Iso7816Error::ValueError)
         }
     }
 }
 
-impl core::convert::Into<u8> for T1PCB {
-    fn into(self) -> u8 {
-        match self {
+impl core::convert::From<T1PCB> for u8 {
+    fn from(value: T1PCB) -> u8 {
+        match value {
         T1PCB::I(seq, multi) => (seq << 6) | { if multi { 0x20 } else { 0 }},
         T1PCB::R(seq, err) => T1_R_CODE | (seq << 5) | err,
         T1PCB::S(code, false) => T1_S_REQUEST_CODE | <T1SCode as Into<u8>>::into(code),
@@ -334,7 +332,8 @@ impl core::convert::Into<u8> for T1PCB {
     }
 }
 
-#[derive(PartialEq)]
+#[allow(clippy::upper_case_acronyms)]
+#[derive(PartialEq, Eq)]
 pub enum T1SCode {
     Resync = 0,
     IFS = 1,
