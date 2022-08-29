@@ -413,4 +413,6 @@ pub type Se050CRC = crc16::State<crc16::X_25>;
 
 //////////////////////////////////////////////////////////////////////////////
 
+pub struct ObjectId(pub [u8; 4]);
+
 include!("types_convs.rs");
