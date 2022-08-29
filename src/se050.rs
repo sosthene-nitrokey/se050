@@ -312,7 +312,7 @@ where
             return Err(Se050Error::UnknownError);
         }
 
-        let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or({
+        let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or_else(|| {
             error!("SE050 GetRandom Return TLV Missing");
             Se050Error::UnknownError })?;
 
@@ -326,6 +326,7 @@ where
     }
 
     #[inline(never)]
+    /* NOTE: hardcoded Object ID 0xae50ae50! */
     /* no support yet for rfc3394 key wrappings, policies or max attempts */
     fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
         if key.len() != 16 {
@@ -360,7 +361,7 @@ where
     }
 
     #[inline(never)]
-    /* hardcoded ObjID */
+    /* NOTE: hardcoded Object ID 0xae50ae50! */
     fn encrypt_aes_oneshot(
         &mut self,
         data: &[u8],
@@ -402,7 +403,7 @@ where
             return Err(Se050Error::UnknownError);
         }
 
-        let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or({
+        let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or_else(|| {
             error!("SE050 EncryptAESOneshot Return TLV Missing");
             Se050Error::UnknownError })?;
 

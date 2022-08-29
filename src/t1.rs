@@ -199,13 +199,14 @@ where
             let len: usize;
             if buf_offset+1 >= rapdu.data.len() { return Err(T1Error::TlvParseError); }
             if rapdu.data[buf_offset+1] == 0x82 {
-                if buf_offset+3 >= rapdu.data.len() { return Err(T1Error::TlvParseError); }
+                if buf_offset+4 > rapdu.data.len() { return Err(T1Error::TlvParseError); }
                 len = BE::read_u16(&rapdu.data[buf_offset+2..buf_offset+4]) as usize;
-                if buf_offset+4+len >= rapdu.data.len() { return Err(T1Error::TlvParseError); }
+                if buf_offset+4+len > rapdu.data.len() { return Err(T1Error::TlvParseError); }
                 tlvs.push(SimpleTlv::new(tag, &rapdu.data[buf_offset+4..buf_offset+4+len])).map_err(|_| T1Error::TlvParseError)?;
                 buf_offset += 4 + len;
             } else if rapdu.data[buf_offset+1] < 0x80 {
                 len = rapdu.data[buf_offset+1] as usize;
+                if buf_offset+2+len > rapdu.data.len() { return Err(T1Error::TlvParseError); }
                 tlvs.push(SimpleTlv::new(tag, &rapdu.data[buf_offset+2..buf_offset+2+len])).map_err(|_| T1Error::TlvParseError)?;
                 buf_offset += 2 + len;
             }
