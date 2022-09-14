@@ -345,7 +345,7 @@ pub enum T1SCode {
     InterfaceSoftReset = 15,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum T1Error {
     TransmitError,
     ReceiveError,

@@ -5,6 +5,7 @@ use byteorder::{ByteOrder, BE};
 #[derive(Debug, PartialEq, Eq)]
 pub enum Se050Error {
     UnknownError,
+    T1Error(T1Error),
 }
 
 pub const APDU_INSTRUCTION_TRANSIENT: u8 = 0x80;

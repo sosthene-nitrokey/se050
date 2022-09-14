@@ -49,7 +49,7 @@ def emit_convs(tn, d, mask):
 
 	outfile.write(TRYFROM_U8_PATTERN % (tn, mask and (" & %s" % mask) or "", tryfrom_u8_str))
 	outfile.write(FROM_ENUM_PATTERN % (tn, tn, from_enum_str))
-	outfile.write(BITOR_IMPL % (tn, tn))
+	outfile.write(BITOR_IMPL % tn)
 
 tname = None
 
@@ -76,7 +76,7 @@ for ln in infile:
 			emit_convs(tname, vRev, mask)
 			tname = None
 		else:
-			print("// not emitting %s, bogus line: %s" % (tname, ln))
+			outfile.write("// not emitting %s, bogus line: %s\n" % (tname, ln))
 			# suppress emitting this enum, probably not meant to be?
 			tname = None
 
