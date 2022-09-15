@@ -269,13 +269,17 @@ impl<'a> Iterator for CApduByteIterator<'a> {
             Some(ret)
         },
         2 => {
-            let ret = self.capdu_trailer[self.off];
-            self.off += 1;
-            if self.off == self.capdu_trailer.len() {
-                self.area = 3;
-                self.off = 0;
+            if self.capdu_trailer.len() == 0 {
+                None
+            } else {
+                let ret = self.capdu_trailer[self.off];
+                self.off += 1;
+                if self.off == self.capdu_trailer.len() {
+                    self.area = 3;
+                    self.off = 0;
+                }
+                Some(ret)
             }
-            Some(ret)
         },
         _ => { None }
         }

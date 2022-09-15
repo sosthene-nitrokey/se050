@@ -17,6 +17,15 @@ where
 const TWI_RETRIES: usize = 128;
 const TWI_RETRY_DELAY_MS: u32 = 2;
 
+fn maybe_debug(label: &str, data: &[u8]) {
+    if data.len() > 32 {
+        let (dh, dt) = data.split_at(16);
+        debug!("{} {:?}...{:?}", label, dh, &dt[dt.len()-16..dt.len()]);
+    } else {
+        debug!("{} {:?}", label, data);
+    }
+}
+
 impl<TWI> T1overI2C<TWI>
 where
     TWI: embedded_hal::blocking::i2c::Read + embedded_hal::blocking::i2c::Write,
@@ -34,7 +43,7 @@ where
     }
 
     fn twi_write(&mut self, data: &[u8], delay: &mut DelayWrapper) -> Result<(), T1Error> {
-        debug!("T1 W: {:?}", data);
+        maybe_debug("T1 W", data);
         for _i in 0..TWI_RETRIES {
             let e = self.twi.write(self.se_address as u8, data);
             if e.is_ok() {
@@ -53,7 +62,7 @@ where
         for _i in 0..TWI_RETRIES {
             let e = self.twi.read(self.se_address as u8, data);
             if e.is_ok() {
-                debug!("T1 R: {:?}", data);
+                maybe_debug("T1 R", data);
                 trace!("t1r ok({})", i);
                 return Ok(());
             }

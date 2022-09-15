@@ -430,7 +430,7 @@ where
             Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
             Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
             Se050ApduP2::Default.into(),
-            Some(0)
+            None
         );
         capdu.push(tlv1);
         capdu.push(tlv2);
