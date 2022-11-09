@@ -194,10 +194,143 @@ pub enum Se050TlvTag {
     Tag10 = 0x4a,
 }
 
-// See AN12413,4.3.19 ECCurve Table 37. ECCurve constants   P.42
+// See AN12413,4.3.10 ECSignatureAlgo Table 28. ECSignatureAlgo P.39
+//See AN12413, 4.3.22 AttestationAlgo AttestationAlgo is either ECSignatureAlgo or RSASignatureAlgo. P.43
 #[allow(dead_code)]
 #[repr(u8)]
-pub enum Se050ECCurveconstants  {
+pub enum Se050ECSignatureAlgo {
+SIG_ECDSA_PLAIN = 0x09,
+SIG_ECDSA_SHA = 0x11,
+SIG_ECDSA_SHA_224 = 0x25,
+SIG_ECDSA_SHA_256 = 0x21,
+SIG_ECDSA_SHA_384 = 0x22,
+SIG_ECDSA_SHA_512 = 0x26,
+
+}
+
+// See AN12413, 4.3.11 EDSignatureAlgo Table 29. EDSignatureAlgo P.39
+#[allow(dead_code)]
+#[repr(u8)]
+pub enum Se050EDSignatureAlgo {
+
+    SIG_ED25519PURE = 0xA3,
+
+}
+
+// See AN12413, 4.3.12 ECDAASignatureAlgo Table 30. ECDAASignatureAlgo P.40
+#[allow(dead_code)]
+#[repr(u8)]
+pub enum Se050ECDAASignatureAlgo {
+
+    SIG_ECDAA = 0xF4,
+
+}
+
+// See AN12413, 4.3.13 RSASignatureAlgo Table 31. RSASignatureAlgo P.40
+//See AN12413, 4.3.22 AttestationAlgo AttestationAlgo is either ECSignatureAlgo or RSASignatureAlgo. P.43
+#[allow(dead_code)]
+#[repr(u8)]
+pub enum Se050RSASignatureAlgo {
+    
+RSA_SHA1_PKCS1_PSS  = 0x15 ,
+RSA_SHA224_PKCS1_PSS = 0x2B ,
+RSA_SHA256_PKCS1_PSS = 0x2C ,
+RSA_SHA384_PKCS1_PSS = 0x2D ,
+RSA_SHA512_PKCS1_PSS = 0x2E,
+RSA_SHA1_PKCS1 = 0x0A ,
+RSA_SHA_224_PKCS1 = 0x27 ,
+RSA_SHA_256_PKCS1 = 0x28 ,
+RSA_SHA_384_PKCS1 =  0x29 ,
+RSA_SHA_512_PKCS1 = 0x2A ,
+
+}
+
+
+ // See AN12413, 4.3.14 RSAEncryptionAlgo Table 32. RSAEncryptionAlgo P.40
+#[allow(dead_code)]
+#[repr(u8)]
+pub enum Se050RSAEncryptionAlgo {
+
+    RSA_NO_PAD = 0x0C,
+    RSA_PKCS1 = 0x0A,
+    RSA_PKCS1_OAEP = 0x0F,
+
+}
+
+ // See AN12413, 4.3.15 RSABitLength Table 33. RSABitLength P.40
+ #[allow(dead_code)]
+ #[repr(u16)]
+ pub enum Se050RSABitLength {
+
+     RSA_512 = 512,
+     RSA_1024 = 1024,
+     RSA_1152 = 1152,
+     RSA_2048 = 2048,
+     RSA_3072 = 3072,
+     RSA_4096 = 4096,
+ 
+ }
+  
+
+// See AN12413, 4.3.16 RSAKeyComponent Table 34. RSAKeyComponentP.41
+#[allow(dead_code)]
+#[repr(u8)]
+pub enum Se050RSAKeyComponent {    
+    
+    RSA_COMP_MOD = 0x00 ,
+    RSA_COMP_PUB_EXP = 0x01 ,
+    RSA_COMP_PRIV_EXP = 0x02 ,
+    RSA_COMP_P = 0x03 ,
+    RSA_COMP_Q  = 0x04 ,
+    RSA_COMP_DP  = 0x05 ,
+    RSA_COMP_DQ  = 0x06 ,
+    RSA_COMP_INVQ  = 0x07 ,
+
+ 
+}
+ 
+
+    // See AN12413, 4.3.17 DigestMode Table 35. DigestMode constants P.41
+    #[allow(dead_code)]
+    #[repr(u8)]
+    pub enum Se050DigestModeconstants {
+  
+    DIGEST_NO_HASH = 0x00,
+    DIGEST_SHA = 0x01,
+    DIGEST_SHA224 = 0x07,
+    DIGEST_SHA256 = 0x04,
+    DIGEST_SHA384 = 0x05,
+    DIGEST_SHA512 =  0x06,
+
+}
+
+    // See AN12413, 4.3.18 MACAlgo Table 36. MACAlgo constants P.41- 42
+    #[allow(dead_code)]
+    #[repr(u8)]
+    pub enum Se050MACAlgoconstants {
+      
+    HMAC_SHA1 = 0x18,
+    HMAC_SHA256 = 0x19,
+    HMAC_SHA384 = 0x1A,
+    HMAC_SHA512 = 0x1B,
+    CMAC_128  = 0x31,
+    DES_MAC4_ISO9797_M2 = 0x05,
+    DES_MAC4_ISO9797_1_M2_ALG3 = 0x13,
+    DES_MAC4_ISO9797_M1 = 0x03,
+    DES_MAC4_ISO9797_1_M1_ALG3 = 0x2F,
+    DES_MAC8_ISO9797_M2 = 0x06,
+    DES_MAC8_ISO9797_1_M2_ALG3 = 0x14,
+    DES_MAC8_ISO9797_1_M1_ALG3 = 0x04,
+   // DES_MAC8_ISO9797_1_M1_ALG3 = 0x30,
+
+}
+ 
+
+    // See AN12413,4.3.19 ECCurve Table 37. ECCurve constants   P.42
+    #[allow(dead_code)]
+    #[repr(u8)]
+    pub enum Se050ECCurveconstants  {
+    
     NIST_P192 = 0x01,
     NIST_P224 = 0x02,    
     NIST_P256 = 0x03,
@@ -223,10 +356,24 @@ pub enum Se050ECCurveconstants  {
  
 }
 
-// See AN12413,4.3.21 CipherMode Table 39. CipherMode constants   P.43
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum  Se050CipherModeconstants {
+
+    // See AN12413, 4.3.20 ECCurveParam  Table 38. ECCurveParam constants P 42
+    #[allow(dead_code)]
+    #[repr(u8)]
+    pub enum Se050ECCurveParamconstants {     
+    
+    CURVE_PARAM_A = 0x01,
+    CURVE_PARAM_B = 0x02,
+    CURVE_PARAM_G = 0x04,
+    CURVE_PARAM_N = 0x08,
+    CURVE_PARAM_PRIME = 0x10,
+
+}
+ 
+    // See AN12413,4.3.21 CipherMode Table 39. CipherMode constants   P.43
+    #[allow(dead_code)]
+    #[repr(u8)]
+    pub enum  Se050CipherModeconstants {
          
     DES_CBC_NOPAD = 0x01,  
     DES_CBC_ISO9797_M1 = 0x02,
@@ -246,10 +393,119 @@ pub enum  Se050CipherModeconstants {
  
 }
 
+    // See AN12413,4.3.23 AppletConfig Table 40. Applet configurations   P.43-44
+    #[allow(dead_code)]
+    #[repr(u16)]
+    pub enum  Se050AppletConfig {
+
+     CONFIG_ECDAA = 0x0001,
+     CONFIG_ECDSA_ECDH_ECDHE = 0x0002,
+     CONFIG_EDDSA = 0x0004,
+     CONFIG_DH_MONT = 0x0008,
+     CONFIG_HMAC = 0x0010,
+     CONFIG_RSA_PLAIN = 0x0020,
+     CONFIG_RSA_CRT =  0x0040,
+     CONFIG_AES = 0x0080,
+  
+     CONFIG_DES = 0x0100,
+     CONFIG_PBKDF = 0x0200,
+     CONFIG_TLS = 0x0400,
+     CONFIG_MIFARE = 0x0800,
+     CONFIG_FIPS_MODE_DISABLED = 0x1000,
+     CONFIG_I2CM = 0x2000,
+
+     CONFIG_ECC_ALL = 0x000F,
+     CONFIG_RSA_ALL = 0x0060,
+     CONFIG_ALL = 0x3FFF,
+
+     }
 
 
 
+    // See AN12413, 4.3.24 LockIndicator ,Table 41. LockIndicator constants  P.44
+    #[allow(dead_code)]
+    #[repr(u8)]
+    pub enum  Se050LockIndicatorconstants { 
 
+    TRANSIENT_LOCK = 0x01,
+    PERSISTENT_LOCK = 0x02,
+ 
+}
+ 
+    // See AN12413,  4.3.25 ,   Table 42. LockState constants   P.44
+    #[allow(dead_code)]
+    #[repr(u8)]
+    pub enum  Se050LockStateconstants {   
+
+    LOCKED = 0x01,
+    UNLOCKED = 0x02,
+ 
+}
+
+
+    // See AN12413,   4.3.26 CryptoContext , Table 43. P.44
+    #[allow(dead_code)]
+    #[repr(u8)]
+    pub enum  Se050CryptoContextconstants { 
+
+        CC_DIGEST = 0x01, 
+        CC_CIPHER = 0x02,
+        CC_SIGNATURE = 0x03,
+    }
+     
+    // See AN12413,  4.3.27 Result  Table 44. Result constants P.44
+    #[allow(dead_code)]
+    #[repr(u8)]
+    pub enum  Se050Resultconstants {     
+ 
+     RESULT_SUCCESS= 0x01,
+     RESULT_FAILURE = 0x02,
+    }
+
+
+     // See AN12413,4.3.28  TransientIndicator, Table 45. TransientIndicator constants P.44   
+     #[allow(dead_code)]
+     #[repr(u8)]
+     pub enum  Se050TransientIndicatorconstants {     
+
+     PERSISTENT =0x01,
+     TRANSIENT =0x02,
+
+     }
+ 
+   // See AN12413,4.3.28, 4.3.29 SetIndicator  Table 46. SetIndicator constants P.45     
+     #[allow(dead_code)]
+     #[repr(u8)]
+     pub enum  Se050SetIndicatorconstants {     
+
+      NOT_SET = 0x01,
+      SET = 0x02,
+
+     }
+ 
+     // See AN12413,4.3.28, 4.3.30 MoreIndicator   Table 47. MoreIndicator constants   P.45  
+     #[allow(dead_code)]
+     #[repr(u8)]
+     pub enum  Se050MoreIndicatorconstants {    
+
+     NO_MORE = 0x01,
+     MORE = 0x02,
+
+     }
+
+ 
+
+     // See AN12413,4.3.28, 4.3.31 PlatformSCPRequest , Table 48. PlatformSCPRequest constants P.45
+    #[allow(dead_code)]
+     #[repr(u8)]
+     pub enum  Se050PlatformSCPRequestconstants {    
+
+     SCP_REQUIRED = 0x01 ,
+     SCP_NOT_REQUIRED = 0x02,
+
+     }
+ 
+ 
 
 include!("se050_convs.rs");
 
@@ -257,6 +513,8 @@ include!("se050_convs.rs");
 //trait-Se050Device ->  struct Se050
 pub trait Se050Device {
     
+    fn WriteUserID(&mut self, UserIdentifierValue : &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>;
+
     fn enable(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error>;
 
     fn disable(&mut self, _delay: &mut DelayWrapper);
@@ -296,10 +554,15 @@ pub trait Se050Device {
 
     */
 
-  // See AN12413 // 4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.5 WriteUserID  //P.62
-
+  // See AN12413 // 4.7 Secure Object management //4.7.1 WriteSecureObject P.57 //4.7.1.5 WriteUserID  //P.62
+ 
+  
+  
      /*
     TO-DO  ->FUNCTIONS  FOR Creating or writing  a UserID object, setting the user identifier value.  
+    VerifySessionUserID 0x80 0x04 0x00 0x2C
+    WriteUserID 0x80 0x01 0x07 0x00
+
     */
  
 
@@ -372,6 +635,9 @@ impl<T> Se050Device for Se050<T>
 where
     T: T1Proto,
 {
+
+ 
+
     fn enable(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
         /* Step 1: perform interface soft reset, parse ATR */
         let r = self.t1_proto.interface_soft_reset(delay);
@@ -503,9 +769,45 @@ where
 
 
 
+// VerifySessionUserID 0x80 0x04 0x00 0x2C
 
 
+#[inline(never)]
+/* NOTE: hardcoded Object ID 0xae51ae51! */
+//WriteUserID 0x80 0x01 0x07 0x00
+/* NOTE: hardcoded Object ID 0xae51ae51! */
+     // See AN12413 // 4.7 Secure Object management //4.7.1 WriteSecureObject P.57 //4.7.1.5 WriteUserID  //P.62
+fn WriteUserID(&mut self, UserIdentifierValue : &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
+    let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &UserIdentifierValue );	 
+    let mut capdu = CApdu::new(
+        ApduClass::ProprietaryPlain,
+        Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
+        Se050ApduP1CredType::UserID.into(),
+        Se050ApduP2::Default.into(),
+        None
+    );
+    capdu.push(tlv1);
+    capdu.push(tlv2);
+    self.t1_proto
+        .send_apdu(&capdu, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
 
+    let mut rapdu_buf: [u8; 16] = [0; 16];
+    let rapdu = self.t1_proto
+        .receive_apdu(&mut rapdu_buf, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    if rapdu.sw != 0x9000 {
+        error!("SE050 WriteUserID  Failed: {:x}", rapdu.sw);
+        return Err(Se050Error::UnknownError);
+    }
+
+    debug!("SE050 WriteUserID OK");
+    Ok(ObjectId([0xae, 0x51, 0xae, 0x51]))
+}
+
+ 
 
 //###########################################################################
 
@@ -953,6 +1255,5 @@ fn decrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
         Ok(())
     }
  
-
 
 }
