@@ -13,7 +13,7 @@ pub const APDU_INSTRUCTION_TRANSIENT: u8 = 0x80;
 pub const APDU_INSTRUCTION_AUTH_OBJECT: u8 = 0x40;
 pub const APDU_INSTRUCTION_ATTEST: u8 = 0x20;
 
-//See AN12413,P. 35 - Table 19. Instruction constants
+//See AN12413,- Table 19. Instruction constants P. 35 
 #[allow(dead_code)]
 #[repr(u8)]
 pub enum Se050ApduInstruction {
@@ -27,7 +27,7 @@ pub enum Se050ApduInstruction {
 }
 
 
-// See AN12413, P. 35 Table 21. P1KeyType constants
+// See AN12413,  Table 21. P1KeyType constants P. 35
 #[allow(dead_code)]
 #[repr(u8)]
 pub enum Se050ApduP1KeyType {
@@ -513,13 +513,40 @@ include!("se050_convs.rs");
 //trait-Se050Device ->  struct Se050
 pub trait Se050Device {
     
-    fn WriteUserID(&mut self, UserIdentifierValue : &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>;
-
     fn enable(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error>;
 
     fn disable(&mut self, _delay: &mut DelayWrapper);
 
    
+    fn SetAppletFeatures(&mut self,AppletConfig: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+
+
+
+
+//See AN12413,4.5 Session management // 4.5.1 Generic session commands //4.5.1.1 CreateSession P.48
+
+    fn CreateSession(&mut self,  authobjid: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+
+//See AN12413,4.5 Session management // 4.5.1 Generic session commands //4.5.1.2 ExchangeSessionData P.49
+
+    fn ExchangeSessionData(&mut self,  SessionPolicies: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+
+//See AN12413 , 4.5 Session management // 4.5.1 Generic session commands /4.5.1.3 ProcessSessionCmd P.49-50
+    fn ProcessSessionCmd(&mut self,APDUcommand : &[u8], SessionID : &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
+
+    //See AN12413 , 4.5 Session management // 4.5.1 Generic session commands //4.5.1.4 RefreshSession P.50
+    fn RefreshSession(&mut self,Policy: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+
+//See AN12413 , 4.5 Session management // 4.5.1 Generic session commands //4.5.1.4 RefreshSession P.50
+    fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+
+
+//See AN12413 , 4.5 Session management //4.5.2 UserID session operations // 4.5.2.1 VerifySessionUserID P.51-52
+
+ 
+fn VerifySessionUserID(&mut self, UserIDvalue: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error>;
+
+
 
    // See AN12413, // 4.7 Secure Object management // P57-58
 
@@ -556,7 +583,7 @@ pub trait Se050Device {
 
   // See AN12413 // 4.7 Secure Object management //4.7.1 WriteSecureObject P.57 //4.7.1.5 WriteUserID  //P.62
  
-  
+  fn WriteUserID(&mut self, UserIdentifierValue : &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>;
   
      /*
     TO-DO  ->FUNCTIONS  FOR Creating or writing  a UserID object, setting the user identifier value.  
@@ -691,8 +718,263 @@ where
         // power down
     }
 
+//###########################################################################
+//See AN12413, 4.5 Session management // 4.5.1 Generic session commands //4.5.1.1 CreateSession P.48
+// Creates a session on SE050.
+//Depending on the authentication object being referenced, a specific method of authentication applies. 
+//The response needs to adhere to this authentication method.
 
+// authentication object identifier -> authobjid
+
+
+#[inline(never)]
+fn CreateSession(&mut self,  authobjid: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &authobjid);
    
+    let mut capdu = CApdu::new(
+        ApduClass::ProprietaryPlain,
+        Into::<u8>::into(Se050ApduInstruction::Mgmt ) | APDU_INSTRUCTION_TRANSIENT,
+        Se050ApduP1CredType::Default.into(),
+        Se050ApduP2::SessionCreate.into(),
+        Some(12)
+    );
+    capdu.push(tlv1);
+   
+    self.t1_proto
+        .send_apdu(&capdu, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    let mut rapdu_buf: [u8; 16] = [0; 16];
+    let rapdu = self.t1_proto
+        .receive_apdu(&mut rapdu_buf, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    if rapdu.sw != 0x9000 {
+        error!("SE050 CreateSession Failed: {:x}", rapdu.sw);
+        return Err(Se050Error::UnknownError);
+    }
+
+    debug!("SE050 CreateSession OK");
+    Ok(())
+}
+
+
+//###########################################################################
+//See AN12413 , 4.5 Session management // 4.5.1 Generic session commands //4.5.1.2 ExchangeSessionData P.49
+// Sets session policies for the current session.
+ // Session policies -> SessionPolicies
+
+
+#[inline(never)]
+fn ExchangeSessionData(&mut self,  SessionPolicies: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &SessionPolicies);
+   
+    let mut capdu = CApdu::new(
+        ApduClass::ProprietaryPlain,
+        Into::<u8>::into(Se050ApduInstruction::Mgmt ) | APDU_INSTRUCTION_TRANSIENT,
+        Se050ApduP1CredType::Default.into(),
+        Se050ApduP2::SessionPolicy.into(),
+        Some(0)
+    );
+    capdu.push(tlv1);
+   
+    self.t1_proto
+        .send_apdu(&capdu, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    let mut rapdu_buf: [u8; 16] = [0; 16];
+    let rapdu = self.t1_proto
+        .receive_apdu(&mut rapdu_buf, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    if rapdu.sw != 0x9000 {
+        error!("SE050 ExchangeSessionData Failed: {:x}", rapdu.sw);
+        return Err(Se050Error::UnknownError);
+    }
+
+    debug!("SE050 ExchangeSessionData OK");
+    Ok(())
+}
+
+
+
+
+     //###########################################################################
+//See AN12413 , 4.5 Session management // 4.5.1 Generic session commands /4.5.1.3 ProcessSessionCmd P.49-50
+//Requests a command to be processed within a specific session. 
+//Note that the applet does not check the validity of the CLA byte of the TLV[TAG_1] payload.
+
+     #[inline(never)]
+     
+     fn ProcessSessionCmd(&mut self,APDUcommand : &[u8], SessionID : &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+
+         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &APDUcommand);
+
+         let tlv = SimpleTlv::new(Se050TlvTag::SessionID.into(), &SessionID);	
+
+        
+         let mut capdu = CApdu::new(
+             ApduClass::ProprietaryPlain,
+             Into::<u8>::into(Se050ApduInstruction::Process) | APDU_INSTRUCTION_TRANSIENT,
+             Se050ApduP1CredType::Default.into(),
+             Se050ApduP2::Default.into(),
+             Some(0)
+         );
+         capdu.push(tlv1);
+         capdu.push(tlv);
+     
+         self.t1_proto
+             .send_apdu(&capdu, delay)
+             .map_err(|_| Se050Error::UnknownError)?;
+ 
+         let mut rapdu_buf: [u8; 16] = [0; 16];
+         let rapdu = self.t1_proto
+             .receive_apdu(&mut rapdu_buf, delay)
+             .map_err(|_| Se050Error::UnknownError)?;
+ 
+         if rapdu.sw != 0x9000 {
+             error!("SE050 ProcessSessionCmd: {:x}", rapdu.sw);
+             return Err(Se050Error::UnknownError);
+         }
+ 
+         debug!("SE050 ProcessSessionCmd OK");
+         Ok(())
+     }
+ 
+ //###########################################################################
+
+//See AN12413 , 4.5 Session management // 4.5.1 Generic session commands //4.5.1.4 RefreshSession P.50
+
+#[inline(never)]
+     
+fn RefreshSession(&mut self,Policy: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+
+    let tlv = SimpleTlv::new(Se050TlvTag::Policy.into(), &Policy);
+ 
+    let mut capdu = CApdu::new(
+        ApduClass::ProprietaryPlain,
+        Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
+        Se050ApduP1CredType::Default.into(),
+        Se050ApduP2:: SessionRefresh.into(),
+        None
+    );
+    capdu.push(tlv);
+    
+
+    self.t1_proto
+        .send_apdu(&capdu, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    let mut rapdu_buf: [u8; 16] = [0; 16];
+    let rapdu = self.t1_proto
+        .receive_apdu(&mut rapdu_buf, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    if rapdu.sw != 0x9000 {
+        error!("SE050 RefreshSession: {:x}", rapdu.sw);
+        return Err(Se050Error::UnknownError);
+    }
+
+    debug!("SE050 RefreshSession OK");
+    Ok(())
+}
+
+
+
+ //###########################################################################
+
+//See AN12413 , 4.5 Session management // 4.5.1 Generic session commands 4.5.1.5 CloseSession P.50
+//Closes a running session.
+//When a session is closed, it cannot be reopened.
+//All session parameters are transient.
+//If CloseSession returns a Status Word different from SW_NO_ERROR, the applet immediately needs to be reselected as further APDUs would not be handled successfully.
+ 
+
+#[inline(never)]
+     
+fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+   
+    let mut capdu = CApdu::new(
+        ApduClass::ProprietaryPlain,
+        Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
+        Se050ApduP1CredType::Default.into(),
+        Se050ApduP2::SessionClose.into(),
+        None
+    );
+    
+    self.t1_proto
+        .send_apdu(&capdu, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    let mut rapdu_buf: [u8; 16] = [0; 16];
+    let rapdu = self.t1_proto
+        .receive_apdu(&mut rapdu_buf, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    if rapdu.sw != 0x9000 {
+        error!("SE050 CloseSession: {:x}", rapdu.sw);
+        return Err(Se050Error::UnknownError);
+    }
+
+    debug!("SE050CloseSession OK");
+    Ok(())
+}
+
+
+ //###########################################################################
+
+ //See AN12413 , 4.5 Session management //4.5.2 UserID session operations // 4.5.2.1 VerifySessionUserID P.51-52
+
+ #[inline(never)]
+ 
+ fn VerifySessionUserID(&mut self, UserIDvalue: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &UserIDvalue);
+      
+     let mut capdu = CApdu::new(
+         ApduClass::ProprietaryPlain,
+         Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
+         Se050ApduP1CredType::Default.into(),
+         Se050ApduP2::SessionUserID.into(),
+         None
+     );
+     capdu.push(tlv1);
+      
+     self.t1_proto
+         .send_apdu(&capdu, delay)
+         .map_err(|_| Se050Error::UnknownError)?;
+
+     let mut rapdu_buf: [u8; 16] = [0; 16];
+     let rapdu = self.t1_proto
+         .receive_apdu(&mut rapdu_buf, delay)
+         .map_err(|_| Se050Error::UnknownError)?;
+
+     if rapdu.sw != 0x9000 {
+         error!("SE050 VerifySessionUserID Failed: {:x}", rapdu.sw);
+         return Err(Se050Error::UnknownError);
+     }
+
+     debug!("SE050 VerifySessionUserID OK");
+     Ok(())
+ }
+
+
+
+
+
+ //4.5.3 AESKey session operations // 4.5.3.1 SCPInitializeUpdate
+  //[SCP03] Section 7.1.1 shall be applied.
+// The user shall always set the P1 parameter to ‘00’ (KVN = ‘00’).
+
+
+ //4.5.3.2 SCPExternalAuthenticate
+ //[SCP03] Section 7.1.2 shall be applied.
+
+
+ // 4.5.4 ECKey session operations // 4.5.4.1 ECKeySessionInternalAuthenticate P.52
+ 
+ //Initiates an authentication based on an ECKey Authentication Object. 
+ //See  Section 3.6.3.3 for more information.
+ //The user shall always use key version number = ‘00’ and key identifier = ‘00’.
 
 
  //###########################################################################
@@ -700,7 +982,8 @@ where
     #[inline(never)]
     /* ASSUMPTION: SE050 is provisioned with an instantiated ECC curve object; */
            /* NOTE: hardcoded Object ID 0xae51ae51! */
-     //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey //P1_EC //  4.3.19 ECCurve  
+     //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey    P.58
+    //P1_EC 4.3.19 ECCurve P.42
     fn generate_ECCURVE_key(&mut self, ECCurve: &[u8],delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &ECCurve );	// Se050ECCurveconstants
@@ -732,11 +1015,13 @@ where
     }
 
 
+     //###########################################################################
     #[inline(never)]
     /* ASSUMPTION: SE050 is provisioned with an instantiated P-256 curve object;
         see NXP AN12413 -> Secure Objects -> Default Configuration */
     /* NOTE: hardcoded Object ID 0xae51ae51! */
-     //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey //P1_EC //  NIST_P256
+     //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey   P.58
+      //P1_EC //  4.3.19 ECCurve NIST_P256 P.42
     fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x03]);	// NIST P-256
@@ -768,53 +1053,13 @@ where
     }
 
 
-
-// VerifySessionUserID 0x80 0x04 0x00 0x2C
-
-
-#[inline(never)]
-/* NOTE: hardcoded Object ID 0xae51ae51! */
-//WriteUserID 0x80 0x01 0x07 0x00
-/* NOTE: hardcoded Object ID 0xae51ae51! */
-     // See AN12413 // 4.7 Secure Object management //4.7.1 WriteSecureObject P.57 //4.7.1.5 WriteUserID  //P.62
-fn WriteUserID(&mut self, UserIdentifierValue : &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
-    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
-    let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &UserIdentifierValue );	 
-    let mut capdu = CApdu::new(
-        ApduClass::ProprietaryPlain,
-        Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
-        Se050ApduP1CredType::UserID.into(),
-        Se050ApduP2::Default.into(),
-        None
-    );
-    capdu.push(tlv1);
-    capdu.push(tlv2);
-    self.t1_proto
-        .send_apdu(&capdu, delay)
-        .map_err(|_| Se050Error::UnknownError)?;
-
-    let mut rapdu_buf: [u8; 16] = [0; 16];
-    let rapdu = self.t1_proto
-        .receive_apdu(&mut rapdu_buf, delay)
-        .map_err(|_| Se050Error::UnknownError)?;
-
-    if rapdu.sw != 0x9000 {
-        error!("SE050 WriteUserID  Failed: {:x}", rapdu.sw);
-        return Err(Se050Error::UnknownError);
-    }
-
-    debug!("SE050 WriteUserID OK");
-    Ok(ObjectId([0xae, 0x51, 0xae, 0x51]))
-}
-
- 
-
 //###########################################################################
 
     #[inline(never)]
     /* NOTE: hardcoded Object ID 0xae50ae50! */
     /* no support yet for rfc3394 key wrappings, policies or max attempts */
-      //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.3 WriteSymmKey //P1_AES //template for 
+      //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.3 WriteSymmKey P.60 
+      //P1_AES //template for 
     fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
         if key.len() != 16 {
             todo!();
@@ -855,7 +1100,8 @@ fn WriteUserID(&mut self, UserIdentifierValue : &[u8], delay: &mut DelayWrapper)
     #[inline(never)]
     /* NOTE: hardcoded Object ID 0xae50ae50! */
     /* no support yet for rfc3394 key wrappings, policies or max attempts */
-    //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.3 WriteSymmKey //P1_DES
+    //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.3 WriteSymmKey P.60 
+    //P1_DES
     fn write_des_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
         if key.len() != 16 {
             todo!();
@@ -894,7 +1140,8 @@ fn WriteUserID(&mut self, UserIdentifierValue : &[u8], delay: &mut DelayWrapper)
     #[inline(never)]
     /* NOTE: hardcoded Object ID 0xae50ae50! */
     /* no support yet for rfc3394 key wrappings, policies or max attempts */
-    //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.3 WriteSymmKey //P1_HMAC
+    //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.3 WriteSymmKey P.60 
+    //P1_HMAC
     fn write_hmac_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
     if key.len() != 16 {
         todo!();
@@ -985,13 +1232,50 @@ fn WriteUserID(&mut self, UserIdentifierValue : &[u8], delay: &mut DelayWrapper)
     }
  */
 
+// VerifySessionUserID 0x80 0x04 0x00 0x2C
+
+
+#[inline(never)]
+//WriteUserID 0x80 0x01 0x07 0x00
+/* NOTE: hardcoded Object ID 0xae51ae51! */
+// See AN12413 // 4.7 Secure Object management //4.7.1 WriteSecureObject P.57 //4.7.1.5 WriteUserID  //P.62
+fn WriteUserID(&mut self, UserIdentifierValue : &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
+    let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &UserIdentifierValue );	 
+    let mut capdu = CApdu::new(
+        ApduClass::ProprietaryPlain,
+        Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
+        Se050ApduP1CredType::UserID.into(),
+        Se050ApduP2::Default.into(),
+        None
+    );
+    capdu.push(tlv1);
+    capdu.push(tlv2);
+    self.t1_proto
+        .send_apdu(&capdu, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    let mut rapdu_buf: [u8; 16] = [0; 16];
+    let rapdu = self.t1_proto
+        .receive_apdu(&mut rapdu_buf, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    if rapdu.sw != 0x9000 {
+        error!("SE050 WriteUserID  Failed: {:x}", rapdu.sw);
+        return Err(Se050Error::UnknownError);
+    }
+
+    debug!("SE050 WriteUserID OK");
+    Ok(ObjectId([0xae, 0x51, 0xae, 0x51]))
+}
 
 
 //###########################################################################
   
 #[inline(never)]
 /* NOTE: hardcoded Object ID 0xae50ae50! */
-//4.12 Crypto operations AES/DES // 4.12.4 CipherOneShot // ENCRYPT//  4.3.21 CipherMode // 4.3.21 CipherMode Table 39. CipherMode constants
+//4.12 Crypto operations AES/DES // 4.12.4 CipherOneShot // ENCRYPT P.87
+//  4.3.21 CipherMode // 4.3.21 CipherMode Table 39. CipherMode constants P.43
 fn encrypt_aes_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper, ) -> Result<(), Se050Error> 
 {
     if data.len() > 240 || (data.len() % 16 != 0) {
@@ -1047,7 +1331,8 @@ fn encrypt_aes_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
 //ERWEITERT
 #[inline(never)]
 /* NOTE: hardcoded Object ID 0xae50ae50! */
-//4.12 Crypto operations AES/DES // 4.12.4 CipherOneShot // DECRYPT//  4.3.21 CipherMode // 4.3.21 CipherMode Table 39. CipherMode constants
+//4.12 Crypto operations AES/DES // 4.12.4 CipherOneShot // DECRYPT P.87
+//  4.3.21 CipherMode // 4.3.21 CipherMode Table 39. CipherMode constants P.43
 fn decrypt_aes_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper, ) -> Result<(), Se050Error> 
 {
     if data.len() > 240 || (data.len() % 16 != 0) {
@@ -1106,7 +1391,8 @@ fn decrypt_aes_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
   
 #[inline(never)]
 /* NOTE: hardcoded Object ID 0xae50ae50! */
-//4.12 Crypto operations AES/DES // 4.12.4 CipherOneShot // ENCRYPT//  4.3.21 CipherMode // 4.3.21 CipherMode Table 39. CipherMode constants
+//4.12 Crypto operations AES/DES // 4.12.4 CipherOneShot // ENCRYPT  P.87
+//  4.3.21 CipherMode // 4.3.21 CipherMode Table 39. CipherMode constants P.43
 fn encrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper, ) -> Result<(), Se050Error> 
 {
     if data.len() > 240 || (data.len() % 16 != 0) {
@@ -1162,7 +1448,8 @@ fn encrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
 //ERWEITERT
 #[inline(never)]
 /* NOTE: hardcoded Object ID 0xae50ae50! */
-//4.12 Crypto operations AES/DES // 4.12.4 CipherOneShot // DECRYPT//  4.3.21 CipherMode // 4.3.21 CipherMode Table 39. CipherMode constants
+//4.12 Crypto operations AES/DES // 4.12.4 CipherOneShot // DECRYPT P.87 
+//  4.3.21 CipherMode // 4.3.21 CipherMode Table 39. CipherMode constants P.43
 fn decrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper, ) -> Result<(), Se050Error> 
 {
     if data.len() > 240 || (data.len() % 16 != 0) {
@@ -1213,10 +1500,51 @@ fn decrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
     Ok(())
 }
 
+//###########################################################################
+ //AN12413 // 4.6 Module management  //4.6.3 SetAppletFeatures  P.56 -57
+ // Sets the applet features that are supported. 
+ // To successfully execute this command, the session must be authenticated using the RESERVED_ID_FEATURE.
+//The 2-byte input value is a pre-defined AppletConfig value.
+
+
+     #[inline(never)]    
+    fn SetAppletFeatures(&mut self,AppletConfig: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &AppletConfig);
+       
+        let mut capdu = CApdu::new(
+            ApduClass::ProprietaryPlain,
+            Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
+            Se050ApduP1CredType::Default.into(),
+            Se050ApduP2::Default.into(),
+            None
+        );
+        capdu.push(tlv1);
+         
+        self.t1_proto
+            .send_apdu(&capdu, delay)
+            .map_err(|_| Se050Error::UnknownError)?;
+
+        let mut rapdu_buf: [u8; 16] = [0; 16];
+        let rapdu = self.t1_proto
+            .receive_apdu(&mut rapdu_buf, delay)
+            .map_err(|_| Se050Error::UnknownError)?;
+
+        if rapdu.sw != 0x9000 {
+            error!("SE050  SetAppletFeatures Failed: {:x}", rapdu.sw);
+            return Err(Se050Error::UnknownError);
+        }
+
+        debug!("SE050  SetAppletFeatures OK");
+        Ok(())
+    }
+
+
+
+
 
  
  //###########################################################################
-    //AN12413, Pages 110/111 -> 4.19 Generic management commands //4.19.4 GetRandom (Gets random data from the SE050.)
+    //AN12413, Pages 110/111 -> 4.19 Generic management commands //4.19.4 GetRandom (Gets random data from the SE050.) p.110
     #[inline(never)]
     fn get_random(&mut self, buf: &mut [u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
         let mut buflen: [u8; 2] = [0, 0];
