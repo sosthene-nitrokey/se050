@@ -24,6 +24,8 @@ pub enum Se050ApduInstruction {
     Mgmt = 0x04,
     Process = 0x05,
     ImportExternal = 0x06,
+    InstructECKSIA = 0x88,
+    InstructECKSGECKAPK = 0xCA,
 }
 
 
@@ -57,6 +59,7 @@ pub enum Se050ApduP1CredType {
     Cipher = 0x0e,
     TLS = 0x0f,
     CryptoObj = 0x10,
+    EcksgeckapkP1 = 0xBF,
 }
 
 // See AN12413, 4.3.5 P2 parameter Table 23. P2 constants -P. 36 - 37
@@ -131,6 +134,7 @@ pub enum Se050ApduP2 {
     SCP = 0x52,
     AuthFirstPart1 = 0x53,
     AuthNonfirstPart1 = 0x54,
+    ECKSGECKAPK_P2 = 0x21,
 }
 
 // See AN12413, 4.3.6 SecureObject type Table 24. SecureObjectType constants   P. 38
@@ -421,7 +425,6 @@ pub enum Se050RSAKeyComponent {
      }
 
 
-
     // See AN12413, 4.3.24 LockIndicator ,Table 41. LockIndicator constants  P.44
     #[allow(dead_code)]
     #[repr(u8)]
@@ -505,7 +508,6 @@ pub enum Se050RSAKeyComponent {
 
      }
  
- 
 
 include!("se050_convs.rs");
 
@@ -517,36 +519,35 @@ pub trait Se050Device {
 
     fn disable(&mut self, _delay: &mut DelayWrapper);
 
-   
-    fn SetAppletFeatures(&mut self,AppletConfig: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
-
-
-
-
-//See AN12413,4.5 Session management // 4.5.1 Generic session commands //4.5.1.1 CreateSession P.48
-
+    //See AN12413,4.5 Session management // 4.5.1 Generic session commands //4.5.1.1 CreateSession P.48
     fn CreateSession(&mut self,  authobjid: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
 
-//See AN12413,4.5 Session management // 4.5.1 Generic session commands //4.5.1.2 ExchangeSessionData P.49
-
+    //See AN12413,4.5 Session management // 4.5.1 Generic session commands //4.5.1.2 ExchangeSessionData P.49
     fn ExchangeSessionData(&mut self,  SessionPolicies: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
 
-//See AN12413 , 4.5 Session management // 4.5.1 Generic session commands /4.5.1.3 ProcessSessionCmd P.49-50
+    //See AN12413 , 4.5 Session management // 4.5.1 Generic session commands /4.5.1.3 ProcessSessionCmd P.49-50
     fn ProcessSessionCmd(&mut self,APDUcommand : &[u8], SessionID : &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
 
     //See AN12413 , 4.5 Session management // 4.5.1 Generic session commands //4.5.1.4 RefreshSession P.50
     fn RefreshSession(&mut self,Policy: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
 
-//See AN12413 , 4.5 Session management // 4.5.1 Generic session commands //4.5.1.4 RefreshSession P.50
+    //See AN12413 , 4.5 Session management // 4.5.1 Generic session commands //4.5.1.4 RefreshSession P.50
     fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
 
 
-//See AN12413 , 4.5 Session management //4.5.2 UserID session operations // 4.5.2.1 VerifySessionUserID P.51-52
+    //See AN12413 , 4.5 Session management //4.5.2 UserID session operations // 4.5.2.1 VerifySessionUserID P.51-52    
+    fn VerifySessionUserID(&mut self, UserIDvalue: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error>;
 
- 
-fn VerifySessionUserID(&mut self, UserIDvalue: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error>;
+    //See AN12413 , 4.5.4 ECKey session operations //  4.5.4.1 ECKeySessionInternalAuthenticate P.52    
+    fn ECKeySessionInternalAuthenticate(&mut self, InputData: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
+
+    //See AN12413 ,  4.5.4 ECKey session operations //   4.5.4.2 ECKeySessionGetECKAPublicKey P.53-54
+    fn ECKeySessionGetECKAPublicKey(&mut self, InputData: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
 
 
+       
+    //AN12413 // 4.6 Module management  //4.6.3 SetAppletFeatures  P.56 -57
+    fn SetAppletFeatures(&mut self,AppletConfig: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
 
    // See AN12413, // 4.7 Secure Object management // P57-58
 
@@ -581,28 +582,23 @@ fn VerifySessionUserID(&mut self, UserIDvalue: &[u8],delay: &mut DelayWrapper) -
 
     */
 
-  // See AN12413 // 4.7 Secure Object management //4.7.1 WriteSecureObject P.57 //4.7.1.5 WriteUserID  //P.62
- 
-  fn WriteUserID(&mut self, UserIdentifierValue : &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>;
-  
+    // See AN12413 // 4.7 Secure Object management //4.7.1 WriteSecureObject P.57 //4.7.1.5 WriteUserID  //P.62    
+    fn WriteUserID(&mut self, UserIdentifierValue : &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>;
+    
      /*
     TO-DO  ->FUNCTIONS  FOR Creating or writing  a UserID object, setting the user identifier value.  
     VerifySessionUserID 0x80 0x04 0x00 0x2C
     WriteUserID 0x80 0x01 0x07 0x00
 
     */
- 
-
-
+  
     // See AN12413 // 4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.6 WriteCounter  //P.62
 
      /*
     TO-DO  ->FUNCTIONS  FOR Creating or writing to a counter object.
 
     */
-
-
-
+ 
     //4.12 Crypto operations AES/DES  //4.12.4 CipherOneShot - Encrypt or decrypt data in one shot mode //P.87
 
     /* 
@@ -621,11 +617,25 @@ fn VerifySessionUserID(&mut self, UserIDvalue: &[u8],delay: &mut DelayWrapper) -
     fn encrypt_des_oneshot( &mut self,  CipherMode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper,) -> Result<(), Se050Error>;
     fn decrypt_des_oneshot( &mut self,  CipherMode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper,) -> Result<(), Se050Error>;
          
+
     // See AN12413, //4.19 Generic management commands // P110-11
     fn get_random(&mut self, buf: &mut [u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
 
-}
+    //AN12413, // 4.19 Generic management commands //4.19.1 GetVersion  P.108 -109  
+    fn GetVersion(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+    
+    //AN12413, // 4.19 Generic management commands //4.19.2 GetTimestamp P.109
+    fn GetTimestamp(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+    
+    //AN12413, // 4.19 Generic management commands //4.19.2 GetTimestamp P.109 
+    fn GetFreeMemory(&mut self, Memoryconstant: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
 
+
+    //AN12413, // 4.19 Generic management commands //44.19.5 DeleteAll P.112
+    fn DeleteAll(&mut self, Memoryconstant: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+ 
+    }
+ 
 //struct Se050AppInfo ->no further Implementation 20221026
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -736,7 +746,7 @@ fn CreateSession(&mut self,  authobjid: &[u8],delay: &mut DelayWrapper) -> Resul
         Into::<u8>::into(Se050ApduInstruction::Mgmt ) | APDU_INSTRUCTION_TRANSIENT,
         Se050ApduP1CredType::Default.into(),
         Se050ApduP2::SessionCreate.into(),
-        Some(12)
+        Some((0x0C))
     );
     capdu.push(tlv1);
    
@@ -763,7 +773,6 @@ fn CreateSession(&mut self,  authobjid: &[u8],delay: &mut DelayWrapper) -> Resul
 //See AN12413 , 4.5 Session management // 4.5.1 Generic session commands //4.5.1.2 ExchangeSessionData P.49
 // Sets session policies for the current session.
  // Session policies -> SessionPolicies
-
 
 #[inline(never)]
 fn ExchangeSessionData(&mut self,  SessionPolicies: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> {
@@ -797,12 +806,10 @@ fn ExchangeSessionData(&mut self,  SessionPolicies: &[u8],delay: &mut DelayWrapp
 }
 
 
-
-
      //###########################################################################
-//See AN12413 , 4.5 Session management // 4.5.1 Generic session commands /4.5.1.3 ProcessSessionCmd P.49-50
-//Requests a command to be processed within a specific session. 
-//Note that the applet does not check the validity of the CLA byte of the TLV[TAG_1] payload.
+    //See AN12413 , 4.5 Session management // 4.5.1 Generic session commands /4.5.1.3 ProcessSessionCmd P.49-50
+    //Requests a command to be processed within a specific session. 
+    //Note that the applet does not check the validity of the CLA byte of the TLV[TAG_1] payload.
 
      #[inline(never)]
      
@@ -878,8 +885,6 @@ fn RefreshSession(&mut self,Policy: &[u8], delay: &mut DelayWrapper) -> Result<(
     debug!("SE050 RefreshSession OK");
     Ok(())
 }
-
-
 
  //###########################################################################
 
@@ -958,15 +963,12 @@ fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
  }
 
 
-
-
-
- //4.5.3 AESKey session operations // 4.5.3.1 SCPInitializeUpdate
+ //4.5.3 AESKey session operations // 4.5.3.1 SCPInitializeUpdate  P.52
   //[SCP03] Section 7.1.1 shall be applied.
 // The user shall always set the P1 parameter to ‘00’ (KVN = ‘00’).
 
 
- //4.5.3.2 SCPExternalAuthenticate
+ //4.5.3.2 SCPExternalAuthenticate  P.52
  //[SCP03] Section 7.1.2 shall be applied.
 
 
@@ -975,6 +977,93 @@ fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
  //Initiates an authentication based on an ECKey Authentication Object. 
  //See  Section 3.6.3.3 for more information.
  //The user shall always use key version number = ‘00’ and key identifier = ‘00’.
+
+
+ //###########################################################################
+  //See AN12413 , 4.5.4 ECKey session operations //  4.5.4.1 ECKeySessionInternalAuthenticate P.52-53
+ // Initiates an authentication based on an ECKey Authentication Object. e
+ //See  Section 3.6.3.3 for more information.
+// The user shall always use key version number = ‘00’ and key identifier = ‘00’.
+//Payload TLV[TAG_1] Input data (see Table 73) P.53.
+//InstructECKSIA = 0x88
+
+#[inline(never)]
+ 
+    fn ECKeySessionInternalAuthenticate(&mut self, InputData: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &InputData);
+        
+        let mut capdu = CApdu::new(
+            ApduClass::ProprietarySecure,
+            Into::<u8>::into(Se050ApduInstruction::InstructECKSIA) | APDU_INSTRUCTION_TRANSIENT,
+            Se050ApduP1CredType::Default.into(),
+            Se050ApduP2::Default.into(),   
+            Some(0)
+        );
+
+        capdu.push(tlv1);
+        
+        self.t1_proto
+            .send_apdu(&capdu, delay)
+            .map_err(|_| Se050Error::UnknownError)?;
+
+        let mut rapdu_buf: [u8; 16] = [0; 16];
+        let rapdu = self.t1_proto
+            .receive_apdu(&mut rapdu_buf, delay)
+            .map_err(|_| Se050Error::UnknownError)?;
+
+        if rapdu.sw != 0x9000 {
+            error!("SE050 ECKeySessionInternalAuthenticate Failed: {:x}", rapdu.sw);
+            return Err(Se050Error::UnknownError);
+        }
+
+        debug!("SE050 ECKeySessionInternalAuthenticate OK");
+        Ok(())
+    }
+
+
+//###########################################################################
+  //See AN12413 ,  4.5.4 ECKey session operations //   4.5.4.2 ECKeySessionGetECKAPublicKey P.53-54
+  //  Gets the public key of the static device key pair (either     RESERVED_ID_ECKEY_SESSION or RESERVED_ID_EXTERNAL_IMPORT).
+  //  The key identifier used in subTag 0x83 must be either:
+  //  • 0x00 for user authentication.
+ //   • 0x02 for ImportExternalObject (i.e., single side import) only.
+  //  Note that any key identifier value different from 0x02 or 0x00 is RFU, but if passed, it is  treated as user authentication (so equal to 0x00).
+//InstructECKSGECKAPK=0xCA 
+
+  #[inline(never)]
+ 
+  fn ECKeySessionGetECKAPublicKey(&mut self, InputData: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+
+      let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &InputData);
+             
+      let mut capdu = CApdu::new(
+          ApduClass::ProprietarySecure,
+          Into::<u8>::into(Se050ApduInstruction:: InstructECKSGECKAPK) | APDU_INSTRUCTION_TRANSIENT,
+          Se050ApduP1CredType::EcksgeckapkP1.into(),
+          Se050ApduP2::ECKSGECKAPK_P2.into(),
+          Some(0)
+      );
+
+      capdu.push(tlv1);
+      
+      self.t1_proto
+          .send_apdu(&capdu, delay)
+          .map_err(|_| Se050Error::UnknownError)?;
+
+      let mut rapdu_buf: [u8; 16] = [0; 16];
+      let rapdu = self.t1_proto
+          .receive_apdu(&mut rapdu_buf, delay)
+          .map_err(|_| Se050Error::UnknownError)?;
+
+      if rapdu.sw != 0x9000 {
+          error!("SE050 ECKeySessionGetECKAPublicKey Failed: {:x}", rapdu.sw);
+          return Err(Se050Error::UnknownError);
+      }
+
+      debug!("SE050 ECKeySessionGetECKAPublicKey OK");
+      Ok(())
+  }
 
 
  //###########################################################################
@@ -1091,7 +1180,6 @@ fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
 
         Ok(())
     }
-
 
 
     //##################################################
@@ -1384,9 +1472,6 @@ fn decrypt_aes_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
 }
 
 
-
-
-
 //###########################################################################
   
 #[inline(never)]
@@ -1541,6 +1626,128 @@ fn decrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
 
 
 
+//###########################################################################
+    //AN12413, // 4.19 Generic management commands //4.19.1 GetVersion  P.108 -109
+   // Gets the applet version information.
+   // This will return 7-byte VersionInfo (including major, minor and patch version of the applet,  supported applet features and secure box version).
+//Le 0x0B Expecting TLV with 7-byte data
+
+#[inline(never)]
+
+fn GetVersion(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+
+    
+    let mut capdu = CApdu::new(
+        ApduClass::ProprietaryPlain,
+        Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
+        Se050ApduP1CredType::Default.into(),
+        Se050ApduP2:: Version.into(),
+        Some((0x0B))
+    );
+
+    self.t1_proto
+        .send_apdu(&capdu, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    let mut rapdu_buf: [u8; 16] = [0; 16];
+    let rapdu = self.t1_proto
+        .receive_apdu(&mut rapdu_buf, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    if rapdu.sw != 0x9000 {
+        error!("SE050 GetVersion Failed: {:x}", rapdu.sw);
+        return Err(Se050Error::UnknownError);
+    }
+
+    debug!("SE050 GetVersion OK");
+    Ok(())
+}
+
+
+ //###########################################################################
+ //AN12413, // 4.19 Generic management commands //4.19.2 GetTimestamp P.109
+//Gets a monotonic counter value (time stamp) from the operating system of the device (both persistent and transient part). 
+//See TimestampFunctionality for details on the timestamps.
+
+
+#[inline(never)]
+
+fn GetTimestamp(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+
+    
+    let mut capdu = CApdu::new(
+        ApduClass::ProprietaryPlain,
+        Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
+        Se050ApduP1CredType::Default.into(),
+        Se050ApduP2::Time.into(),
+        Some((0x14))
+    );
+
+    self.t1_proto
+        .send_apdu(&capdu, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    let mut rapdu_buf: [u8; 16] = [0; 16];
+    let rapdu = self.t1_proto
+        .receive_apdu(&mut rapdu_buf, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    if rapdu.sw != 0x9000 {
+        error!("SE050 GetTimestamp Failed: {:x}", rapdu.sw);
+        return Err(Se050Error::UnknownError);
+    }
+
+    debug!("SE050 GetTimestamp OK");
+    Ok(())
+}
+
+ //###########################################################################
+ //AN12413, // 4.19 Generic management commands //4.19.2 GetTimestamp P.109
+//Gets the amount of free memory. 
+//MemoryType indicates the type of memory.
+
+//The result indicates the amount of free memory. 
+//Note that behavior of the function might not be fully linear
+//and can have a granularity of 16 bytes since the applet will typically report the “worst case” amount. 
+//For example, when allocating 2 bytes at a time, the first report will show 16 bytes being allocated, which remains the same for the next 7 allocations of 2 bytes.
+
+//  Memoryconstant      Persistent = 1,   TransientReset = 2,    TransientDeselect = 3,
+ 
+
+#[inline(never)]
+
+fn GetFreeMemory(&mut self, Memoryconstant: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &Memoryconstant);
+
+    let mut capdu = CApdu::new(
+        ApduClass::ProprietaryPlain,
+        Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
+        Se050ApduP1CredType::Default.into(),
+        Se050ApduP2::Memory.into(),
+        Some((0x06))
+    );
+
+    capdu.push(tlv1);
+
+    self.t1_proto
+        .send_apdu(&capdu, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    let mut rapdu_buf: [u8; 16] = [0; 16];
+    let rapdu = self.t1_proto
+        .receive_apdu(&mut rapdu_buf, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    if rapdu.sw != 0x9000 {
+        error!("SE050 GetFreeMemory Failed: {:x}", rapdu.sw);
+        return Err(Se050Error::UnknownError);
+    }
+
+    debug!("SE050 GetFreeMemory OK");
+    Ok(())
+}
+
 
  
  //###########################################################################
@@ -1583,5 +1790,53 @@ fn decrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
         Ok(())
     }
  
+
+
+ //###########################################################################
+ //AN12413, // 4.19 Generic management commands //44.19.5 DeleteAll P.112
+ /* 
+ Delete all Secure Objects, delete all curves and Crypto Objects. 
+ Secure Objects that are trust provisioned by NXP are not deleted 
+ (i.e., all objects that have Origin set to ORIGIN_PROVISIONED, 
+ including the objects with reserved object identifiers listed in Object attributes).
+ This command can only be used from sessions that are authenticated using the credential with index RESERVED_ID_FACTORY_RESET.
+ Important: if a secure messaging session is up & running (e.g., AESKey or ECKey session) 
+ and the command is sent within this session, 
+ the response of the DeleteAll command will not be wrapped 
+ (i.e., not encrypted and no R-MAC), 
+ so this will also break down the secure channel protocol 
+ (as the session is closed by the DeleteAll command itself).
+ */
+
+#[inline(never)]
+
+fn DeleteAll(&mut self, Memoryconstant: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+
+    
+    let mut capdu = CApdu::new(
+        ApduClass::ProprietaryPlain,
+        Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
+        Se050ApduP1CredType::Default.into(),
+        Se050ApduP2::DeleteAll.into(),
+        Some((0x00))
+    );
+
+    self.t1_proto
+        .send_apdu(&capdu, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    let mut rapdu_buf: [u8; 16] = [0; 16];
+    let rapdu = self.t1_proto
+        .receive_apdu(&mut rapdu_buf, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    if rapdu.sw != 0x9000 {
+        error!("SE050 DeleteAll Failed: {:x}", rapdu.sw);
+        return Err(Se050Error::UnknownError);
+    }
+
+    debug!("SE050 DeleteAll OK");
+    Ok(())
+}
 
 }
