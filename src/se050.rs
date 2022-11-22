@@ -9,8 +9,12 @@ pub enum Se050Error {
 }
 
 //SEE AN12413 P. 34 - Table 18. Instruction characteristics constants
+
 pub const APDU_INSTRUCTION_TRANSIENT: u8 = 0x80;
-pub const APDU_INSTRUCTION_AUTH_OBJECT: u8 = 0x40;
+
+#[allow(dead_code)]
+pub const APDU_INSTRUCTION_AUTH_OBJECT: u8 = 0x40; 
+#[allow(dead_code)]
 pub const APDU_INSTRUCTION_ATTEST: u8 = 0x20;
 
 //See AN12413,- Table 19. Instruction constants P. 35 
@@ -203,12 +207,12 @@ pub enum Se050TlvTag {
 #[allow(dead_code)]
 #[repr(u8)]
 pub enum Se050ECSignatureAlgo {
-SIG_ECDSA_PLAIN = 0x09,
-SIG_ECDSA_SHA = 0x11,
-SIG_ECDSA_SHA_224 = 0x25,
-SIG_ECDSA_SHA_256 = 0x21,
-SIG_ECDSA_SHA_384 = 0x22,
-SIG_ECDSA_SHA_512 = 0x26,
+SigEcdsaPlain = 0x09,
+SigEcdsaSha = 0x11,
+SigEcdsaSha224 = 0x25,
+SigEcdsaSha256 = 0x21,
+SigEcdsaSha384 = 0x22,
+SigEcdsaSha512 = 0x26,
 
 }
 
@@ -217,7 +221,7 @@ SIG_ECDSA_SHA_512 = 0x26,
 #[repr(u8)]
 pub enum Se050EDSignatureAlgo {
 
-    SIG_ED25519PURE = 0xA3,
+    SigEd25519pure = 0xA3,
 
 }
 
@@ -226,7 +230,7 @@ pub enum Se050EDSignatureAlgo {
 #[repr(u8)]
 pub enum Se050ECDAASignatureAlgo {
 
-    SIG_ECDAA = 0xF4,
+    SigEcdaa= 0xF4,
 
 }
 
@@ -236,16 +240,16 @@ pub enum Se050ECDAASignatureAlgo {
 #[repr(u8)]
 pub enum Se050RSASignatureAlgo {
     
-RSA_SHA1_PKCS1_PSS  = 0x15 ,
-RSA_SHA224_PKCS1_PSS = 0x2B ,
-RSA_SHA256_PKCS1_PSS = 0x2C ,
-RSA_SHA384_PKCS1_PSS = 0x2D ,
-RSA_SHA512_PKCS1_PSS = 0x2E,
-RSA_SHA1_PKCS1 = 0x0A ,
-RSA_SHA_224_PKCS1 = 0x27 ,
-RSA_SHA_256_PKCS1 = 0x28 ,
-RSA_SHA_384_PKCS1 =  0x29 ,
-RSA_SHA_512_PKCS1 = 0x2A ,
+RsaSha1Pkcs1Pss  = 0x15 ,
+RsaSha224Pkcs1Pss = 0x2B ,
+RsaSha256Pkcs1Pss= 0x2C ,
+RsaSha384Pkcs1Pss = 0x2D ,
+RsaSha512Pkcs1Pss = 0x2E,
+RsaSha1Pkcs1 = 0x0A ,
+RsaSha224Pkcs1 = 0x27 ,
+RsaSha256Pkcs1 = 0x28 ,
+RsaSha384Pkcs1 =  0x29 ,
+RsaSha512Pkcs1 = 0x2A ,
 
 }
 
@@ -255,9 +259,9 @@ RSA_SHA_512_PKCS1 = 0x2A ,
 #[repr(u8)]
 pub enum Se050RSAEncryptionAlgo {
 
-    RSA_NO_PAD = 0x0C,
-    RSA_PKCS1 = 0x0A,
-    RSA_PKCS1_OAEP = 0x0F,
+    RsaNoPad = 0x0C,
+    RsaPkcs1 = 0x0A,
+    RsaPkcs10aep = 0x0F,
 
 }
 
@@ -266,12 +270,12 @@ pub enum Se050RSAEncryptionAlgo {
  #[repr(u16)]
  pub enum Se050RSABitLength {
 
-     RSA_512 = 512,
-     RSA_1024 = 1024,
-     RSA_1152 = 1152,
-     RSA_2048 = 2048,
-     RSA_3072 = 3072,
-     RSA_4096 = 4096,
+     Rsa512 = 512,
+     Rsa1024 = 1024,
+     Rsa1152 = 1152,
+     Rsa2048 = 2048,
+     Rsa3072 = 3072,
+     Rsa4096 = 4096,
  
  }
   
@@ -281,14 +285,14 @@ pub enum Se050RSAEncryptionAlgo {
 #[repr(u8)]
 pub enum Se050RSAKeyComponent {    
     
-    RSA_COMP_MOD = 0x00 ,
-    RSA_COMP_PUB_EXP = 0x01 ,
-    RSA_COMP_PRIV_EXP = 0x02 ,
-    RSA_COMP_P = 0x03 ,
-    RSA_COMP_Q  = 0x04 ,
-    RSA_COMP_DP  = 0x05 ,
-    RSA_COMP_DQ  = 0x06 ,
-    RSA_COMP_INVQ  = 0x07 ,
+    RsaCompMod = 0x00 ,
+    RsaCompPubExp = 0x01 ,
+    RsaCompPrivExp = 0x02 ,
+    RsaCompP = 0x03 ,
+    RsaCompQ  = 0x04 ,
+    RsaCompDp = 0x05 ,
+    RsaCompDq = 0x06 ,
+    RsaCompInvq = 0x07 ,
 
  
 }
@@ -299,12 +303,12 @@ pub enum Se050RSAKeyComponent {
     #[repr(u8)]
     pub enum Se050DigestModeconstants {
   
-    DIGEST_NO_HASH = 0x00,
-    DIGEST_SHA = 0x01,
-    DIGEST_SHA224 = 0x07,
-    DIGEST_SHA256 = 0x04,
-    DIGEST_SHA384 = 0x05,
-    DIGEST_SHA512 =  0x06,
+        DigestNoHash = 0x00,
+        DigestSha = 0x01,
+        DigestSha224 = 0x07,
+        DigestSha256 = 0x04,
+        DigestSha384 = 0x05,
+        DigestSha512 =  0x06,
 
 }
 
@@ -313,18 +317,18 @@ pub enum Se050RSAKeyComponent {
     #[repr(u8)]
     pub enum Se050MACAlgoconstants {
       
-    HMAC_SHA1 = 0x18,
-    HMAC_SHA256 = 0x19,
-    HMAC_SHA384 = 0x1A,
-    HMAC_SHA512 = 0x1B,
-    CMAC_128  = 0x31,
-    DES_MAC4_ISO9797_M2 = 0x05,
-    DES_MAC4_ISO9797_1_M2_ALG3 = 0x13,
-    DES_MAC4_ISO9797_M1 = 0x03,
-    DES_MAC4_ISO9797_1_M1_ALG3 = 0x2F,
-    DES_MAC8_ISO9797_M2 = 0x06,
-    DES_MAC8_ISO9797_1_M2_ALG3 = 0x14,
-    DES_MAC8_ISO9797_1_M1_ALG3 = 0x04,
+        HmacSha = 0x18,
+        HmacSha256 = 0x19,
+        HmacSha384 = 0x1A,
+        HmacSha512 = 0x1B,
+        Cmac128  = 0x31,
+        DesMac4Iso9797M2 = 0x05,
+        DesMac4Iso9797_1M2Alg3 = 0x13,
+        DesMac4Iso9797M1 = 0x03,
+        DesMac4Iso9797_1M1Alg3 = 0x2F,
+        DesMac8Iso9797M2 = 0x06,
+        DesMac8Iso9797_1M2Alg3 = 0x14,
+        DesMac8Iso9797_1M1Alg3 = 0x04,
    // DES_MAC8_ISO9797_1_M1_ALG3 = 0x30,
 
 }
@@ -335,11 +339,11 @@ pub enum Se050RSAKeyComponent {
     #[repr(u8)]
     pub enum Se050ECCurveconstants  {
     
-    NIST_P192 = 0x01,
-    NIST_P224 = 0x02,    
-    NIST_P256 = 0x03,
-    NIST_P384 = 0x04,
-    NIST_P521 = 0x05,
+    NistP192 = 0x01,
+    NistP224 = 0x02,    
+    NistP256 = 0x03,
+    NistP384 = 0x04,
+    NistP521 = 0x05,
 
     Brainpool160 = 0x06,
     Brainpool192 = 0x07,
@@ -354,9 +358,9 @@ pub enum Se050RSAKeyComponent {
     Secp224k1=0x0F,
     Secp256k1=0x10,
   
-    TPM_ECC_BN_P256=0x11,
-    ID_ECC_ED_25519= 0x40, 
-    ID_ECC_MONT_DH_25519=0x41
+    TpmEccBnP256=0x11,
+    IdEccEd25519= 0x40, 
+    IdEccMontDh25519=0x41
  
 }
 
@@ -366,11 +370,11 @@ pub enum Se050RSAKeyComponent {
     #[repr(u8)]
     pub enum Se050ECCurveParamconstants {     
     
-    CURVE_PARAM_A = 0x01,
-    CURVE_PARAM_B = 0x02,
-    CURVE_PARAM_G = 0x04,
-    CURVE_PARAM_N = 0x08,
-    CURVE_PARAM_PRIME = 0x10,
+    CurveParamA = 0x01,
+    CurveParamB = 0x02,
+    CurveParamG = 0x04,
+    CurveParamN = 0x08,
+    CurveParamPrime = 0x10,
 
 }
  
@@ -379,20 +383,20 @@ pub enum Se050RSAKeyComponent {
     #[repr(u8)]
     pub enum  Se050CipherModeconstants {
          
-    DES_CBC_NOPAD = 0x01,  
-    DES_CBC_ISO9797_M1 = 0x02,
-    DES_CBC_ISO9797_M2=0x03,
-    DES_CBC_PKCS5=0x04,
-    DES_ECB_NOPAD= 0x05,
-    DES_ECB_ISO9797_M1= 0x06,
-    DES_ECB_ISO9797_M2= 0x07,
-    DES_ECB_PKCS5 =0x08,
-    AES_ECB_NOPAD =0x0E,
-    AES_CBC_NOPAD =0x0D,
-    AES_CBC_ISO9797_M1 =0x16,
-    AES_CBC_ISO9797_M2 =0x17,
-    AES_CBC_PKCS5= 0x18,
-    AES_CTR =0xF0,
+    DesCbcNopad = 0x01,  
+    DesCbcIso9797M1 = 0x02,
+    DesCbcIso9797M2=0x03,
+    DesCbcPkcs5=0x04,
+    DesEcbNopad= 0x05,
+    DesEcbIso9797M1= 0x06,
+    DesEcbIso9797M2= 0x07,
+    DesEcbPkcs5 =0x08,
+    AesEcbNopad =0x0E,
+    AesCbcNopad =0x0D,
+    AesCbcIso9797M1 =0x16,
+    AesCbcIso9797M2 =0x17,
+    AesCbcPkcs5= 0x18,
+    AesCtr =0xF0,
 
  
 }
@@ -402,25 +406,25 @@ pub enum Se050RSAKeyComponent {
     #[repr(u16)]
     pub enum  Se050AppletConfig {
 
-     CONFIG_ECDAA = 0x0001,
-     CONFIG_ECDSA_ECDH_ECDHE = 0x0002,
-     CONFIG_EDDSA = 0x0004,
-     CONFIG_DH_MONT = 0x0008,
-     CONFIG_HMAC = 0x0010,
-     CONFIG_RSA_PLAIN = 0x0020,
-     CONFIG_RSA_CRT =  0x0040,
-     CONFIG_AES = 0x0080,
+     ConfigEcdaa = 0x0001,
+     ConfigEcdsaEcdhEcdhe = 0x0002,
+     ConfigEddsaA = 0x0004,
+     ConfigDhMont = 0x0008,
+     ConfigHmac = 0x0010,
+     ConfigRsaPlain = 0x0020,
+     ConfigRsaCrt =  0x0040,
+     ConfigAes = 0x0080,
   
-     CONFIG_DES = 0x0100,
-     CONFIG_PBKDF = 0x0200,
-     CONFIG_TLS = 0x0400,
-     CONFIG_MIFARE = 0x0800,
-     CONFIG_FIPS_MODE_DISABLED = 0x1000,
-     CONFIG_I2CM = 0x2000,
+     ConfigDes = 0x0100,
+     ConfigPbkdf= 0x0200,
+     ConfigTls = 0x0400,
+     ConfigMifare = 0x0800,
+     ConfigFipsModeDisabled = 0x1000,
+     ConfigI2cm = 0x2000,
 
-     CONFIG_ECC_ALL = 0x000F,
-     CONFIG_RSA_ALL = 0x0060,
-     CONFIG_ALL = 0x3FFF,
+     ConfigEccAll = 0x000F,
+     ConfigRsaAll = 0x0060,
+     ConfigAll = 0x3FFF,
 
      }
 
@@ -430,8 +434,8 @@ pub enum Se050RSAKeyComponent {
     #[repr(u8)]
     pub enum  Se050LockIndicatorconstants { 
 
-    TRANSIENT_LOCK = 0x01,
-    PERSISTENT_LOCK = 0x02,
+    TransientLock = 0x01,
+    PersistentLock = 0x02,
  
 }
  
@@ -451,9 +455,9 @@ pub enum Se050RSAKeyComponent {
     #[repr(u8)]
     pub enum  Se050CryptoContextconstants { 
 
-        CC_DIGEST = 0x01, 
-        CC_CIPHER = 0x02,
-        CC_SIGNATURE = 0x03,
+        CcDigest = 0x01, 
+        CcCipher = 0x02,
+        CcSignature = 0x03,
     }
      
     // See AN12413,  4.3.27 Result  Table 44. Result constants P.44
@@ -461,8 +465,8 @@ pub enum Se050RSAKeyComponent {
     #[repr(u8)]
     pub enum  Se050Resultconstants {     
  
-     RESULT_SUCCESS= 0x01,
-     RESULT_FAILURE = 0x02,
+     ResultSuccess= 0x01,
+     ResultFailure = 0x02,
     }
 
 
@@ -481,7 +485,7 @@ pub enum Se050RSAKeyComponent {
      #[repr(u8)]
      pub enum  Se050SetIndicatorconstants {     
 
-      NOT_SET = 0x01,
+      NotSet = 0x01,
       SET = 0x02,
 
      }
@@ -491,7 +495,7 @@ pub enum Se050RSAKeyComponent {
      #[repr(u8)]
      pub enum  Se050MoreIndicatorconstants {    
 
-     NO_MORE = 0x01,
+     NoMore = 0x01,
      MORE = 0x02,
 
      }
@@ -503,8 +507,8 @@ pub enum Se050RSAKeyComponent {
      #[repr(u8)]
      pub enum  Se050PlatformSCPRequestconstants {    
 
-     SCP_REQUIRED = 0x01 ,
-     SCP_NOT_REQUIRED = 0x02,
+     ScpRequired = 0x01 ,
+     ScpNotRequired = 0x02,
 
      }
  
@@ -520,40 +524,40 @@ pub trait Se050Device {
     fn disable(&mut self, _delay: &mut DelayWrapper);
 
     //See AN12413,4.5 Session management // 4.5.1 Generic session commands //4.5.1.1 CreateSession P.48
-    fn CreateSession(&mut self,  authobjid: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+    fn create_session(&mut self,  authobjid: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
 
     //See AN12413,4.5 Session management // 4.5.1 Generic session commands //4.5.1.2 ExchangeSessionData P.49
-    fn ExchangeSessionData(&mut self,  SessionPolicies: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+    fn exchange_session_data(&mut self, session_policies: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
 
-    //See AN12413 , 4.5 Session management // 4.5.1 Generic session commands /4.5.1.3 ProcessSessionCmd P.49-50
-    fn ProcessSessionCmd(&mut self,APDUcommand : &[u8], SessionID : &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
-
-    //See AN12413 , 4.5 Session management // 4.5.1 Generic session commands //4.5.1.4 RefreshSession P.50
-    fn RefreshSession(&mut self,Policy: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+    //See AN12413 , 4.5 Session management // 4.5.1 Generic session commands /4.5.1.3 process_session_cmd P.49-50
+    fn process_session_cmd(&mut self,apducommand : &[u8], session_id : &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
 
     //See AN12413 , 4.5 Session management // 4.5.1 Generic session commands //4.5.1.4 RefreshSession P.50
-    fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+    fn refresh_session(&mut self,policy: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+
+    //See AN12413 , 4.5 Session management // 4.5.1 Generic session commands //4.5.1.4 RefreshSession P.50
+    fn close_session(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
 
 
     //See AN12413 , 4.5 Session management //4.5.2 UserID session operations // 4.5.2.1 VerifySessionUserID P.51-52    
-    fn VerifySessionUserID(&mut self, UserIDvalue: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error>;
+    fn verify_session_user_id(&mut self, user_idvalue: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error>;
 
     //See AN12413 , 4.5.4 ECKey session operations //  4.5.4.1 ECKeySessionInternalAuthenticate P.52    
-    fn ECKeySessionInternalAuthenticate(&mut self, InputData: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
+    fn eckey_session_internal_authenticate(&mut self, input_data: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
 
-    //See AN12413 ,  4.5.4 ECKey session operations //   4.5.4.2 ECKeySessionGetECKAPublicKey P.53-54
-    fn ECKeySessionGetECKAPublicKey(&mut self, InputData: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
+    //See AN12413 ,  4.5.4 ECKey session operations //   4.5.4.2 eckey_session_get_eckapublic_key P.53-54
+    fn eckey_session_get_eckapublic_key(&mut self, input_data: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
 
 
        
-    //AN12413 // 4.6 Module management  //4.6.3 SetAppletFeatures  P.56 -57
-    fn SetAppletFeatures(&mut self,AppletConfig: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+    //AN12413 // 4.6 Module management  //4.6.3 set_applet_features  P.56 -57
+    fn set_applet_features(&mut self,applet_config: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
 
    // See AN12413, // 4.7 Secure Object management // P57-58
 
     // See AN12413,  4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey //P1_EC ///P.58-59
  
-    fn generate_ECCURVE_key(&mut self, ECCurve: &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>; //ERWEITERT
+    fn generate_eccurve_key(&mut self, eccurve: &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>; //ERWEITERT
     
     fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>; //DEFAULT CONFIGURATION OF SE050
 
@@ -582,8 +586,8 @@ pub trait Se050Device {
 
     */
 
-    // See AN12413 // 4.7 Secure Object management //4.7.1 WriteSecureObject P.57 //4.7.1.5 WriteUserID  //P.62    
-    fn WriteUserID(&mut self, UserIdentifierValue : &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>;
+    // See AN12413 // 4.7 Secure Object management //4.7.1 WriteSecureObject P.57 //4.7.1.5 write_user_id  //P.62    
+    fn write_user_id(&mut self, user_identifier_value : &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>;
     
      /*
     TO-DO  ->FUNCTIONS  FOR Creating or writing  a UserID object, setting the user identifier value.  
@@ -611,28 +615,28 @@ pub trait Se050Device {
     */
 
     //fn encrypt_aes_oneshot( &mut self,   data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper,) -> Result<(), Se050Error>;
-    fn encrypt_aes_oneshot( &mut self,  CipherMode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper,) -> Result<(), Se050Error>;
-    fn decrypt_aes_oneshot( &mut self,  CipherMode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper,) -> Result<(), Se050Error>;
+    fn encrypt_aes_oneshot( &mut self,   cipher_mode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper,) -> Result<(), Se050Error>;
+    fn decrypt_aes_oneshot( &mut self,   cipher_mode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper,) -> Result<(), Se050Error>;
     
-    fn encrypt_des_oneshot( &mut self,  CipherMode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper,) -> Result<(), Se050Error>;
-    fn decrypt_des_oneshot( &mut self,  CipherMode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper,) -> Result<(), Se050Error>;
+    fn encrypt_des_oneshot( &mut self,   cipher_mode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper,) -> Result<(), Se050Error>;
+    fn decrypt_des_oneshot( &mut self,   cipher_mode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper,) -> Result<(), Se050Error>;
          
 
     // See AN12413, //4.19 Generic management commands // P110-11
     fn get_random(&mut self, buf: &mut [u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
 
     //AN12413, // 4.19 Generic management commands //4.19.1 GetVersion  P.108 -109  
-    fn GetVersion(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+    fn get_version(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
     
-    //AN12413, // 4.19 Generic management commands //4.19.2 GetTimestamp P.109
-    fn GetTimestamp(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+    //AN12413, // 4.19 Generic management commands //4.19.2 get_timestamp P.109
+    fn get_timestamp(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
     
     //AN12413, // 4.19 Generic management commands //4.19.2 GetTimestamp P.109 
-    fn GetFreeMemory(&mut self, Memoryconstant: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+    fn get_free_memory(&mut self, memoryconstant: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
 
 
-    //AN12413, // 4.19 Generic management commands //44.19.5 DeleteAll P.112
-    fn DeleteAll(&mut self, Memoryconstant: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+    //AN12413, // 4.19 Generic management commands //44.19.5 delete_all P.112
+    fn delete_all(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
  
     }
  
@@ -729,7 +733,7 @@ where
     }
 
 //###########################################################################
-//See AN12413, 4.5 Session management // 4.5.1 Generic session commands //4.5.1.1 CreateSession P.48
+//See AN12413, 4.5 Session management // 4.5.1 Generic session commands //4.5.1.1 create_session P.48
 // Creates a session on SE050.
 //Depending on the authentication object being referenced, a specific method of authentication applies. 
 //The response needs to adhere to this authentication method.
@@ -738,7 +742,7 @@ where
 
 
 #[inline(never)]
-fn CreateSession(&mut self,  authobjid: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+fn create_session(&mut self,  authobjid: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> {
     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &authobjid);
    
     let mut capdu = CApdu::new(
@@ -746,7 +750,7 @@ fn CreateSession(&mut self,  authobjid: &[u8],delay: &mut DelayWrapper) -> Resul
         Into::<u8>::into(Se050ApduInstruction::Mgmt ) | APDU_INSTRUCTION_TRANSIENT,
         Se050ApduP1CredType::Default.into(),
         Se050ApduP2::SessionCreate.into(),
-        Some((0x0C))
+        Some(0x0C)
     );
     capdu.push(tlv1);
    
@@ -760,23 +764,23 @@ fn CreateSession(&mut self,  authobjid: &[u8],delay: &mut DelayWrapper) -> Resul
         .map_err(|_| Se050Error::UnknownError)?;
 
     if rapdu.sw != 0x9000 {
-        error!("SE050 CreateSession Failed: {:x}", rapdu.sw);
+        error!("SE050 create_session Failed: {:x}", rapdu.sw);
         return Err(Se050Error::UnknownError);
     }
 
-    debug!("SE050 CreateSession OK");
+    debug!("SE050 create_session OK");
     Ok(())
 }
 
 
 //###########################################################################
-//See AN12413 , 4.5 Session management // 4.5.1 Generic session commands //4.5.1.2 ExchangeSessionData P.49
+//See AN12413 , 4.5 Session management // 4.5.1 Generic session commands //4.5.1.2 exchange_session_data P.49
 // Sets session policies for the current session.
- // Session policies -> SessionPolicies
+ // Session policies ->session_policies
 
 #[inline(never)]
-fn ExchangeSessionData(&mut self,  SessionPolicies: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> {
-    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &SessionPolicies);
+fn exchange_session_data(&mut self, session_policies: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &session_policies);
    
     let mut capdu = CApdu::new(
         ApduClass::ProprietaryPlain,
@@ -797,27 +801,27 @@ fn ExchangeSessionData(&mut self,  SessionPolicies: &[u8],delay: &mut DelayWrapp
         .map_err(|_| Se050Error::UnknownError)?;
 
     if rapdu.sw != 0x9000 {
-        error!("SE050 ExchangeSessionData Failed: {:x}", rapdu.sw);
+        error!("SE050 exchange_session_data Failed: {:x}", rapdu.sw);
         return Err(Se050Error::UnknownError);
     }
 
-    debug!("SE050 ExchangeSessionData OK");
+    debug!("SE050 exchange_session_data OK");
     Ok(())
 }
 
 
      //###########################################################################
-    //See AN12413 , 4.5 Session management // 4.5.1 Generic session commands /4.5.1.3 ProcessSessionCmd P.49-50
+    //See AN12413 , 4.5 Session management // 4.5.1 Generic session commands /4.5.1.3 process_session_cmd P.49-50
     //Requests a command to be processed within a specific session. 
     //Note that the applet does not check the validity of the CLA byte of the TLV[TAG_1] payload.
 
      #[inline(never)]
      
-     fn ProcessSessionCmd(&mut self,APDUcommand : &[u8], SessionID : &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+     fn process_session_cmd(&mut self,apducommand : &[u8], session_id : &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
 
-         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &APDUcommand);
+         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &apducommand);
 
-         let tlv = SimpleTlv::new(Se050TlvTag::SessionID.into(), &SessionID);	
+         let tlv = SimpleTlv::new(Se050TlvTag::SessionID.into(), &session_id);	
 
         
          let mut capdu = CApdu::new(
@@ -840,23 +844,23 @@ fn ExchangeSessionData(&mut self,  SessionPolicies: &[u8],delay: &mut DelayWrapp
              .map_err(|_| Se050Error::UnknownError)?;
  
          if rapdu.sw != 0x9000 {
-             error!("SE050 ProcessSessionCmd: {:x}", rapdu.sw);
+             error!("SE050 process_session_cmd: {:x}", rapdu.sw);
              return Err(Se050Error::UnknownError);
          }
  
-         debug!("SE050 ProcessSessionCmd OK");
+         debug!("SE050 process_session_cmd OK");
          Ok(())
      }
  
  //###########################################################################
 
-//See AN12413 , 4.5 Session management // 4.5.1 Generic session commands //4.5.1.4 RefreshSession P.50
+//See AN12413 , 4.5 Session management // 4.5.1 Generic session commands //4.5.1.4 refresh_session P.50
 
 #[inline(never)]
      
-fn RefreshSession(&mut self,Policy: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+fn refresh_session(&mut self,policy: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
 
-    let tlv = SimpleTlv::new(Se050TlvTag::Policy.into(), &Policy);
+    let tlv = SimpleTlv::new(Se050TlvTag::Policy.into(), &policy);
  
     let mut capdu = CApdu::new(
         ApduClass::ProprietaryPlain,
@@ -878,11 +882,11 @@ fn RefreshSession(&mut self,Policy: &[u8], delay: &mut DelayWrapper) -> Result<(
         .map_err(|_| Se050Error::UnknownError)?;
 
     if rapdu.sw != 0x9000 {
-        error!("SE050 RefreshSession: {:x}", rapdu.sw);
+        error!("SE050 refresh_session: {:x}", rapdu.sw);
         return Err(Se050Error::UnknownError);
     }
 
-    debug!("SE050 RefreshSession OK");
+    debug!("SE050 refresh_session OK");
     Ok(())
 }
 
@@ -896,8 +900,8 @@ fn RefreshSession(&mut self,Policy: &[u8], delay: &mut DelayWrapper) -> Result<(
  
 
 #[inline(never)]
-     
-fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+#[allow(unused_mut)]
+fn close_session(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
    
     let mut capdu = CApdu::new(
         ApduClass::ProprietaryPlain,
@@ -917,11 +921,11 @@ fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
         .map_err(|_| Se050Error::UnknownError)?;
 
     if rapdu.sw != 0x9000 {
-        error!("SE050 CloseSession: {:x}", rapdu.sw);
+        error!("SE050 close_session: {:x}", rapdu.sw);
         return Err(Se050Error::UnknownError);
     }
 
-    debug!("SE050CloseSession OK");
+    debug!("SE050close_session OK");
     Ok(())
 }
 
@@ -932,8 +936,8 @@ fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
 
  #[inline(never)]
  
- fn VerifySessionUserID(&mut self, UserIDvalue: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> {
-     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &UserIDvalue);
+ fn verify_session_user_id(&mut self, user_idvalue: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &user_idvalue);
       
      let mut capdu = CApdu::new(
          ApduClass::ProprietaryPlain,
@@ -954,11 +958,11 @@ fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
          .map_err(|_| Se050Error::UnknownError)?;
 
      if rapdu.sw != 0x9000 {
-         error!("SE050 VerifySessionUserID Failed: {:x}", rapdu.sw);
+         error!("SE050 verify_session_user_id Failed: {:x}", rapdu.sw);
          return Err(Se050Error::UnknownError);
      }
 
-     debug!("SE050 VerifySessionUserID OK");
+     debug!("SE050 verify_session_user_id OK");
      Ok(())
  }
 
@@ -989,9 +993,9 @@ fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
 
 #[inline(never)]
  
-    fn ECKeySessionInternalAuthenticate(&mut self, InputData: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+    fn eckey_session_internal_authenticate(&mut self, input_data: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
 
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &InputData);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &input_data);
         
         let mut capdu = CApdu::new(
             ApduClass::ProprietarySecure,
@@ -1013,17 +1017,17 @@ fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
             .map_err(|_| Se050Error::UnknownError)?;
 
         if rapdu.sw != 0x9000 {
-            error!("SE050 ECKeySessionInternalAuthenticate Failed: {:x}", rapdu.sw);
+            error!("SE050 eckey_session_internal_authenticate Failed: {:x}", rapdu.sw);
             return Err(Se050Error::UnknownError);
         }
 
-        debug!("SE050 ECKeySessionInternalAuthenticate OK");
+        debug!("SE050 eckey_session_internal_authenticate OK");
         Ok(())
     }
 
 
 //###########################################################################
-  //See AN12413 ,  4.5.4 ECKey session operations //   4.5.4.2 ECKeySessionGetECKAPublicKey P.53-54
+  //See AN12413 ,  4.5.4 ECKey session operations //   4.5.4.2 eckey_session_get_eckapublic_key P.53-54
   //  Gets the public key of the static device key pair (either     RESERVED_ID_ECKEY_SESSION or RESERVED_ID_EXTERNAL_IMPORT).
   //  The key identifier used in subTag 0x83 must be either:
   //  • 0x00 for user authentication.
@@ -1033,9 +1037,9 @@ fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
 
   #[inline(never)]
  
-  fn ECKeySessionGetECKAPublicKey(&mut self, InputData: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+  fn eckey_session_get_eckapublic_key(&mut self, input_data: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
 
-      let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &InputData);
+      let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &input_data);
              
       let mut capdu = CApdu::new(
           ApduClass::ProprietarySecure,
@@ -1057,11 +1061,11 @@ fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
           .map_err(|_| Se050Error::UnknownError)?;
 
       if rapdu.sw != 0x9000 {
-          error!("SE050 ECKeySessionGetECKAPublicKey Failed: {:x}", rapdu.sw);
+          error!("SE050 eckey_session_get_eckapublic_key Failed: {:x}", rapdu.sw);
           return Err(Se050Error::UnknownError);
       }
 
-      debug!("SE050 ECKeySessionGetECKAPublicKey OK");
+      debug!("SE050 eckey_session_get_eckapublic_key OK");
       Ok(())
   }
 
@@ -1073,9 +1077,9 @@ fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
            /* NOTE: hardcoded Object ID 0xae51ae51! */
      //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey    P.58
     //P1_EC 4.3.19 ECCurve P.42
-    fn generate_ECCURVE_key(&mut self, ECCurve: &[u8],delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
+    fn generate_eccurve_key(&mut self, eccurve: &[u8],delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &ECCurve );	// Se050ECCurveconstants
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &eccurve );	// Se050ECCurveconstants
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
@@ -1095,11 +1099,11 @@ fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
             .map_err(|_| Se050Error::UnknownError)?;
 
         if rapdu.sw != 0x9000 {
-            error!("SE050 GenECCurve {:x} Failed: {:x}", ECCurve, rapdu.sw);
+            error!("SE050 GenECCurve {:x} Failed: {:x}", eccurve, rapdu.sw);
             return Err(Se050Error::UnknownError);
         }
 
-        debug!("SE050 GenECCurvev {:x} : OK",ECCurve);
+        debug!("SE050 GenEccurve {:x} : OK",eccurve);
         Ok(ObjectId([0xae, 0x51, 0xae, 0x51]))
     }
 
@@ -1327,9 +1331,9 @@ fn CloseSession(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
 //WriteUserID 0x80 0x01 0x07 0x00
 /* NOTE: hardcoded Object ID 0xae51ae51! */
 // See AN12413 // 4.7 Secure Object management //4.7.1 WriteSecureObject P.57 //4.7.1.5 WriteUserID  //P.62
-fn WriteUserID(&mut self, UserIdentifierValue : &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
+fn write_user_id(&mut self, user_identifier_value : &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
-    let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &UserIdentifierValue );	 
+    let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &user_identifier_value );	 
     let mut capdu = CApdu::new(
         ApduClass::ProprietaryPlain,
         Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
@@ -1349,11 +1353,11 @@ fn WriteUserID(&mut self, UserIdentifierValue : &[u8], delay: &mut DelayWrapper)
         .map_err(|_| Se050Error::UnknownError)?;
 
     if rapdu.sw != 0x9000 {
-        error!("SE050 WriteUserID  Failed: {:x}", rapdu.sw);
+        error!("SE050 write_user_id  Failed: {:x}", rapdu.sw);
         return Err(Se050Error::UnknownError);
     }
 
-    debug!("SE050 WriteUserID OK");
+    debug!("SE050 write_user_id OK");
     Ok(ObjectId([0xae, 0x51, 0xae, 0x51]))
 }
 
@@ -1364,7 +1368,7 @@ fn WriteUserID(&mut self, UserIdentifierValue : &[u8], delay: &mut DelayWrapper)
 /* NOTE: hardcoded Object ID 0xae50ae50! */
 //4.12 Crypto operations AES/DES // 4.12.4 CipherOneShot // ENCRYPT P.87
 //  4.3.21 CipherMode // 4.3.21 CipherMode Table 39. CipherMode constants P.43
-fn encrypt_aes_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper, ) -> Result<(), Se050Error> 
+fn encrypt_aes_oneshot(&mut self,  cipher_mode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper, ) -> Result<(), Se050Error> 
 {
     if data.len() > 240 || (data.len() % 16 != 0) {
         error!("Input data too long or unaligned");
@@ -1375,7 +1379,7 @@ fn encrypt_aes_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
         return Err(Se050Error::UnknownError);
     }
     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x50, 0xae, 0x50]);
-    let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &CipherMode);	// 4.3.21 CipherMode Table 39. CipherMode constants
+    let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), & cipher_mode);	// 4.3.21 CipherMode Table 39. CipherMode constants
     let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), data);
     let mut capdu = CApdu::new(
         ApduClass::ProprietaryPlain,
@@ -1397,7 +1401,7 @@ fn encrypt_aes_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
         .map_err(|_| Se050Error::UnknownError)?;
 
     if rapdu.sw != 0x9000 {
-        error!("SE050 EncryptAESOneshot {:x} Failed: {:x}", CipherMode, rapdu.sw);
+        error!("SE050 EncryptAESOneshot {:x} Failed: {:x}",  cipher_mode, rapdu.sw);
         return Err(Se050Error::UnknownError);
     }
 
@@ -1410,7 +1414,7 @@ fn encrypt_aes_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
         return Err(Se050Error::UnknownError);
     }
     enc.copy_from_slice(tlv1_ret.get_data());
-    debug!("SE050 EncryptAESOneshot {:x} OK", CipherMode );
+    debug!("SE050 EncryptAESOneshot {:x} OK",  cipher_mode );
     Ok(())
 }
 
@@ -1421,7 +1425,7 @@ fn encrypt_aes_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
 /* NOTE: hardcoded Object ID 0xae50ae50! */
 //4.12 Crypto operations AES/DES // 4.12.4 CipherOneShot // DECRYPT P.87
 //  4.3.21 CipherMode // 4.3.21 CipherMode Table 39. CipherMode constants P.43
-fn decrypt_aes_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper, ) -> Result<(), Se050Error> 
+fn decrypt_aes_oneshot(&mut self,  cipher_mode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper, ) -> Result<(), Se050Error> 
 {
     if data.len() > 240 || (data.len() % 16 != 0) {
         error!("Input data too long or unaligned");
@@ -1432,7 +1436,7 @@ fn decrypt_aes_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
         return Err(Se050Error::UnknownError);
     }
     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x50, 0xae, 0x50]);
-    let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(),  &CipherMode);	// 4.3.21 CipherMode Table 39. CipherMode constants
+    let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(),  & cipher_mode);	// 4.3.21 CipherMode Table 39. CipherMode constants
     let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), data);
     let mut capdu = CApdu::new(
         ApduClass::ProprietaryPlain,
@@ -1454,20 +1458,20 @@ fn decrypt_aes_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
         .map_err(|_| Se050Error::UnknownError)?;
 
     if rapdu.sw != 0x9000 {
-        error!("SE050 DecryptAESOneshot {:x}, Failed: {:x}", CipherMode,rapdu.sw);
+        error!("SE050 DecryptAESOneshot {:x}, Failed: {:x}",  cipher_mode,rapdu.sw);
         return Err(Se050Error::UnknownError);
     }
 
     let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or_else(|| {
-        error!("SE050 DecryptAESOneshot_{:x} Return TLV Missing",  CipherMode);
+        error!("SE050 DecryptAESOneshot_{:x} Return TLV Missing",   cipher_mode);
         Se050Error::UnknownError })?;
 
     if tlv1_ret.get_data().len() != enc.len() {
-        error!("SE050 DecryptAESOneshot {:x} Length Mismatch", CipherMode );
+        error!("SE050 DecryptAESOneshot {:x} Length Mismatch",  cipher_mode );
         return Err(Se050Error::UnknownError);
     }
     enc.copy_from_slice(tlv1_ret.get_data());
-    debug!("SE050 DecryptAESOneshot {:x} OK",CipherMode );
+    debug!("SE050 DecryptAESOneshot {:x} OK", cipher_mode );
     Ok(())
 }
 
@@ -1478,7 +1482,7 @@ fn decrypt_aes_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
 /* NOTE: hardcoded Object ID 0xae50ae50! */
 //4.12 Crypto operations AES/DES // 4.12.4 CipherOneShot // ENCRYPT  P.87
 //  4.3.21 CipherMode // 4.3.21 CipherMode Table 39. CipherMode constants P.43
-fn encrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper, ) -> Result<(), Se050Error> 
+fn encrypt_des_oneshot(&mut self,  cipher_mode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper, ) -> Result<(), Se050Error> 
 {
     if data.len() > 240 || (data.len() % 16 != 0) {
         error!("Input data too long or unaligned");
@@ -1489,7 +1493,7 @@ fn encrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
         return Err(Se050Error::UnknownError);
     }
     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x50, 0xae, 0x50]);
-    let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &CipherMode);	// 4.3.21 CipherMode Table 39. CipherMode constants
+    let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), & cipher_mode);	// 4.3.21 CipherMode Table 39. CipherMode constants
     let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), data);
     let mut capdu = CApdu::new(
         ApduClass::ProprietaryPlain,
@@ -1511,7 +1515,7 @@ fn encrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
         .map_err(|_| Se050Error::UnknownError)?;
 
     if rapdu.sw != 0x9000 {
-        error!("SE050 EncryptDESOneshot {:x} Failed: {:x}", CipherMode, rapdu.sw);
+        error!("SE050 EncryptDESOneshot {:x} Failed: {:x}",  cipher_mode, rapdu.sw);
         return Err(Se050Error::UnknownError);
     }
 
@@ -1524,7 +1528,7 @@ fn encrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
         return Err(Se050Error::UnknownError);
     }
     enc.copy_from_slice(tlv1_ret.get_data());
-    debug!("SE050 EncryptDESOneshot {:x} OK", CipherMode );
+    debug!("SE050 EncryptDESOneshot {:x} OK",  cipher_mode );
     Ok(())
 }
 
@@ -1535,7 +1539,7 @@ fn encrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
 /* NOTE: hardcoded Object ID 0xae50ae50! */
 //4.12 Crypto operations AES/DES // 4.12.4 CipherOneShot // DECRYPT P.87 
 //  4.3.21 CipherMode // 4.3.21 CipherMode Table 39. CipherMode constants P.43
-fn decrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper, ) -> Result<(), Se050Error> 
+fn decrypt_des_oneshot(&mut self,  cipher_mode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper, ) -> Result<(), Se050Error> 
 {
     if data.len() > 240 || (data.len() % 16 != 0) {
         error!("Input data too long or unaligned");
@@ -1546,7 +1550,7 @@ fn decrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
         return Err(Se050Error::UnknownError);
     }
     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x50, 0xae, 0x50]);
-    let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(),  &CipherMode);	// 4.3.21 CipherMode Table 39. CipherMode constants
+    let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(),  & cipher_mode);	// 4.3.21 CipherMode Table 39. CipherMode constants
     let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), data);
     let mut capdu = CApdu::new(
         ApduClass::ProprietaryPlain,
@@ -1568,20 +1572,20 @@ fn decrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
         .map_err(|_| Se050Error::UnknownError)?;
 
     if rapdu.sw != 0x9000 {
-        error!("SE050 DecryptDESOneshot {:x}, Failed: {:x}", CipherMode,rapdu.sw);
+        error!("SE050 DecryptDESOneshot {:x}, Failed: {:x}",  cipher_mode,rapdu.sw);
         return Err(Se050Error::UnknownError);
     }
 
     let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or_else(|| {
-        error!("SE050 DecryptDESOneshot_{:x} Return TLV Missing",  CipherMode);
+        error!("SE050 DecryptDESOneshot_{:x} Return TLV Missing",   cipher_mode);
         Se050Error::UnknownError })?;
 
     if tlv1_ret.get_data().len() != enc.len() {
-        error!("SE050 DecryptDESOneshot {:x} Length Mismatch", CipherMode );
+        error!("SE050 DecryptDESOneshot {:x} Length Mismatch",  cipher_mode );
         return Err(Se050Error::UnknownError);
     }
     enc.copy_from_slice(tlv1_ret.get_data());
-    debug!("SE050 DecryptDESOneshot {:x} OK",CipherMode );
+    debug!("SE050 DecryptDESOneshot {:x} OK", cipher_mode );
     Ok(())
 }
 
@@ -1593,8 +1597,8 @@ fn decrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
 
 
      #[inline(never)]    
-    fn SetAppletFeatures(&mut self,AppletConfig: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &AppletConfig);
+    fn set_applet_features(&mut self,applet_config: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &applet_config);
        
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -1615,11 +1619,11 @@ fn decrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
             .map_err(|_| Se050Error::UnknownError)?;
 
         if rapdu.sw != 0x9000 {
-            error!("SE050  SetAppletFeatures Failed: {:x}", rapdu.sw);
+            error!("SE050  set_applet_features Failed: {:x}", rapdu.sw);
             return Err(Se050Error::UnknownError);
         }
 
-        debug!("SE050  SetAppletFeatures OK");
+        debug!("SE050  set_applet_features OK");
         Ok(())
     }
 
@@ -1633,8 +1637,8 @@ fn decrypt_des_oneshot(&mut self, CipherMode: &[u8], data: &[u8],  enc: &mut [u8
 //Le 0x0B Expecting TLV with 7-byte data
 
 #[inline(never)]
-
-fn GetVersion(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+#[allow(unused_mut)]
+fn get_version(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
 
     
     let mut capdu = CApdu::new(
@@ -1642,7 +1646,7 @@ fn GetVersion(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
         Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
         Se050ApduP1CredType::Default.into(),
         Se050ApduP2:: Version.into(),
-        Some((0x0B))
+        Some(0x0B)
     );
 
     self.t1_proto
@@ -1655,11 +1659,11 @@ fn GetVersion(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
         .map_err(|_| Se050Error::UnknownError)?;
 
     if rapdu.sw != 0x9000 {
-        error!("SE050 GetVersion Failed: {:x}", rapdu.sw);
+        error!("SE050 get_version Failed: {:x}", rapdu.sw);
         return Err(Se050Error::UnknownError);
     }
 
-    debug!("SE050 GetVersion OK");
+    debug!("SE050 get_version OK");
     Ok(())
 }
 
@@ -1671,8 +1675,8 @@ fn GetVersion(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
 
 
 #[inline(never)]
-
-fn GetTimestamp(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+#[allow(unused_mut)]
+fn get_timestamp(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
 
     
     let mut capdu = CApdu::new(
@@ -1680,7 +1684,7 @@ fn GetTimestamp(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
         Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
         Se050ApduP1CredType::Default.into(),
         Se050ApduP2::Time.into(),
-        Some((0x14))
+        Some(0x14)
     );
 
     self.t1_proto
@@ -1693,11 +1697,11 @@ fn GetTimestamp(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
         .map_err(|_| Se050Error::UnknownError)?;
 
     if rapdu.sw != 0x9000 {
-        error!("SE050 GetTimestamp Failed: {:x}", rapdu.sw);
+        error!("SE050 get_timestamp Failed: {:x}", rapdu.sw);
         return Err(Se050Error::UnknownError);
     }
 
-    debug!("SE050 GetTimestamp OK");
+    debug!("SE050 get_timestamp OK");
     Ok(())
 }
 
@@ -1711,21 +1715,21 @@ fn GetTimestamp(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
 //and can have a granularity of 16 bytes since the applet will typically report the “worst case” amount. 
 //For example, when allocating 2 bytes at a time, the first report will show 16 bytes being allocated, which remains the same for the next 7 allocations of 2 bytes.
 
-//  Memoryconstant      Persistent = 1,   TransientReset = 2,    TransientDeselect = 3,
+//  memoryconstant      Persistent = 1,   TransientReset = 2,    TransientDeselect = 3,
  
 
 #[inline(never)]
 
-fn GetFreeMemory(&mut self, Memoryconstant: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+fn get_free_memory(&mut self, memoryconstant: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
 
-    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &Memoryconstant);
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &memoryconstant);
 
     let mut capdu = CApdu::new(
         ApduClass::ProprietaryPlain,
         Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
         Se050ApduP1CredType::Default.into(),
         Se050ApduP2::Memory.into(),
-        Some((0x06))
+        Some(0x06)
     );
 
     capdu.push(tlv1);
@@ -1740,11 +1744,11 @@ fn GetFreeMemory(&mut self, Memoryconstant: &[u8], delay: &mut DelayWrapper) -> 
         .map_err(|_| Se050Error::UnknownError)?;
 
     if rapdu.sw != 0x9000 {
-        error!("SE050 GetFreeMemory Failed: {:x}", rapdu.sw);
+        error!("SE050 get_free_memory Failed: {:x}", rapdu.sw);
         return Err(Se050Error::UnknownError);
     }
 
-    debug!("SE050 GetFreeMemory OK");
+    debug!("SE050 get_free_memory OK");
     Ok(())
 }
 
@@ -1805,12 +1809,12 @@ fn GetFreeMemory(&mut self, Memoryconstant: &[u8], delay: &mut DelayWrapper) -> 
  the response of the DeleteAll command will not be wrapped 
  (i.e., not encrypted and no R-MAC), 
  so this will also break down the secure channel protocol 
- (as the session is closed by the DeleteAll command itself).
+ (as the session is closed by the delete_all command itself).
  */
 
 #[inline(never)]
-
-fn DeleteAll(&mut self, Memoryconstant: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+#[allow(unused_mut)]
+fn delete_all(&mut self,  delay: &mut DelayWrapper) -> Result<(), Se050Error> {
 
     
     let mut capdu = CApdu::new(
@@ -1818,7 +1822,7 @@ fn DeleteAll(&mut self, Memoryconstant: &[u8], delay: &mut DelayWrapper) -> Resu
         Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
         Se050ApduP1CredType::Default.into(),
         Se050ApduP2::DeleteAll.into(),
-        Some((0x00))
+        Some(0x00)
     );
 
     self.t1_proto
@@ -1831,11 +1835,11 @@ fn DeleteAll(&mut self, Memoryconstant: &[u8], delay: &mut DelayWrapper) -> Resu
         .map_err(|_| Se050Error::UnknownError)?;
 
     if rapdu.sw != 0x9000 {
-        error!("SE050 DeleteAll Failed: {:x}", rapdu.sw);
+        error!("SE050 delete_all Failed: {:x}", rapdu.sw);
         return Err(Se050Error::UnknownError);
     }
 
-    debug!("SE050 DeleteAll OK");
+    debug!("SE050 delete_all OK");
     Ok(())
 }
 
