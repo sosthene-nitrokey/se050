@@ -8,6 +8,12 @@ pub enum Se050Error {
     T1Error(T1Error),
 }
 
+//SEE AN12413 P. 34 - Table 17. Instruction mask constants
+#[allow(dead_code)]
+pub const INS_MASK_INS_CHAR : u8 = 0xE0;
+#[allow(dead_code)]
+pub const INS_MASK_INSTRUCTION : u8 = 0x1F;
+
 //SEE AN12413 P. 34 - Table 18. Instruction characteristics constants
 
 pub const APDU_INSTRUCTION_TRANSIENT: u8 = 0x80;
@@ -16,6 +22,9 @@ pub const APDU_INSTRUCTION_TRANSIENT: u8 = 0x80;
 pub const APDU_INSTRUCTION_AUTH_OBJECT: u8 = 0x40; 
 #[allow(dead_code)]
 pub const APDU_INSTRUCTION_ATTEST: u8 = 0x20;
+
+
+
 
 //See AN12413,- Table 19. Instruction constants P. 35 
 #[allow(dead_code)]
@@ -27,9 +36,21 @@ pub enum Se050ApduInstruction {
     Crypto = 0x03,
     Mgmt = 0x04,
     Process = 0x05,
-    ImportExternal = 0x06,
+    ImportExternal = 0x06,    
     InstructECKSIA = 0x88,
     InstructECKSGECKAPK = 0xCA,
+}
+
+
+
+// See AN12413,  Table 20. P1Mask constants P. 35
+#[allow(dead_code)]
+#[repr(u8)]
+pub enum Se050ApduP1Maskconstants {
+    P1Unused = 0x80,
+    P1MaskKeyType = 0x60,
+    P1MaskCredType = 0x1F,
+
 }
 
 
@@ -203,7 +224,7 @@ pub enum Se050TlvTag {
 }
 
 // See AN12413,4.3.10 ECSignatureAlgo Table 28. ECSignatureAlgo P.39
-//See AN12413, 4.3.22 AttestationAlgo AttestationAlgo is either ECSignatureAlgo or RSASignatureAlgo. P.43
+//(See AN12413, 4.3.22 AttestationAlgo AttestationAlgo is either ECSignatureAlgo or RSASignatureAlgo. P.43)
 #[allow(dead_code)]
 #[repr(u8)]
 pub enum Se050ECSignatureAlgo {
@@ -329,7 +350,10 @@ pub enum Se050RSAKeyComponent {
         DesMac8Iso9797M2 = 0x06,
         DesMac8Iso9797_1M2Alg3 = 0x14,
         DesMac8Iso9797_1M1Alg3 = 0x04,
-   // DES_MAC8_ISO9797_1_M1_ALG3 = 0x30,
+        // DES_MAC8_ISO9797_1_M1_ALG3 = 0x30,
+        //CMAC128 = 0x31,
+        DesCmac8 = 0x7A,
+        AesCmac16 = 0x66,
 
 }
  
@@ -400,6 +424,9 @@ pub enum Se050RSAKeyComponent {
 
  
 }
+
+// See AN12413,4.3.23 // 4.3.22 AttestationAlgo // AttestationAlgo is either ECSignatureAlgo or RSASignatureAlgo.
+
 
     // See AN12413,4.3.23 AppletConfig Table 40. Applet configurations   P.43-44
     #[allow(dead_code)]
@@ -513,6 +540,105 @@ pub enum Se050RSAKeyComponent {
      }
  
 
+
+     // See AN12413,// 4.3.34 Policy constants // 4.3.34.1 Session policy P.46
+    //  A notation will be used to identify specific bits: 
+    // the most significant Byte is 1 and the most significant bit is 8; 
+    // so if B2b7 is set, this would be coded as 0x00 0x40.
+     //Position in Header:
+    //B1b8 = 1000 0000 =0x80 ,  
+    //B1b7 = 0100 0000 = 0x40,,  
+    //B1b6 = 0010 0000 = 0x20 ;
+    //B1b5 = 0001 0000 = 0x10 ;
+    //B1b4 = 0000 1000 =0x08 ,  
+    //B1b3 = 0000 0100 = 0x04,,  
+    //B1b2 = 0000 0010 = 0x02 ;
+    //B1b1 = 0000 0001 = 0x01;
+
+    #[allow(dead_code)]
+    #[repr(u32)]
+    pub enum  Se050Sessionpolicies {    
+        //RFU = 0x80 ,
+        //RFU = 0x40 ,
+        PolicySessionMaxApdu= 0x80,        
+        PolicySessionAllowRefresh = 0x20,        
+   
+        }
+    
+ // See AN12413,// 4.3.34 Policy constants // 4.3.34.1 Session policy P.47
+    //  A notation will be used to identify specific bits: 
+    // the most significant Byte is 1 and the most significant bit is 8; 
+    // so if B2b7 is set, this would be coded as 0x00 0x40.
+    //Position in Header 
+    //B1b8 = 1000 0000 =0x80 ,  
+    //B1b7 = 0100 0000 = 0x40,,  
+    //B1b6 = 0010 0000 = 0x20 ;
+    //B1b5 = 0001 0000 = 0x10 ;
+    //B1b4 = 0000 1000 =0x08 ,  
+    //B1b3 = 0000 0100 = 0x04,,  
+    //B1b2 = 0000 0010 = 0x02 ;
+    //B1b1 = 0000 0001 = 0x01;
+
+    //B2b8 = 1000 0000 0000 0000 =0x8000 ,  
+    //B2b7 = 0100 0000 0000 0000 = 0x4000,  
+    //B2b6 = 0010 0000 0000 0000= 0x2000 ;
+    //B2b5 = 0001 0000 0000 0000= 0x1000 ;
+    //B2b4 = 0000 1000 0000 0000=0x0800 ,  
+    //B2b3 = 0000 0100 0000 0000= 0x0400,,  
+    //B2b2 = 0000 0010 0000 0000= 0x0200 ;
+    //B2b1 = 0000 0001 0000 0000= 0x0100;
+
+    //B3b8 = 1000 0000 0000 0000 0000 0000 =0x800000 ,  
+    //B3b7 = 0100 0000 0000 0000 0000 0000= 0x400000,  
+    //B3b6 = 0010 0000 0000 0000 0000 0000= 0x200000 ;
+    //B3b5 = 0001 0000 0000 0000 0000 0000= 0x100000 ;
+    //B3b4 = 0000 1000 0000 0000 0000 0000= 0x080000 ,  
+    //B3b3 = 0000 0100 0000 0000 0000 0000= 0x040000,  
+    //B3b2 = 0000 0010 0000 0000 0000 0000= 0x020000 ;
+    //B3b1 = 0000 0001 0000 0000 0000 0000= 0x010000;
+
+
+
+
+    #[allow(dead_code)]  
+  
+         #[repr(u32)]
+    pub enum Se050Objectpolicies {    
+
+        //RFU = 0x80 ,
+        //RFU = 0x40 ,
+        PolicyObjForbidAll= 0x20,
+        PolicyObjAllowSign = 0x10,
+
+        PolicyObjAllowVerify = 0x08,
+        PolicyObjAllowKa = 0x04,
+        PolicyObjAllowEnc = 0x02,
+        PolicyObjAllowDec = 0x01,
+
+        PolicyObjAllowKdf = 0x8000,
+        PolicyObjAllowWrap =  0x4000,
+        PolicyObjAllowRead =  0x2000,
+        PolicyObjAllowWrite = 0x1000,
+
+        PolicyObjAllowGen = 0x0800,
+        PolicyObjAllowDelete = 0x0400,  
+        PolicyObjRequireSm  = 0x0200,
+        PolicyObjRequirePcrValue =  0x0100,
+
+        PolicyObjAllowAttestation = 0x800000 , 
+        PolicyObjAllowDesfireAuthentication = 0x400000 ,  
+        PolicyObjAllowDesfireDumpSessionKeys  = 0x200000 , 
+        PolicyObjAllowImportExport = 0x100000 ,        
+
+        //RFU = 0x080000 ,
+        //RFU = 0x040000 ,
+        //RFU = 0x020000 ,
+        //RFU = 0x010000 ,      
+
+        }
+    
+
+
 include!("se050_convs.rs");
 
 //////////////////////////////////////////////////////////////////////////////
@@ -557,10 +683,11 @@ pub trait Se050Device {
 
     // See AN12413,  4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey //P1_EC ///P.58-59
  
-    fn generate_eccurve_key(&mut self, eccurve: &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>; //ERWEITERT
-    
-    fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>; //DEFAULT CONFIGURATION OF SE050
+   // fn generate_eccurve_key(&mut self, eccurve: &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>; //ERWEITERT
+   fn generate_eccurve_key(&mut self, objectid: &[u8;4] ,eccurve: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
 
+   // fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error //DEFAULT CONFIGURATION OF SE050
+    fn generate_p256_key(&mut self, objectid: &[u8;4],delay: &mut DelayWrapper) -> Result<(), Se050Error>;
      
     // See AN12413,  4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.2 WriteRSAKey  //P.59-60
 
@@ -1069,44 +1196,90 @@ fn close_session(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> 
       Ok(())
   }
 
+ 
+ //###########################################################################
+ /*  
+ #[inline(never)]
+ /* ASSUMPTION: SE050 is provisioned with an instantiated ECC curve object; */
+        /* NOTE: hardcoded Object ID 0xae51ae51! */
+  //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey    P.58
+ //P1_EC 4.3.19 ECCurve P.42
+ fn generate_eccurve_key(&mut self,  eccurve: &[u8],delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
+     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
+     let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &eccurve );	// Se050ECCurveconstants
+     let mut capdu = CApdu::new(
+         ApduClass::ProprietaryPlain,
+         Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
+         Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
+         Se050ApduP2::Default.into(),
+         None
+     );
+     capdu.push(tlv1);
+     capdu.push(tlv2);
+     self.t1_proto
+         .send_apdu(&capdu, delay)
+         .map_err(|_| Se050Error::UnknownError)?;
+
+     let mut rapdu_buf: [u8; 16] = [0; 16];
+     let rapdu = self.t1_proto
+         .receive_apdu(&mut rapdu_buf, delay)
+         .map_err(|_| Se050Error::UnknownError)?;
+
+     if rapdu.sw != 0x9000 {
+         error!("SE050 GenECCurve {:x} Failed: {:x}", eccurve, rapdu.sw);
+         return Err(Se050Error::UnknownError);
+     }
+
+     debug!("SE050 GenEccurve {:x} : OK",eccurve);
+     Ok(ObjectId([0xae, 0x51, 0xae, 0x51]))
+ }
+ */
+
+
+
 
  //###########################################################################
- 
-    #[inline(never)]
-    /* ASSUMPTION: SE050 is provisioned with an instantiated ECC curve object; */
-           /* NOTE: hardcoded Object ID 0xae51ae51! */
-     //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey    P.58
-    //P1_EC 4.3.19 ECCurve P.42
-    fn generate_eccurve_key(&mut self, eccurve: &[u8],delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &eccurve );	// Se050ECCurveconstants
-        let mut capdu = CApdu::new(
-            ApduClass::ProprietaryPlain,
-            Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
-            Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
-            Se050ApduP2::Default.into(),
-            None
-        );
-        capdu.push(tlv1);
-        capdu.push(tlv2);
-        self.t1_proto
-            .send_apdu(&capdu, delay)
-            .map_err(|_| Se050Error::UnknownError)?;
+ #[inline(never)]
+ /* ASSUMPTION: SE050 is provisioned with an instantiated ECC curve object; */
+        /* NOTE: hardcoded Object ID 0xae51ae51! */
+  //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey    P.58
+ //P1_EC 4.3.19 ECCurve P.42
+ fn generate_eccurve_key(&mut self, objectid: &[u8;4], eccurve: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectid);
+     let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &eccurve );	// Se050ECCurveconstants
+     let mut capdu = CApdu::new(
+         ApduClass::ProprietaryPlain,
+         Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
+         Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
+         Se050ApduP2::Default.into(),
+         None
+     );
+     capdu.push(tlv1);
+     capdu.push(tlv2);
+     self.t1_proto
+         .send_apdu(&capdu, delay)
+         .map_err(|_| Se050Error::UnknownError)?;
 
-        let mut rapdu_buf: [u8; 16] = [0; 16];
-        let rapdu = self.t1_proto
-            .receive_apdu(&mut rapdu_buf, delay)
-            .map_err(|_| Se050Error::UnknownError)?;
+     let mut rapdu_buf: [u8; 16] = [0; 16];
+     let rapdu = self.t1_proto
+         .receive_apdu(&mut rapdu_buf, delay)
+         .map_err(|_| Se050Error::UnknownError)?;
 
-        if rapdu.sw != 0x9000 {
-            error!("SE050 GenECCurve {:x} Failed: {:x}", eccurve, rapdu.sw);
-            return Err(Se050Error::UnknownError);
-        }
+     if rapdu.sw != 0x9000 {
+         error!("SE050 GenECCurve {:x} Failed: {:x}", eccurve, rapdu.sw);
+         return Err(Se050Error::UnknownError);
+     }
 
-        debug!("SE050 GenEccurve {:x} : OK",eccurve);
-        Ok(ObjectId([0xae, 0x51, 0xae, 0x51]))
-    }
+     debug!("SE050 GenEccurve {:x} : OK",eccurve);
+     Ok(())
+ }
 
+
+
+
+
+  
+/*  
 
      //###########################################################################
     #[inline(never)]
@@ -1144,6 +1317,48 @@ fn close_session(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> 
         debug!("SE050 GenP256 OK");
         Ok(ObjectId([0xae, 0x51, 0xae, 0x51]))
     }
+
+*/
+
+   //###########################################################################
+   #[inline(never)]
+   /* ASSUMPTION: SE050 is provisioned with an instantiated P-256 curve object;
+       see NXP AN12413 -> Secure Objects -> Default Configuration */
+   /* NOTE: hardcoded Object ID 0xae51ae51! */
+    //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey   P.58
+     //P1_EC //  4.3.19 ECCurve NIST_P256 P.42
+   fn generate_p256_key(&mut self, objectid: &[u8;4],delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+       let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectid);
+       let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x03]);	// NIST P-256
+       let mut capdu = CApdu::new(
+           ApduClass::ProprietaryPlain,
+           Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
+           Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
+           Se050ApduP2::Default.into(),
+           None
+       );
+       capdu.push(tlv1);
+       capdu.push(tlv2);
+       self.t1_proto
+           .send_apdu(&capdu, delay)
+           .map_err(|_| Se050Error::UnknownError)?;
+
+       let mut rapdu_buf: [u8; 16] = [0; 16];
+       let rapdu = self.t1_proto
+           .receive_apdu(&mut rapdu_buf, delay)
+           .map_err(|_| Se050Error::UnknownError)?;
+
+       if rapdu.sw != 0x9000 {
+           error!("SE050 GenP256 Failed: {:x}", rapdu.sw);
+           return Err(Se050Error::UnknownError);
+       }
+
+       debug!("SE050 GenP256 OK");
+       Ok(())
+   }
+
+ 
+
 
 
 //###########################################################################
