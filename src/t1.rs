@@ -17,6 +17,7 @@ where
 const TWI_RETRIES: usize = 128;
 const TWI_RETRY_DELAY_MS: u32 = 2;
 
+#[allow(unused_variables)]
 fn maybe_debug(label: &str, data: &[u8]) {
     if data.len() > 32 {
         let (dh, dt) = data.split_at(16);
