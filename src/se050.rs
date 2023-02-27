@@ -1680,11 +1680,18 @@ where
             .map_err(|_| Se050Error::UnknownError)?;
 
         if rapdu.sw != 0x9000 {
-            error!("SE050 write_ec_key {:x} Failed: {:x}", eccurve, rapdu.sw);
+          //  error!("SE050 write_ec_key {:x} Failed: {:x}", eccurve, rapdu.sw);
+          //error!("SE050 write_ec_key   Failed: {:x}",  rapdu.sw);
+            error!("SE050 write_ec_key {:x?} Failed: {:x}", eccurve, rapdu.sw);
+            
             return Err(Se050Error::UnknownError);
         }
 
-        debug!("SE050 write_ec_key {:x} : OK",eccurve);
+        //debug!("SE050 write_ec_key {:x} : OK",eccurve);
+
+        //debug!("SE050 write_ec_key   : OK" );
+        debug!("SE050 write_ec_key {:x?} : OK",eccurve);
+
         Ok(())
     }
     
@@ -1848,11 +1855,15 @@ where
             .map_err(|_| Se050Error::UnknownError)?;
 
         if rapdu.sw != 0x9000 {
-            error!("SE050 write_rsa_key {:x} Failed: {:x}", eccurve, rapdu.sw);
+          //  error!("SE050 write_rsa_key {:x} Failed: {:x}", eccurve, rapdu.sw);
+          error!("SE050 write_rsa_key  Failed: {:x}",   rapdu.sw);
             return Err(Se050Error::UnknownError);
         }
 
-        debug!("SE050 write_rsa_key {:x} : OK",eccurve);
+        //debug!("SE050 write_rsa_key {:x} : OK",eccurve);
+         debug!("SE050 write_rsa_key : OK");
+
+
         Ok(())
     }
     
@@ -3834,7 +3845,10 @@ where
             .map_err(|_| Se050Error::UnknownError)?;
 
         if rapdu.sw != 0x9000 {
-            error!("SE050 EncryptAESOneshot {:x} Failed: {:x}",  cipher_mode, rapdu.sw);
+            //error!("SE050 EncryptAESOneshot {:x} Failed: {:x}",  cipher_mode, rapdu.sw);
+            //error!("SE050 EncryptAESOneshot   Failed: {:x}",  c  rapdu.sw);
+            error!("SE050 EncryptAESOneshot {:x?} Failed: {:x}",  cipher_mode, rapdu.sw);
+
             return Err(Se050Error::UnknownError);
         }
 
@@ -3847,7 +3861,12 @@ where
             return Err(Se050Error::UnknownError);
         }
         enc.copy_from_slice(tlv1_ret.get_data());
-        debug!("SE050 EncryptAESOneshot {:x} OK",  cipher_mode );
+      //  debug!("SE050 EncryptAESOneshot {:x} OK",  cipher_mode );
+       // debug!("SE050 EncryptAESOneshot   OK",  cipher_mode );
+       debug!("SE050 EncryptAESOneshot {:x?} OK",  cipher_mode );
+
+
+
         Ok(())
     }
 
@@ -3890,20 +3909,35 @@ where
             .map_err(|_| Se050Error::UnknownError)?;
 
         if rapdu.sw != 0x9000 {
-            error!("SE050 DecryptAESOneshot {:x}, Failed: {:x}",  cipher_mode,rapdu.sw);
+            //error!("SE050 DecryptAESOneshot {:x}, Failed: {:x}",  cipher_mode,rapdu.sw);
+            //error!("SE050 DecryptAESOneshot   Failed: {:x}",  rapdu.sw);
+            error!("SE050 DecryptAESOneshot {:x?}, Failed: {:x}",  cipher_mode,rapdu.sw);
             return Err(Se050Error::UnknownError);
         }
 
         let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or_else(|| {
-            error!("SE050 DecryptAESOneshot_{:x} Return TLV Missing",   cipher_mode);
+         //   error!("SE050 DecryptAESOneshot {:x} Return TLV Missing",   cipher_mode);
+          //  error!("SE050 DecryptAESOneshot   Return TLV Missing",   );
+            error!("SE050 DecryptAESOneshot {:x?} Return TLV Missing",   cipher_mode);
+
+
             Se050Error::UnknownError })?;
 
         if tlv1_ret.get_data().len() != enc.len() {
-            error!("SE050 DecryptAESOneshot {:x} Length Mismatch",  cipher_mode );
+          //  error!("SE050 DecryptAESOneshot {:x} Length Mismatch",  cipher_mode );
+            //error!("SE050 DecryptAESOneshot  Length Mismatch" );
+            error!("SE050 DecryptAESOneshot {:x?} Length Mismatch",  cipher_mode );
+
             return Err(Se050Error::UnknownError);
         }
         enc.copy_from_slice(tlv1_ret.get_data());
-        debug!("SE050 DecryptAESOneshot {:x} OK", cipher_mode );
+       // debug!("SE050 DecryptAESOneshot {:x} OK", cipher_mode );
+        //debug!("SE050 DecryptAESOneshot  OK",   );
+        debug!("SE050 DecryptAESOneshot {:x?} OK", cipher_mode );
+
+
+
+
         Ok(())
     }
 
@@ -3947,7 +3981,9 @@ where
             .map_err(|_| Se050Error::UnknownError)?;
 
         if rapdu.sw != 0x9000 {
-            error!("SE050 EncryptDESOneshot {:x} Failed: {:x}",  cipher_mode, rapdu.sw);
+          //  error!("SE050 EncryptDESOneshot {:x} Failed: {:x}",  cipher_mode, rapdu.sw);
+           // error!("SE050 EncryptDESOneshot   Failed: {:x}",  rapdu.sw);
+            error!("SE050 EncryptDESOneshot {:x?} Failed: {:x}",  cipher_mode, rapdu.sw);
             return Err(Se050Error::UnknownError);
         }
 
@@ -3960,7 +3996,9 @@ where
             return Err(Se050Error::UnknownError);
         }
         enc.copy_from_slice(tlv1_ret.get_data());
-        debug!("SE050 EncryptDESOneshot {:x} OK",  cipher_mode );
+       // debug!("SE050 EncryptDESOneshot {:x} OK",  cipher_mode );
+     //   debug!("SE050 EncryptDESOneshot   OK",   );
+        debug!("SE050 EncryptDESOneshot {:x?} OK",  cipher_mode );
         Ok(())
     }
 
@@ -4003,20 +4041,37 @@ where
             .map_err(|_| Se050Error::UnknownError)?;
 
         if rapdu.sw != 0x9000 {
-            error!("SE050 DecryptDESOneshot {:x}, Failed: {:x}",  cipher_mode,rapdu.sw);
+            //error!("SE050 DecryptDESOneshot {:x}, Failed: {:x}",  cipher_mode,rapdu.sw);
+           // error!("SE050 DecryptDESOneshot  Failed: {:x}",   rapdu.sw);
+            error!("SE050 DecryptDESOneshot {:x?}, Failed: {:x}",  cipher_mode,rapdu.sw);
+
+
             return Err(Se050Error::UnknownError);
         }
 
         let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or_else(|| {
-            error!("SE050 DecryptDESOneshot_{:x} Return TLV Missing",   cipher_mode);
+          //  error!("SE050 DecryptDESOneshot_{:x} Return TLV Missing",   cipher_mode);
+          //  error!("SE050 DecryptDESOneshot    Return TLV Missing",   );
+            error!("SE050 DecryptDESOneshot {:x?} Return TLV Missing",   cipher_mode);
+
+
+            
             Se050Error::UnknownError })?;
 
         if tlv1_ret.get_data().len() != enc.len() {
-            error!("SE050 DecryptDESOneshot {:x} Length Mismatch",  cipher_mode );
+            //error!("SE050 DecryptDESOneshot {:x} Length Mismatch",  cipher_mode );
+            //error!("SE050 DecryptDESOneshot   Length Mismatch" );
+            error!("SE050 DecryptDESOneshot {:x?} Length Mismatch",  cipher_mode );
+
+
             return Err(Se050Error::UnknownError);
         }
         enc.copy_from_slice(tlv1_ret.get_data());
-        debug!("SE050 DecryptDESOneshot {:x} OK", cipher_mode );
+      //  debug!("SE050 DecryptDESOneshot {:x} OK", cipher_mode );
+       // debug!("SE050 DecryptDESOneshot   OK"    );
+        debug!("SE050 DecryptDESOneshot {:x?} OK", cipher_mode );
+
+
         Ok(())
     }    
 
