@@ -705,8 +705,9 @@ pub trait Se050Device {
     // fn generate_eccurve_key(&mut self, eccurve: &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>; //ERWEITERT      
     fn write_ec_key(&mut self,policy: &[u8],  objectid: &[u8;4], eccurve: &[u8], private_key_value: &[u8],  delay: &mut DelayWrapper) -> Result<(), Se050Error>  ;
     
-    //fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error //DEFAULT CONFIGURATION OF SE050    
-    fn generate_p256_key(&mut self,policy: &[u8],  objectid: &[u8;4],  private_key_value: &[u8],  delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+    fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> ;
+    //DEFAULT CONFIGURATION OF SE050    
+   // fn generate_p256_key(&mut self,policy: &[u8],  objectid: &[u8;4],  private_key_value: &[u8],  delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
 
     //AN12413 //4.7 Secure Object management //4.7.1 WriteSecureObject// 4.7.1.2 WriteRSAKey //P.59-60  
     fn write_rsa_key(&mut self,policy: &[u8],  objectid: &[u8;4], keysize: &[u8;2],   delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
@@ -1696,7 +1697,7 @@ where
     }
     
     //###########################################################################
-    /* 
+    
     #[inline(never)]
     /* ASSUMPTION: SE050 is provisioned with an instantiated P-256 curve object;
         see NXP AN12413 -> Secure Objects -> Default Configuration */
@@ -1732,7 +1733,7 @@ where
         debug!("SE050 GenP256 OK");
         Ok(ObjectId([0xae, 0x51, 0xae, 0x51]))
     }
-*/ 
+  
 
     //###########################################################################
     /* ASSUMPTION: SE050 is provisioned with an instantiated P-256 curve object;
@@ -1740,7 +1741,7 @@ where
     
     //AN12413 //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey   P.58
     //P1_EC //  4.3.19 ECCurve NIST_P256 P.42
-    #[inline(never)]
+ /*    #[inline(never)]
 
     fn generate_p256_key(&mut self,policy: &[u8],  objectid: &[u8;4],   private_key_value: &[u8],  delay: &mut DelayWrapper) -> Result<(), Se050Error> 
     {
@@ -1780,7 +1781,7 @@ where
         debug!("SE050 GenP256 OK");
         Ok(())
    }
- 
+ */
     //###########################################################################
     //AN12413 //4.7 Secure Object management //4.7.1 WriteSecureObject// 4.7.1.2 WriteRSAKey
     /*  
