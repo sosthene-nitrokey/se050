@@ -649,9 +649,9 @@ include!("se050_convs.rs");
 //////////////////////////////////////////////////////////////////////////////
 //trait-Se050Device ->  struct Se050
 pub trait Se050Device {
-    
+    //OLD VERSION
     fn enable(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error>;
-
+    //OLD VERSION
     fn disable(&mut self, _delay: &mut DelayWrapper);
 
    
@@ -705,8 +705,11 @@ pub trait Se050Device {
     // fn generate_eccurve_key(&mut self, eccurve: &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>; //ERWEITERT      
     fn write_ec_key(&mut self,policy: &[u8],  objectid: &[u8;4], eccurve: &[u8], private_key_value: &[u8],  delay: &mut DelayWrapper) -> Result<(), Se050Error>  ;
     
+    //OLD VERSION
     fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> ;
-    //DEFAULT CONFIGURATION OF SE050    
+    //DEFAULT CONFIGURATION OF SE050   
+
+    //NEW VERSION
    // fn generate_p256_key(&mut self,policy: &[u8],  objectid: &[u8;4],  private_key_value: &[u8],  delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
 
     //AN12413 //4.7 Secure Object management //4.7.1 WriteSecureObject// 4.7.1.2 WriteRSAKey //P.59-60  
@@ -714,8 +717,14 @@ pub trait Se050Device {
     
     // See AN12413 4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.3 WriteSymmKey //AES key, DES key or HMAC key // P 60/ P.61 
 
-    fn write_aes_key(&mut self,policy: &[u8], objectid: &[u8;4],kekid: &[u8;4],key: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
- 
+    //OLD VERSION
+    fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
+
+    //NEW VERSION
+    //  fn write_aes_key(&mut self,policy: &[u8], objectid: &[u8;4],kekid: &[u8;4],key: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
+    
+
+
     fn write_des_key(&mut self,policy: &[u8], objectid: &[u8;4],kekid: &[u8;4],key: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
  
     fn write_hmac_key(&mut self,policy: &[u8], objectid: &[u8;4],kekid: &[u8;4],key: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
@@ -849,6 +858,7 @@ pub trait Se050Device {
  
     //4.12 Crypto operations AES/DES  //4.12.4 CipherOneShot - Encrypt or decrypt data in one shot mode //P.87
     /* 
+    //OLD VERSION
         fn encrypt_aes_oneshot(
             &mut self,
             data: &[u8],
@@ -856,10 +866,11 @@ pub trait Se050Device {
             delay: &mut DelayWrapper,
         ) -> Result<(), Se050Error>;
     */
+    //OLD VERSION
+     fn encrypt_aes_oneshot( &mut self,   data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper,) -> Result<(), Se050Error>;   
 
-    //fn encrypt_aes_oneshot( &mut self,   data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper,) -> Result<(), Se050Error>;   
-
-    fn encrypt_aes_oneshot(&mut self, objectid: &[u8;4], cipher_mode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper, ) -> Result<(), Se050Error> ;
+//NEW VERSION
+    //fn encrypt_aes_oneshot(&mut self, objectid: &[u8;4], cipher_mode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper, ) -> Result<(), Se050Error> ;
     fn decrypt_aes_oneshot( &mut self,  objectid: &[u8;4],  cipher_mode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper,) -> Result<(), Se050Error>;
     
     fn encrypt_des_oneshot( &mut self,   objectid: &[u8;4], cipher_mode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper,) -> Result<(), Se050Error>;
@@ -965,6 +976,7 @@ pub trait Se050Device {
     fn get_free_memory(&mut self, memoryconstant: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
 
     // See AN12413, //4.19 Generic management commands // P110-11
+    //OLD VERSION
     fn get_random(&mut self, buf: &mut [u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
 
     //AN12413, // 4.19 Generic management commands //44.19.5 delete_all P.112
@@ -1010,7 +1022,7 @@ where
 { 
     //###########################################################################
     //###########################################################################
-
+//OLD VERSION
     fn enable(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
         /* Step 1: perform interface soft reset, parse ATR */
         let r = self.t1_proto.interface_soft_reset(delay);
@@ -1697,7 +1709,7 @@ where
     }
     
     //###########################################################################
-    
+    //OLD VERSION
     #[inline(never)]
     /* ASSUMPTION: SE050 is provisioned with an instantiated P-256 curve object;
         see NXP AN12413 -> Secure Objects -> Default Configuration */
@@ -1738,7 +1750,7 @@ where
     //###########################################################################
     /* ASSUMPTION: SE050 is provisioned with an instantiated P-256 curve object;
        see NXP AN12413 -> Secure Objects -> Default Configuration */
-    
+    //NEW VERSION
     //AN12413 //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey   P.58
     //P1_EC //  4.3.19 ECCurve NIST_P256 P.42
  /*    #[inline(never)]
@@ -1867,7 +1879,9 @@ where
 
         Ok(())
     }
-    
+    /*  
+    //NEW VERSION
+ 
     //########################################################################### 
     /* NOTE: hardcoded Object ID 0xae50ae50! */
     /* no support yet for rfc3394 key wrappings, policies or max attempts */
@@ -1912,6 +1926,51 @@ where
 
         Ok(())
     }
+*/
+//OLD VERSION 
+
+#[inline(never)]
+/* NOTE: hardcoded Object ID 0xae50ae50! */
+/* no support yet for rfc3394 key wrappings, policies or max attempts */
+fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+    if key.len() != 16 {
+        todo!();
+    }
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x50, 0xae, 0x50]);
+    let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), key);
+    let mut capdu = CApdu::new(
+        ApduClass::ProprietaryPlain,
+        Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
+        Se050ApduP1CredType::AES.into(),
+        Se050ApduP2::Default.into(),
+        Some(0)
+    );
+    capdu.push(tlv1);
+    capdu.push(tlv3);
+    self.t1_proto
+        .send_apdu(&capdu, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    let mut rapdu_buf: [u8; 260] = [0; 260];
+    let rapdu = self.t1_proto
+        .receive_apdu(&mut rapdu_buf, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    if rapdu.sw != 0x9000 {
+        error!("SE050 WriteAESKey Failed: {:x}", rapdu.sw);
+        return Err(Se050Error::UnknownError);
+    }
+
+    Ok(())
+}
+
+
+
+
+
+
+
+
 
     //##################################################
     //ERWEITERT
@@ -2051,9 +2110,9 @@ where
     Ok(())
     }
 
-    /*  
+   
     //###########################################################################
-    
+    //OLD VERSION
         #[inline(never)]
         /* NOTE: hardcoded Object ID 0xae50ae50! */
         //4.12 Crypto operations AES/DES // 4.12.4 CipherOneShot // ENCRYPT//  4.3.21 CipherMode // AES CBC NOPAD
@@ -2106,7 +2165,7 @@ where
             debug!("SE050 EncryptAESOneshot OK");
             Ok(())
         }
-    */
+   
 
     // VerifySessionUserID 0x80 0x04 0x00 0x2C
 
@@ -3807,7 +3866,8 @@ where
 
     Ok(())
     }    
-
+/*  
+//NEW VERSION
     //###########################################################################    
     #[inline(never)]
     /* NOTE: hardcoded Object ID 0xae50ae50! */
@@ -3870,7 +3930,7 @@ where
 
         Ok(())
     }
-
+*/
     //###########################################################################
     //ERWEITERT
     #[inline(never)]
@@ -5433,7 +5493,7 @@ where
     //###########################################################################
     //See AN12413, Pages 110/111 -> 4.19 Generic management commands //4.19.4 GetRandom (Gets random data from the SE050.) p.110
     //TLV[TAG_1] 2-byte requested size.  
-  
+   //OLD VERSION
     #[inline(never)]
     fn get_random(&mut self, buf: &mut [u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> 
     {
