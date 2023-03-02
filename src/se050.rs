@@ -1967,11 +1967,6 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
 
 
 
-
-
-
-
-
     //##################################################
     //ERWEITERT
     #[inline(never)]
