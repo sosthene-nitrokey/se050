@@ -1810,8 +1810,10 @@ where
         if rapdu.sw != 0x9000 {
           //  error!("SE050 write_ec_key {:x} Failed: {:x}", eccurve, rapdu.sw);
           //error!("SE050 write_ec_key   Failed: {:x}",  rapdu.sw);
-            error!("SE050 generate_ed255_key_pair {:x?} Failed: {:x}", eccurve, rapdu.sw);
+           // error!("SE050 generate_ed255_key_pair {:x?} Failed: {:x}", eccurve, rapdu.sw);
             
+            error!("SE050 generate_ed255_key_pair   Failed: {:x}", rapdu.sw);
+
             return Err(Se050Error::UnknownError);
         }
 
