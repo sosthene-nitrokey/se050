@@ -774,7 +774,11 @@ pub trait Se050Device {
 
     // See AN12413// 4.7 Secure Object management  //4.7.4 ManageSecureObject // 4.7.4.4 CheckObjectExists P.70 
     fn check_object_exists(&mut self,objectidentifier: &[u8;4] ,  delay: &mut DelayWrapper) -> Result<(), Se050Error>;
- 
+    
+    fn check_object_exists_p256(&mut self,   delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>;
+      
+
+
     // See AN12413// 4.7 Secure Object management  //4.7.4 ManageSecureObject // 4.7.4.5 DeleteSecureObject P.70    
     fn delete_secure_object(&mut self,objectidentifier: &[u8;4] ,  delay: &mut DelayWrapper) -> Result<(), Se050Error>;
 
@@ -1724,7 +1728,7 @@ where
 
         //20E8A001
     //&[0x20, 0xE8, 0xA0, 0x01]
-   //  &[0xae, 0x51, 0xae, 0x51]
+   
     fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
         //let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
           let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xE8, 0xA0, 0x01]);
@@ -2871,6 +2875,74 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
     Ok(())
     }
  
+
+//###########################################################################
+//NEW
+    // See AN12413// 4.7 Secure Object management  //4.7.4 ManageSecureObject // 4.7.4.4 CheckObjectExists P.70 
+
+//20E8A001
+    //&[0x20, 0xE8, 0xA0, 0x01]
+   
+   
+    #[inline(never)]
+     // fn check_object_exists_p256(&mut self,objectidentifier: &[u8;4] ,  delay: &mut DelayWrapper) -> Result<(), Se050Error>
+    fn check_object_exists_p256(&mut self,   delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>
+    {   
+
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xE8, 0xA0, 0x01]);  
+    
+    let mut capdu = CApdu::new(
+    ApduClass::ProprietaryPlain,
+    Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
+    Se050ApduP1CredType::Default.into(),
+    Se050ApduP2::Exist.into(),
+    Some(0x00)
+    );
+
+    capdu.push(tlv1);    
+    
+    self.t1_proto
+    .send_apdu(&capdu, delay)
+    .map_err(|_| Se050Error::UnknownError)?;
+
+    //let mut rapdu_buf: [u8; 16] = [0; 16];
+    let mut rapdu_buf: [u8; 260] = [0; 260];
+    
+    let rapdu = self.t1_proto
+    .receive_apdu(&mut rapdu_buf, delay)
+    .map_err(|_| Se050Error::UnknownError)?;
+
+    if rapdu.sw != 0x9000 {
+    error!("SE050 check_object_exists Failed: {:x}", rapdu.sw);
+    return Err(Se050Error::UnknownError);
+    }
+
+      
+  
+   
+  
+    debug!("SE050 check_object_exists OK");
+    Ok(ObjectId([0x20, 0xE8, 0xA0, 0x01]))
+  //  Ok(())
+
+  
+    }
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     //###########################################################################
     // See AN12413// 4.7 Secure Object management  //4.7.4 ManageSecureObject // 4.7.4.5 DeleteSecureObject P.70 
     #[inline(never)]
