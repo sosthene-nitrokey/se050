@@ -1716,8 +1716,13 @@ where
     /* NOTE: hardcoded Object ID 0xae51ae51! */
      //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey   P.58
       //P1_EC //  4.3.19 ECCurve NIST_P256 P.42
+
+        //20E8A001
+    //&[0x20, 0xE8, 0xA0, 0x01]
+   //  &[0xae, 0x51, 0xae, 0x51]
     fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
+        //let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
+          let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xE8, 0xA0, 0x01]);
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x03]);	// NIST P-256
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -1928,7 +1933,7 @@ where
     }
 */
 //OLD VERSION 
-
+ 
 #[inline(never)]
 /* NOTE: hardcoded Object ID 0xae50ae50! */
 /* no support yet for rfc3394 key wrappings, policies or max attempts */
@@ -1963,6 +1968,78 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
 
     Ok(())
 }
+
+ 
+
+/*  
+    
+    //NEW VERSION
+ 
+    //########################################################################### 
+    /* NOTE: hardcoded Object ID 0xae50ae50! */
+    /* no support yet for rfc3394 key wrappings, policies or max attempts */
+    //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.3 WriteSymmKey P.60 
+    //P1_AES //template for 
+    #[inline(never)]
+    //fn write_aes_key(&mut self,policy: &[u8], objectid: &[u8;4],kekid: &[u8;4],key: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+     
+    fn generate_aes_key(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+       /*   if key.len() != 16 {
+            todo!();
+        }
+*/
+       // let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), &policy);
+      //  let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectid);
+      //  let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), kekid);
+     //   let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), key);
+
+   let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
+   //20E8A001
+  //& [0x20, 0xE8, 0xA0, 0x01]
+   //  &[0xae, 0x51, 0xae, 0x51]
+        let mut capdu = CApdu::new(
+            ApduClass::ProprietaryPlain,
+            Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
+            Se050ApduP1CredType::AES.into(),
+            Se050ApduP2::Default.into(),
+            Some(0)
+        );
+        capdu.push(tlvp);
+        capdu.push(tlv1);
+        capdu.push(tlv2);
+        capdu.push(tlv3);
+
+        self.t1_proto
+            .send_apdu(&capdu, delay)
+            .map_err(|_| Se050Error::UnknownError)?;
+
+        let mut rapdu_buf: [u8; 260] = [0; 260];
+        let rapdu = self.t1_proto
+            .receive_apdu(&mut rapdu_buf, delay)
+            .map_err(|_| Se050Error::UnknownError)?;
+
+        if rapdu.sw != 0x9000 {
+            error!("SE050 WriteAESKey Failed: {:x}", rapdu.sw);
+            return Err(Se050Error::UnknownError);
+        }
+
+        Ok(())
+    }
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
