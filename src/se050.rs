@@ -723,7 +723,7 @@ pub trait Se050Device {
     //NEW VERSION
     //  fn write_aes_key(&mut self,policy: &[u8], objectid: &[u8;4],kekid: &[u8;4],key: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
     
-
+    fn generate_aes_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>;
 
     fn write_des_key(&mut self,policy: &[u8], objectid: &[u8;4],kekid: &[u8;4],key: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
  
@@ -1971,7 +1971,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
 
  
 
-/*  
+ 
     
     //NEW VERSION
  
@@ -1983,20 +1983,22 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
     #[inline(never)]
     //fn write_aes_key(&mut self,policy: &[u8], objectid: &[u8;4],kekid: &[u8;4],key: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
      
-    fn generate_aes_key(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+    //fn generate_aes_key(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
+        fn generate_aes_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
+
        /*   if key.len() != 16 {
             todo!();
         }
 */
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xE8, 0xA0, 0x02]);
        // let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), &policy);
-      //  let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectid);
-      //  let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), kekid);
-     //   let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), key);
+      // let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectid);
+      // let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), kekid);
+     // let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), key);
 
-   let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
-   //20E8A001
-  //& [0x20, 0xE8, 0xA0, 0x01]
-   //  &[0xae, 0x51, 0xae, 0x51]
+   
+  
+   
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
@@ -2004,16 +2006,17 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
             Se050ApduP2::Default.into(),
             Some(0)
         );
-        capdu.push(tlvp);
+      //  capdu.push(tlvp);
         capdu.push(tlv1);
-        capdu.push(tlv2);
-        capdu.push(tlv3);
+   //     capdu.push(tlv2);
+    //   capdu.push(tlv3);
 
         self.t1_proto
             .send_apdu(&capdu, delay)
             .map_err(|_| Se050Error::UnknownError)?;
 
         let mut rapdu_buf: [u8; 260] = [0; 260];
+
         let rapdu = self.t1_proto
             .receive_apdu(&mut rapdu_buf, delay)
             .map_err(|_| Se050Error::UnknownError)?;
@@ -2023,9 +2026,15 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
             return Err(Se050Error::UnknownError);
         }
 
-        Ok(())
+      //  Ok(())
+
+        debug!("SE050 GenAES OK");
+        Ok(ObjectId([0x20, 0xE8, 0xA0, 0x02]))
+
+
+
     }
-*/
+ 
 
 
 
