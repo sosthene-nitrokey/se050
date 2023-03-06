@@ -8,6 +8,31 @@ pub enum Se050Error {
     T1Error(T1Error),
 }
 
+
+//SEE AN12413 P. 34 - Table 15. Error codes
+#[allow(dead_code)]    
+         #[repr(u16)]
+ 
+  
+pub enum Se050ApduError {
+
+    SwNoError = 0x9000 ,
+     SwConditionsNotSatisfied = 0x6985 ,
+    SwSecurityStatus =0x6982, 
+    SwWrongData = 0x6A80 , 
+    SwDataInvalid = 0x6984 , 
+    SwCommandNotAllowed = 0x6986 , 
+    
+    }
+    
+
+
+
+
+
+
+
+
 //SEE AN12413 P. 34 - Table 17. Instruction mask constants
 #[allow(dead_code)]
 pub const INS_MASK_INS_CHAR : u8 = 0xE0;
@@ -26,7 +51,8 @@ pub const APDU_INSTRUCTION_ATTEST: u8 = 0x20;
 
 
 
-//See AN12413,- Table 19. Instruction constants P. 35 
+
+//See AN12413,- 4.3.3 Instruction - Table 19. Instruction constants P. 35 
 #[allow(dead_code)]
 #[repr(u8)]
 pub enum Se050ApduInstruction {
@@ -645,6 +671,13 @@ pub enum Se050RSAKeyComponent {
  
 
 include!("se050_convs.rs");
+
+ 
+
+ 
+
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 //trait-Se050Device ->  struct Se050
@@ -2913,11 +2946,11 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
     .map_err(|_| Se050Error::UnknownError)?;
 
     if rapdu.sw != 0x9000 {
-    error!("SE050 check_object_exists Failed: {:x}", rapdu.sw);
+    error!("SE050 check_object_exists_p256 Failed: {:x}", rapdu.sw);
     return Err(Se050Error::UnknownError);
     }
 
-      
+      //0x9000 Error Code
   
    
   
