@@ -1,5 +1,5 @@
  use crate::types::*;
-use core::convert::{From, TryFrom};
+use core::{convert::{From, TryFrom}, result};
 use byteorder::{ByteOrder, BE};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -808,9 +808,9 @@ pub trait Se050Device {
     // See AN12413// 4.7 Secure Object management  //4.7.4 ManageSecureObject // 4.7.4.4 CheckObjectExists P.70 
     fn check_object_exists(&mut self,objectidentifier: &[u8;4] ,  delay: &mut DelayWrapper) -> Result<(), Se050Error>;
     
-    //fn check_object_exists_p256(&mut self, buf: &mut [u8],  delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>;
-      
-    fn check_object_exists_p256(&mut self,   delay: &mut DelayWrapper) -> Result<(), Se050Error>;
+
+
+    fn check_object_exists_p256(&mut self, buf: &mut [u8],  delay: &mut DelayWrapper) -> Result< (), Se050Error>;
 
     // See AN12413// 4.7 Secure Object management  //4.7.4 ManageSecureObject // 4.7.4.5 DeleteSecureObject P.70    
     fn delete_secure_object(&mut self,objectidentifier: &[u8;4] ,  delay: &mut DelayWrapper) -> Result<(), Se050Error>;
@@ -2879,6 +2879,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
     #[inline(never)]
     fn check_object_exists(&mut self,objectidentifier: &[u8;4] ,  delay: &mut DelayWrapper) -> Result<(), Se050Error>
     {   
+        
     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectidentifier);  
     
     let mut capdu = CApdu::new(
@@ -2909,25 +2910,16 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
     }
  
 
-//###########################################################################
-//NEW
+ //###########################################################################
+   //###########################################################################
     // See AN12413// 4.7 Secure Object management  //4.7.4 ManageSecureObject // 4.7.4.4 CheckObjectExists P.70 
-
-//20E8A001
-    //&[0x20, 0xE8, 0xA0, 0x01]
-   
-   
     #[inline(never)]
-     // fn check_object_exists_p256(&mut self,objectidentifier: &[u8;4] ,  delay: &mut DelayWrapper) -> Result<(), Se050Error>
-    //fn check_object_exists_p256(&mut self,  buf: &mut [u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>
-   fn check_object_exists_p256(&mut self,   delay: &mut DelayWrapper) -> Result<(), Se050Error>
-{
+    fn check_object_exists_p256(&mut self, buf: &mut [u8],  delay: &mut DelayWrapper) -> Result< (), Se050Error>
+    { 
+ 
+        //let mut buflen: [u8; 2] = [0, 0];
+       // BE::write_u16(&mut buflen, buf.len() as u16);
 
-     
- // let mut buf: u8 = 32;
-   // let mut buflen: [u8; 2] = [0, 0];
-  //  BE::write_u16(&mut buflen, buf.len() as u16);
-  
     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xE8, 0xA0, 0x01]);  
     
     let mut capdu = CApdu::new(
@@ -2944,16 +2936,11 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
     .send_apdu(&capdu, delay)
     .map_err(|_| Se050Error::UnknownError)?;
 
+    let mut rapdu_buf: [u8; 260] = [0; 260];
 
-
-    let mut rapdu_buf: [u8; 16] = [0; 16];
-  // let mut rapdu_buf: [u8; 260] = [0; 260];
-    
     let rapdu = self.t1_proto
     .receive_apdu(&mut rapdu_buf, delay)
     .map_err(|_| Se050Error::UnknownError)?;
-
- //0x9000 Error Code
 
     if rapdu.sw != 0x9000 {
     error!("SE050 check_object_exists_p256 Failed: {:x}", rapdu.sw);
@@ -2961,27 +2948,34 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
     }
 
     let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or_else(|| {
-        error!("SE050 check_object_exists_p256v Return TLV Missing");
+        error!("SE050 check_object_exists_p256 Return TLV Missing");
         Se050Error::UnknownError })?;
-  /*  
+/* 
     if tlv1_ret.get_data().len() != buf.len() {
-        error!("SE050 GetRandom Length Mismatch");
+        error!("SE050 check_object_exists_p256 Length Mismatch");
         return Err(Se050Error::UnknownError);
     }
 */
- 
-    //buf.copy_from_slice(tlv1_ret.get_data());
-   
-  
-    debug!("SE050 check_object_exists OK");
-   // Ok(ObjectId([0x20, 0xE8, 0xA0, 0x01]))
-   Ok(())
 
-  
+//Ok(());
+
+   // buf.copy_from_slice(tlv1_ret.get_data());
+
+   Ok(buf.copy_from_slice(tlv1_ret.get_data()))
+
+
+   
+
+
     }
  
 
 
+   
+
+
+   
+    
 
     //###########################################################################
     // See AN12413// 4.7 Secure Object management  //4.7.4 ManageSecureObject // 4.7.4.5 DeleteSecureObject P.70 
