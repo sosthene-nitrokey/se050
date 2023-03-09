@@ -810,7 +810,7 @@ pub trait Se050Device {
     
 
 
-    fn check_object_exists_p256(&mut self, buf: &mut [u8],  delay: &mut DelayWrapper) -> Result< (), Se050Error>;
+    //fn check_object_exists_p256(&mut self, buf: &mut [u8],  delay: &mut DelayWrapper) -> Result< (), Se050Error>;
 
     // See AN12413// 4.7 Secure Object management  //4.7.4 ManageSecureObject // 4.7.4.5 DeleteSecureObject P.70    
     fn delete_secure_object(&mut self,objectidentifier: &[u8;4] ,  delay: &mut DelayWrapper) -> Result<(), Se050Error>;
@@ -2909,7 +2909,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
     Ok(())
     }
  
-
+/* 
  //###########################################################################
    //###########################################################################
     // See AN12413// 4.7 Secure Object management  //4.7.4 ManageSecureObject // 4.7.4.4 CheckObjectExists P.70 
@@ -2919,6 +2919,11 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
  
         //let mut buflen: [u8; 2] = [0, 0];
        // BE::write_u16(&mut buflen, buf.len() as u16);
+
+       let a : [u8; 1] = [0x00];
+
+       let b : [u8; 1] = [0x01];
+
 
     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xE8, 0xA0, 0x01]);  
     
@@ -2959,17 +2964,24 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
 
 //Ok(());
 
-   // buf.copy_from_slice(tlv1_ret.get_data());
-
-   Ok(buf.copy_from_slice(tlv1_ret.get_data()))
+//Ok(buf.copy_from_slice(tlv1_ret.get_data()))
 
 
-   
+
+   buf.copy_from_slice(tlv1_ret.get_data());
+ 
+
+
+
+
+ Ok(buf.copy_from_slice(tlv1_ret.get_data()))
+
+ 
 
 
     }
  
-
+*/
 
    
 
