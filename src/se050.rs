@@ -5825,7 +5825,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
 
         buf.copy_from_slice(tlv1_ret.get_data());
 
-        debug!("SE050 GetRandom OK");
+        debug!("SE050 GetRandom OK bla bla bla");
 
         Ok(())
     }
