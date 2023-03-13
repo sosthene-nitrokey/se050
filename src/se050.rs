@@ -1795,7 +1795,7 @@ where
         }
 
         debug!("SE050 GenP256 OK");
-        Ok(ObjectId([0xae, 0x51, 0xae, 0x51]))
+        Ok(ObjectId([ 0x01, 0xA1,  0xE8, 0x20]))
     }
   
  
