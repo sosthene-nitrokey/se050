@@ -1760,13 +1760,16 @@ where
       //P1_EC //  4.3.19 ECCurve NIST_P256 P.42
 
         //20E8A001
+        // //20 E8 A0 01
+
+        // 20 E8 A1 00
     //&[0x20, 0xE8, 0xA0, 0x01]
    
     fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
        // let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
       //    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xE8, 0xA0, 0x01]);
-     
-    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[ 0x03, 0xA0,  0xE8, 0x20] );
+      let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[ 0x01, 0xA1,  0xE8, 0x20] );
+    //let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[ 0x05, 0xA0,  0xE8, 0x20] );
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x03]);	// NIST P-256
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -1821,7 +1824,7 @@ where
      //   let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectid);   
      //   
       //  let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(),&[0x20, 0xE8, 0xA0, 0x02]);     
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(),&[ 0x04, 0xA0,0xE8,0x20]);   
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(),&[ 0x06, 0xA0,0xE8,0x20]);   
 
 
        // let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), & eccurve);	// Se050ECCurveconstants
