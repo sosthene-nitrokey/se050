@@ -1,5 +1,6 @@
- use crate::types::*;
-use core::{convert::{From, TryFrom}, result};
+use crate::types::*;
+//use core::{convert::{From, TryFrom}, result};
+use core::convert::{From, TryFrom};
 use byteorder::{ByteOrder, BE};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -911,7 +912,7 @@ pub trait Se050Device {
     //OLD VERSION
      fn encrypt_aes_oneshot( &mut self,   data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper,) -> Result<(), Se050Error>;   
 
-//NEW VERSION
+    //NEW VERSION
     //fn encrypt_aes_oneshot(&mut self, objectid: &[u8;4], cipher_mode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper, ) -> Result<(), Se050Error> ;
     fn decrypt_aes_oneshot( &mut self,  objectid: &[u8;4],  cipher_mode: &[u8], data: &[u8],  enc: &mut [u8], delay: &mut DelayWrapper,) -> Result<(), Se050Error>;
     
@@ -1064,7 +1065,7 @@ where
 { 
     //###########################################################################
     //###########################################################################
-//OLD VERSION
+    //OLD VERSION
     fn enable(&mut self, delay: &mut DelayWrapper) -> Result<(), Se050Error> {
         /* Step 1: perform interface soft reset, parse ATR */
         let r = self.t1_proto.interface_soft_reset(delay);
@@ -1756,30 +1757,110 @@ where
     /* ASSUMPTION: SE050 is provisioned with an instantiated P-256 curve object;
         see NXP AN12413 -> Secure Objects -> Default Configuration */
     /* NOTE: hardcoded Object ID 0xae51ae51! */
+    fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
+        
+        //let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x99, 0xA0, 0xE8, 0x20] );
+       
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x03]);	// NIST P-256
+        
+        let mut capdu = CApdu::new(
+            ApduClass::ProprietaryPlain,
+            Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
+            Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
+            Se050ApduP2::Default.into(),
+            None
+        );
+     
+        capdu.push(tlv1);
+        capdu.push(tlv2);
+       
+        self.t1_proto
+            .send_apdu(&capdu, delay)
+            .map_err(|_| Se050Error::UnknownError)?;
+
+        let mut rapdu_buf: [u8; 16] = [0; 16];
+
+        let rapdu = self.t1_proto
+            .receive_apdu(&mut rapdu_buf, delay)
+            .map_err(|_| Se050Error::UnknownError)?;
+
+        if rapdu.sw != 0x9000 {
+            error!("SE050 GenP256 Failed: {:x}", rapdu.sw);
+            return Err(Se050Error::UnknownError);
+        }
+
+        debug!("SE050 GenP256 OK");
+
+        //Ok(ObjectId([0xae, 0x51, 0xae, 0x51]))
+        Ok(ObjectId([ 0x99, 0xA0, 0xE8, 0x20]))
+      
+
+    }
+
+
+
+ //###########################################################################
+    //OLD VERSION
+    #[inline(never)]
+    /* ASSUMPTION: SE050 is provisioned with an instantiated P-256 curve object;
+        see NXP AN12413 -> Secure Objects -> Default Configuration */
+    /* NOTE: hardcoded Object ID 0xae51ae51! */
+    fn generate_ed255_key_pair(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
+        
+        //let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x98, 0xA0, 0xE8, 0x20] );
+       
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x40]);	// Se050ECCurveconstants //ED255
+        
+        let mut capdu = CApdu::new(
+            ApduClass::ProprietaryPlain,
+            Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
+            Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
+            Se050ApduP2::Default.into(),
+            None
+        );
+     
+        capdu.push(tlv1);
+        capdu.push(tlv2);
+       
+        self.t1_proto
+            .send_apdu(&capdu, delay)
+            .map_err(|_| Se050Error::UnknownError)?;
+
+        let mut rapdu_buf: [u8; 16] = [0; 16];
+
+        let rapdu = self.t1_proto
+            .receive_apdu(&mut rapdu_buf, delay)
+            .map_err(|_| Se050Error::UnknownError)?;
+
+        if rapdu.sw != 0x9000 {
+           
+            error!("SE050 generate_ed255_key_paircFailed: {:x}", rapdu.sw);
+
+            return Err(Se050Error::UnknownError);
+
+        }
+
+        debug!("SE050 generate_ed255_key_pair OK");
+
+        
+        Ok(ObjectId([ 0x98, 0xA0, 0xE8, 0x20]))
+      
+
+    }
+
+
+
+/* 
+   
+    #[inline(never)]
+    /* ASSUMPTION: SE050 is provisioned with an instantiated P-256 curve object;
+        see NXP AN12413 -> Secure Objects -> Default Configuration */
+    /* NOTE: hardcoded Object ID 0xae51ae51! */
      //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey   P.58
       //P1_EC //  4.3.19 ECCurve NIST_P256 P.42
 
-        //20E8A001
-        // //20 E8 A0 01
-
-        // 20 E8 A1 00
-    //&[0x20, 0xE8, 0xA0, 0x01]
-
-//0x20E8A000
-
-    //0x20 0xE8 0xA0 0X00
-
-//0X00 0xA0 0xE8  0x20 
-//0X09 0xA0 0xE8  0x20
-////0X10 0xA0 0xE8  0x20
-////0X12 0xA0 0xE8  0x20
-/// 
-//v0X13 0xA0 0xE8  0x20
-
-////v0X14 0xA0 0xE8  0x20
-
-
-   
     fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
        // let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
       //    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xE8, 0xA0, 0x01]);
@@ -1815,7 +1896,7 @@ where
         Ok(ObjectId([ 0x13, 0xA0, 0xE8 , 0x20]))
     }
   
- 
+ */
 
 
     //###########################################################################
@@ -1825,13 +1906,20 @@ where
     //P1_EC 4.3.19 ECCurve P.42
 
 
+
+
+
+
+
+
+
     /* NOTE: hardcoded Object ID 0xae51ae51! */
    //  &[0xae, 0x51, 0xae, 0x51]
  //20E8A002
     //&[0x20, 0xE8, 0xA0, 0x02]
 
 
-
+/*  
     #[inline(never)]
     //fn write_ec_key(&mut self,policy: &[u8],  objectid: &[u8;4], eccurve: &[u8], private_key_value: &[u8],  delay: &mut DelayWrapper) -> Result<(), Se050Error>  
     fn generate_ed255_key_pair(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {   
@@ -1889,20 +1977,36 @@ where
        
 
         debug!("SE050 generate_ed255_key_pair OK");
-        Ok(ObjectId([0x14, 0xA0,0xE8,0x20]))
-       
+        Ok(ObjectId([0x14, 0xA0,0xE8,0x20]))    
 
 
     }
-}
+    }
 
  
+ //20E8A001
+        // //20 E8 A0 01
+
+        // 20 E8 A1 00
+    //&[0x20, 0xE8, 0xA0, 0x01]
+
+//0x20E8A000
+
+    //0x20 0xE8 0xA0 0X00
+
+//0X00 0xA0 0xE8  0x20 
+//0X09 0xA0 0xE8  0x20
+////0X10 0xA0 0xE8  0x20
+////0X12 0xA0 0xE8  0x20
+/// 
+//v0X13 0xA0 0xE8  0x20
+
+////v0X14 0xA0 0xE8  0x20
 
 
 
 
-
-
+*/
 
 
 
@@ -5904,3 +6008,4 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
     }
 
 }
+
