@@ -1765,12 +1765,12 @@ where
         let rapdu = self.t1_proto
             .receive_apdu(&mut rapdu_buf, delay)
             .map_err(|_| Se050Error::UnknownError)?;
-/* 
+
         if rapdu.sw != 0x9000 {
             error!("SE050 GenP256 Failed: {:x}", rapdu.sw);
             return Err(Se050Error::UnknownError);
         }
-*/
+
         debug!("SE050 GenP256 OK");
 
         Ok(ObjectId([0xae, 0x51, 0xae, 0x51]))
