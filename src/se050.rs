@@ -1764,7 +1764,10 @@ where
    
     fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
         //let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
-       let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
+       //let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
+       let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(),   &[0x20, 0xE8, 0xA0, 0x01]);
+     
+        
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x03]);	// NIST P-256
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -5830,7 +5833,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
 
         buf.copy_from_slice(tlv1_ret.get_data());
 
-        debug!("SE050 GetRandom OK");
+        debug!("SE050 GetRandom OK bla bla");
 
         Ok(())
     }
