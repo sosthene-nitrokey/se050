@@ -1764,7 +1764,7 @@ where
    
     fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
         //let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
-          let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
+       let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x03]);	// NIST P-256
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -1774,7 +1774,9 @@ where
             None
         );
         capdu.push(tlv1);
+
         capdu.push(tlv2);
+        
         self.t1_proto
             .send_apdu(&capdu, delay)
             .map_err(|_| Se050Error::UnknownError)?;
