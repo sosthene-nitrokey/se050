@@ -2,7 +2,8 @@ use crate::types::*;
 //use core::{convert::{From, TryFrom}, result};
 use core::convert::{From, TryFrom};
 use byteorder::{ByteOrder, BE};
-
+use core::result::Result;
+ 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Se050Error {
     UnknownError,
