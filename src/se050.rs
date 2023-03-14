@@ -1811,7 +1811,7 @@ where
         
         //let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
        // let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x98, 0xA0, 0xE8, 0x20] );
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x53]);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x57]);
        
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x40]);	// Se050ECCurveconstants //ED255
         
@@ -1848,7 +1848,7 @@ where
 
         
       // Ok(ObjectId([ 0x98, 0xA0, 0xE8, 0x20]))
-        Ok(ObjectId([0xae, 0x51, 0xae, 0x53]))
+        Ok(ObjectId([0xae, 0x51, 0xae, 0x57]))
 
     }
 
