@@ -1760,7 +1760,7 @@ where
     /* NOTE: hardcoded Object ID 0xae51ae51! */
     fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
         
-         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
+         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x52]);
        // let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x99, 0xA0, 0xE8, 0x20] );
        
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x03]);	// NIST P-256
