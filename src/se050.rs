@@ -661,12 +661,6 @@ pub enum Se050RSAKeyComponent {
 
 include!("se050_convs.rs");
 
- 
-
- 
-
-
-
 
 //////////////////////////////////////////////////////////////////////////////
 //trait-Se050Device ->  struct Se050
@@ -2282,21 +2276,6 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
 
     }
  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
