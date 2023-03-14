@@ -1,8 +1,6 @@
 use crate::types::*;
-//use core::{convert::{From, TryFrom}, result};
 use core::convert::{From, TryFrom};
 use byteorder::{ByteOrder, BE};
-//use core::result::Result;
  
 #[derive(Debug, PartialEq, Eq)]
 pub enum Se050Error {
@@ -26,15 +24,7 @@ pub enum Se050ApduError {
     SwCommandNotAllowed = 0x6986 , 
     
     }
-    
-
-
-
-
-
-
-
-
+   
 //SEE AN12413 P. 34 - Table 17. Instruction mask constants
 #[allow(dead_code)]
 pub const INS_MASK_INS_CHAR : u8 = 0xE0;
@@ -49,9 +39,6 @@ pub const APDU_INSTRUCTION_TRANSIENT: u8 = 0x80;
 pub const APDU_INSTRUCTION_AUTH_OBJECT: u8 = 0x40; 
 #[allow(dead_code)]
 pub const APDU_INSTRUCTION_ATTEST: u8 = 0x20;
-
-
-
 
 
 //See AN12413,- 4.3.3 Instruction - Table 19. Instruction constants P. 35 
@@ -1760,7 +1747,7 @@ where
     /* NOTE: hardcoded Object ID 0xae51ae51! */
     fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
         
-         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x52, 0xae, 0x52] );
+         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51] );
        
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x03]);	// NIST P-256
         
@@ -1792,7 +1779,7 @@ where
 
         debug!("SE050 GenP256 OK");
 
-        Ok(ObjectId([0xae, 0x52, 0xae, 0x52]))
+        Ok(ObjectId([0xae, 0x51, 0xae, 0x51]))
        // Ok(ObjectId([ 0x99, 0xA0, 0xE8, 0x20]))
       
 
