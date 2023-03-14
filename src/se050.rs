@@ -1760,8 +1760,8 @@ where
     /* NOTE: hardcoded Object ID 0xae51ae51! */
     fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
         
-        //let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x99, 0xA0, 0xE8, 0x20] );
+         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
+       // let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x99, 0xA0, 0xE8, 0x20] );
        
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x03]);	// NIST P-256
         
@@ -1793,8 +1793,8 @@ where
 
         debug!("SE050 GenP256 OK");
 
-        //Ok(ObjectId([0xae, 0x51, 0xae, 0x51]))
-        Ok(ObjectId([ 0x99, 0xA0, 0xE8, 0x20]))
+        Ok(ObjectId([0xae, 0x51, 0xae, 0x52]))
+       // Ok(ObjectId([ 0x99, 0xA0, 0xE8, 0x20]))
       
 
     }
@@ -1810,7 +1810,8 @@ where
     fn generate_ed255_key_pair(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
         
         //let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x51]);
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x98, 0xA0, 0xE8, 0x20] );
+       // let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x98, 0xA0, 0xE8, 0x20] );
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x51, 0xae, 0x53]);
        
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x40]);	// Se050ECCurveconstants //ED255
         
@@ -1846,8 +1847,8 @@ where
         debug!("SE050 generate_ed255_key_pair OK");
 
         
-        Ok(ObjectId([ 0x98, 0xA0, 0xE8, 0x20]))
-      
+      // Ok(ObjectId([ 0x98, 0xA0, 0xE8, 0x20]))
+        Ok(ObjectId([0xae, 0x51, 0xae, 0x53]))
 
     }
 
