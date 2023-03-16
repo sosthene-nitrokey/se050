@@ -1784,9 +1784,9 @@ where
             .send_apdu(&capdu, delay)
             .map_err(|_| Se050Error::UnknownError)?;
 
-       // let mut rapdu_buf: [u8; 16] = [0; 16];
+         let mut rapdu_buf: [u8; 16] = [0; 16];
 
-        let mut rapdu_buf: [u8; 260] = [0; 260];
+      // let mut rapdu_buf: [u8; 260] = [0; 260];
 
         let rapdu = self.t1_proto
             .receive_apdu(&mut rapdu_buf, delay)
@@ -1850,8 +1850,8 @@ where
             .send_apdu(&capdu, delay)
             .map_err(|_| Se050Error::UnknownError)?;
 
-      //  let mut rapdu_buf: [u8; 16] = [0; 16];
-        let mut rapdu_buf: [u8; 260] = [0; 260];
+        let mut rapdu_buf: [u8; 16] = [0; 16];
+       // let mut rapdu_buf: [u8; 260] = [0; 260];
 
         let rapdu = self.t1_proto
             .receive_apdu(&mut rapdu_buf, delay)
