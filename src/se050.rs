@@ -850,7 +850,7 @@ pub trait Se050Device {
  
 
     // See AN12413 // 4.10 Crypto operations EC 
-
+//fff
     // See AN12413 // 4.10 Crypto operations EC // 4.10.1 Signature generation // 4.10.1.2 EdDSASign P.77   
     fn eddsa_sign(&mut self, eckeyidentifier: &[u8;4], edsignaturealgo: &[u8],inputdata: &[u8;4], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
   
