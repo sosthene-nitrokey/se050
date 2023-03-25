@@ -813,7 +813,7 @@ pub trait Se050Device {
     //fn check_object_exists_p256(&mut self, buf: &mut [u8],  delay: &mut DelayWrapper) -> Result< (), Se050Error>;
 
     // See AN12413// 4.7 Secure Object management  //4.7.4 ManageSecureObject // 4.7.4.5 DeleteSecureObject P.70    
-    fn delete_secure_object(&mut self,objectidentifier: &[u8;4] ,  delay: &mut DelayWrapper) -> Result<(), Se050Error>;
+    fn delete_secure_object(&mut self,objectidentifier: &[u8;4] ,  delay: &mut DelayWrapper) -> Result< () , Se050Error>;
 
 
     // See AN12413//   4.8 EC curve management
@@ -3007,7 +3007,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
     //###########################################################################
     // See AN12413// 4.7 Secure Object management  //4.7.4 ManageSecureObject // 4.7.4.5 DeleteSecureObject P.70 
     #[inline(never)]
-    fn delete_secure_object(&mut self,objectidentifier: &[u8;4] ,  delay: &mut DelayWrapper) -> Result<(), Se050Error>
+    fn delete_secure_object(&mut self,objectidentifier: &[u8;4] ,  delay: &mut DelayWrapper) -> Result< (), Se050Error>
     {   
     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectidentifier);  
     
@@ -5825,22 +5825,22 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
             .map_err(|_| Se050Error::UnknownError)?;
 
         if rapdu.sw != 0x9000 {
-            error!("SE050 GetRandom Failed: {:x}", rapdu.sw);
+            error!("Se050 crate: SE050 GetRandom Failed: {:x}", rapdu.sw);
             return Err(Se050Error::UnknownError);
         }
 
         let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or_else(|| {
-            error!("SE050 GetRandom Return TLV Missing");
+            error!("Se050 crate: SE050 GetRandom Return TLV Missing");
             Se050Error::UnknownError })?;
 
         if tlv1_ret.get_data().len() != buf.len() {
-            error!("SE050 GetRandom Length Mismatch");
+            error!("Se050 crate: SE050 GetRandom Length Mismatch");
             return Err(Se050Error::UnknownError);
         }
 
         buf.copy_from_slice(tlv1_ret.get_data());
 
-        debug!("SE050 GetRandom OK bla bla");
+        debug!("Se050 crate: SE050 GetRandom OK ");
 
         Ok(())
     }
@@ -5878,6 +5878,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
             .map_err(|_| Se050Error::UnknownError)?;
 
         let mut rapdu_buf: [u8; 16] = [0; 16];
+        
         let rapdu = self.t1_proto
             .receive_apdu(&mut rapdu_buf, delay)
             .map_err(|_| Se050Error::UnknownError)?;
@@ -5920,11 +5921,11 @@ fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se
         .map_err(|_| Se050Error::UnknownError)?;
 
     if rapdu.sw != 0x9000 {
-        error!("SE050 GenP256 Failed: {:x}", rapdu.sw);
+        error!("Se050 crate: SE050 GenP256 Failed: {:x}", rapdu.sw);
         return Err(Se050Error::UnknownError);
     }
 
-    debug!("SE050 GenP256 OK");
+    debug!("Se050 crate: SE050 GenP256 OK");
     Ok(ObjectId([0xae, 0x59, 0xae, 0x59]))
 }
 
@@ -5965,11 +5966,11 @@ fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se
             .map_err(|_| Se050Error::UnknownError)?;
     
         if rapdu.sw != 0x9000 {
-            error!("SE050 ED255 Failed: {:x}", rapdu.sw);
+            error!("Se050 crate: SE050 ED255 Failed: {:x}", rapdu.sw);
             return Err(Se050Error::UnknownError);
         }
     
-        debug!("SE050 ED255 OK");
+        debug!("Se050 crate: SE050 ED255 OK");
         Ok(ObjectId([0xae, 0x51, 0xae, 0x51]))
     }
     
