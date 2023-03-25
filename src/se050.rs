@@ -1035,6 +1035,7 @@ pub struct Se050AppInfo {
     securebox_version: u16,
 }
 //STRUCT SE050
+#[derive(Debug)]
 pub struct Se050<T>
 where
     T: T1Proto,
@@ -5799,6 +5800,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
     //See AN12413, Pages 110/111 -> 4.19 Generic management commands //4.19.4 GetRandom (Gets random data from the SE050.) p.110
     //TLV[TAG_1] 2-byte requested size.  
    //OLD VERSION
+    
     #[inline(never)]
     fn get_random(&mut self, buf: &mut [u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> 
     {
@@ -5841,7 +5843,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
         buf.copy_from_slice(tlv1_ret.get_data());
 
 
-        debug!("Se050 crate: buf {:x}", buf);
+        debug!("Se050 crate: buf {:#?}", buf);
 
         debug!("Se050 crate: SE050 GetRandom OK ");
 
