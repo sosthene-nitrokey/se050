@@ -44,7 +44,7 @@ pub const APDU_INSTRUCTION_AUTH_OBJECT: u8 = 0x40;
 pub const APDU_INSTRUCTION_ATTEST: u8 = 0x20;
 
 
-vvv
+ 
 
 
 //See AN12413,- 4.3.3 Instruction - Table 19. Instruction constants P. 35 
@@ -6029,23 +6029,7 @@ fn generate_ed255_key_pair(&mut self, delay: &mut DelayWrapper) -> Result<Object
 
 }
 
-
-
  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -6136,3 +6120,4 @@ fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se
 
 
 }
+ 
