@@ -5897,59 +5897,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
         Ok(())
     }
 
-//################################################
 
-
-#[inline(never)]
-/* ASSUMPTION: SE050 is provisioned with an instantiated P-256 curve object;
-    see NXP AN12413 -> Secure Objects -> Default Configuration */
-/* NOTE: hardcoded Object ID 0xae51ae51! */
-fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
-    
-    debug!("Se050 crate: SE050 GenP256 DEBUG  tlv1");
-    //let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x59, 0xae, 0x59]);
-    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa0, 0x03]);
-  
-    debug!("Se050 crate: SE050 GenP256 DEBUG  tlv2");
-    let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x03]);	// NIST P-256
-    let mut capdu = CApdu::new(
-        ApduClass::ProprietaryPlain,
-    //     Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
-          Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_AUTH_OBJECT,
-// pub const APDU_INSTRUCTION_AUTH_OBJECT: u8 = 0x40; 
- 
-    //    Into::<u8>::into(Se050ApduInstruction::Write),
-        Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
-      // Se050ApduP1CredType::EC | Se050ApduP1KeyType::PrivateKey,
-        Se050ApduP2::Default.into(),
-        None
-    );
-    capdu.push(tlv1);
-
-    debug!("Se050 crate: SE050 GenP256 DEBUG pushtlv1");
-
-    capdu.push(tlv2);
-    debug!("Se050 crate: SE050 GenP256 DEBUG pushtlv2");
-
-    self.t1_proto
-        .send_apdu(&capdu, delay)
-        .map_err(|_| Se050Error::UnknownError)?;
-
-    let mut rapdu_buf: [u8; 16] = [0; 16];
-    let rapdu = self.t1_proto
-        .receive_apdu(&mut rapdu_buf, delay)
-        .map_err(|_| Se050Error::UnknownError)?;
-
-    if rapdu.sw != 0x9000 {
-        error!("Se050 crate: SE050 GenP256 Failed: {:x}", rapdu.sw);
-        return Err(Se050Error::UnknownError);
-    }
-
-    debug!("Se050 crate: SE050 GenP256 OK");
-
-    
-    Ok(ObjectId([0x20, 0xe8, 0xa0, 0x03]))
-}
 
 
 
@@ -6003,6 +5951,78 @@ fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se
 
 
    // &[0xf0, 0x00, 0x01, 0x23]);
+
+
+
+//#######################################################################################
+
+
+
+//################################################
+
+
+#[inline(never)]
+/* ASSUMPTION: SE050 is provisioned with an instantiated P-256 curve object;
+    see NXP AN12413 -> Secure Objects -> Default Configuration */
+/* NOTE: hardcoded Object ID 0xae51ae51! */
+fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
+    
+    debug!("Se050 crate: SE050 GenP256 DEBUG  tlv1");
+    //let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x59, 0xae, 0x59]);
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa0, 0x05]);
+  
+    debug!("Se050 crate: SE050 GenP256 DEBUG  tlv2");
+    let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x03]);	// NIST P-256
+    let mut capdu = CApdu::new(
+        ApduClass::ProprietaryPlain,
+    //     Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
+          Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_AUTH_OBJECT,
+// pub const APDU_INSTRUCTION_AUTH_OBJECT: u8 = 0x40; 
+ 
+    //    Into::<u8>::into(Se050ApduInstruction::Write),
+        Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
+      // Se050ApduP1CredType::EC | Se050ApduP1KeyType::PrivateKey,
+        Se050ApduP2::Default.into(),
+        None
+    );
+    capdu.push(tlv1);
+
+    debug!("Se050 crate: SE050 GenP256 DEBUG pushtlv1");
+
+    capdu.push(tlv2);
+    debug!("Se050 crate: SE050 GenP256 DEBUG pushtlv2");
+
+    self.t1_proto
+        .send_apdu(&capdu, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    let mut rapdu_buf: [u8; 16] = [0; 16];
+    let rapdu = self.t1_proto
+        .receive_apdu(&mut rapdu_buf, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    if rapdu.sw != 0x9000 {
+        error!("Se050 crate: SE050 GenP256 Failed: {:x}", rapdu.sw);
+        return Err(Se050Error::UnknownError);
+    }
+
+    debug!("Se050 crate: SE050 GenP256 OK");
+
+    
+    Ok(ObjectId([0x20, 0xe8, 0xa0, 0x05]))
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
