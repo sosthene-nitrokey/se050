@@ -5919,8 +5919,8 @@ fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se
 // pub const APDU_INSTRUCTION_AUTH_OBJECT: u8 = 0x40; 
  
     //    Into::<u8>::into(Se050ApduInstruction::Write),
-       // Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
-       Se050ApduP1CredType::EC | Se050ApduP1KeyType::PrivateKey,
+        Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
+      // Se050ApduP1CredType::EC | Se050ApduP1KeyType::PrivateKey,
         Se050ApduP2::Default.into(),
         None
     );
