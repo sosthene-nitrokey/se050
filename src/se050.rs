@@ -2998,7 +2998,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
 
 
    
-    
+    /*  
 
     //###########################################################################
     // See AN12413// 4.7 Secure Object management  //4.7.4 ManageSecureObject // 4.7.4.5 DeleteSecureObject P.70 
@@ -3033,7 +3033,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
 
     Ok(())
     }
-
+*/
 
     //###########################################################################
     //###########################################################################
@@ -5791,60 +5791,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
         Ok(())
     }
  
-    //###########################################################################
-    //See AN12413, Pages 110/111 -> 4.19 Generic management commands //4.19.4 GetRandom (Gets random data from the SE050.) p.110
-    //TLV[TAG_1] 2-byte requested size.  
-   //OLD VERSION
     
-    #[inline(never)]
-    fn get_random(&mut self, buf: &mut [u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> 
-    {
-        let mut buflen: [u8; 2] = [0, 0];
-        BE::write_u16(&mut buflen, buf.len() as u16);
-
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &buflen);
-
-        let mut capdu = CApdu::new(
-            ApduClass::ProprietaryPlain,
-            Se050ApduInstruction::Mgmt.into(),
-            Se050ApduP1CredType::Default.into(),
-            Se050ApduP2::Random.into(),
-            Some(0x00)
-        );
-
-        capdu.push(tlv1);
-
-        self.t1_proto.send_apdu(&capdu, delay).map_err(|_| Se050Error::UnknownError)?;
-
-        let mut rapdu_buf: [u8; 260] = [0; 260];
-        let rapdu = self.t1_proto
-            .receive_apdu(&mut rapdu_buf, delay)
-            .map_err(|_| Se050Error::UnknownError)?;
-
-        if rapdu.sw != 0x9000 {
-            error!("Se050 crate: SE050 GetRandom Failed: {:x}", rapdu.sw);
-            return Err(Se050Error::UnknownError);
-        }
-
-        let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or_else(|| {
-            error!("Se050 crate: SE050 GetRandom Return TLV Missing");
-            Se050Error::UnknownError })?;
-
-        if tlv1_ret.get_data().len() != buf.len() {
-            error!("Se050 crate: SE050 GetRandom Length Mismatch");
-            return Err(Se050Error::UnknownError);
-        }
-
-        buf.copy_from_slice(tlv1_ret.get_data());
-
-
-        debug!("Se050 crate: buf {:#?}", buf);
-
-        debug!("Se050 crate: SE050 GetRandom OK ");
-
-        Ok(())
-    }
-
     //###########################################################################
     //See AN12413, // 4.19 Generic management commands //44.19.5 DeleteAll P.112
     /* 
@@ -5867,10 +5814,15 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
         
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
-            Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
+           // Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
+            Into::<u8>::into(Se050ApduInstruction::Mgmt),
+            
             Se050ApduP1CredType::Default.into(),
+            
             Se050ApduP2::DeleteAll.into(),
+
             Some(0x00)
+    
         );
 
         self.t1_proto
@@ -5889,7 +5841,9 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
         }
 
         debug!("SE050 delete_all OK");
+
         Ok(())
+
     }
 
  
@@ -5903,6 +5857,58 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
 //#######################################################################################
 
 
+//###########################################################################
+    // See AN12413// 4.7 Secure Object management  //4.7.4 ManageSecureObject // 4.7.4.5 DeleteSecureObject P.70 
+    #[inline(never)]
+    fn delete_secure_object(&mut self,objectidentifier: &[u8;4] ,  delay: &mut DelayWrapper) -> Result< (), Se050Error>
+    {   
+
+    debug!("Se050 crate: SE050 delete_secure_object DEBUG  tlv1");
+
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectidentifier);  
+    
+    let mut capdu = CApdu::new(
+
+    ApduClass::ProprietaryPlain,
+
+   // Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
+
+    Into::<u8>::into(Se050ApduInstruction::Mgmt) ,
+
+    Se050ApduP1CredType::Default.into(),
+
+    Se050ApduP2::DeleteObject.into(),
+
+    None
+
+    );
+
+    debug!("Se050 crate: SE050 GenP256 DEBUG  tlv1");
+    capdu.push(tlv1);    
+    
+    self.t1_proto
+    .send_apdu(&capdu, delay)
+    .map_err(|_| Se050Error::UnknownError)?;
+
+    let mut rapdu_buf: [u8; 260] = [0; 260];
+
+    let rapdu = self.t1_proto
+    .receive_apdu(&mut rapdu_buf, delay)
+    .map_err(|_| Se050Error::UnknownError)?;
+
+    if rapdu.sw != 0x9000 {
+    error!("SE050 delete_secure_object Failed: {:x}", rapdu.sw);
+    return Err(Se050Error::UnknownError);
+    }
+
+
+    debug!("Se050 crate: SE050 delete secure object OK");
+
+    Ok(())
+
+    }
+
+ 
 
 //################################################
 //WORK IN PROGRESS
@@ -5964,70 +5970,7 @@ fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se
 }
 
 */
-//##############################################################################
-//###########################################################################
-    /* ASSUMPTION: SE050 is provisioned with an instantiated ECC curve object; */
-    
-    //AN12413 //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey    P.58
-    //P1_EC 4.3.19 ECCurve P.42
 
-/* NOTE: hardcoded Object ID 0x20e8a002! &[0x20, 0xe8, 0xa0, 0x02]*/
-
-
-
-#[inline(never)]
-
-fn generate_ed255_key_pair(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
-   // let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa0, 0x02]);
-    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa0, 0x22]);
-   
-    debug!("Se050 crate: SE050 Gened255 DEBUG  tlv1");
-   
-    let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x40]);	// Se050ECCurveconstants //ED255
-   
-    debug!("Se050 crate: SE050 Gened255 DEBUG  tlv2");
-   
-    let mut capdu = CApdu::new(
-
-        ApduClass::ProprietaryPlain,
-       
-        Into::<u8>::into(Se050ApduInstruction::Write),
-
-        Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
-      
-        Se050ApduP2::Default.into(),
-       
-        None
-    );
-
-    capdu.push(tlv1);
-
-    debug!("Se050 crate: SE050 Gened255 DEBUG pushtlv1");
-
-    capdu.push(tlv2);
-
-    debug!("Se050 crate: SE050 Gened255 DEBUG pushtlv2");
-
-    self.t1_proto
-        .send_apdu(&capdu, delay)
-        .map_err(|_| Se050Error::UnknownError)?;
-
-    let mut rapdu_buf: [u8; 16] = [0; 16];
-
-    let rapdu = self.t1_proto
-        .receive_apdu(&mut rapdu_buf, delay)
-        .map_err(|_| Se050Error::UnknownError)?;
-
-    if rapdu.sw != 0x9000 {
-        error!("Se050 crate: SE050 ED255 Failed: {:x}", rapdu.sw);
-        return Err(Se050Error::UnknownError);
-    }
-
-    debug!("Se050 crate: SE050 ED255 OK");
-    
-    Ok(ObjectId([0x20, 0xe8, 0xa0, 0x22]))
-
-}
 
  
 
@@ -6037,6 +5980,62 @@ fn generate_ed255_key_pair(&mut self, delay: &mut DelayWrapper) -> Result<Object
 
 //################################################
 //WORK FINSIHED
+ 
+//###########################################################################
+    //See AN12413, Pages 110/111 -> 4.19 Generic management commands //4.19.4 GetRandom (Gets random data from the SE050.) p.110
+    //TLV[TAG_1] 2-byte requested size.  
+   //OLD VERSION
+    
+   #[inline(never)]
+   fn get_random(&mut self, buf: &mut [u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> 
+   {
+       let mut buflen: [u8; 2] = [0, 0];
+       BE::write_u16(&mut buflen, buf.len() as u16);
+
+       let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &buflen);
+
+       let mut capdu = CApdu::new(
+           ApduClass::ProprietaryPlain,
+           Se050ApduInstruction::Mgmt.into(),
+           Se050ApduP1CredType::Default.into(),
+           Se050ApduP2::Random.into(),
+           Some(0x00)
+       );
+
+       capdu.push(tlv1);
+
+       self.t1_proto.send_apdu(&capdu, delay).map_err(|_| Se050Error::UnknownError)?;
+
+       let mut rapdu_buf: [u8; 260] = [0; 260];
+       let rapdu = self.t1_proto
+           .receive_apdu(&mut rapdu_buf, delay)
+           .map_err(|_| Se050Error::UnknownError)?;
+
+       if rapdu.sw != 0x9000 {
+           error!("Se050 crate: SE050 GetRandom Failed: {:x}", rapdu.sw);
+           return Err(Se050Error::UnknownError);
+       }
+
+       let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or_else(|| {
+           error!("Se050 crate: SE050 GetRandom Return TLV Missing");
+           Se050Error::UnknownError })?;
+
+       if tlv1_ret.get_data().len() != buf.len() {
+           error!("Se050 crate: SE050 GetRandom Length Mismatch");
+           return Err(Se050Error::UnknownError);
+       }
+
+       buf.copy_from_slice(tlv1_ret.get_data());
+
+
+       debug!("Se050 crate: buf {:#?}", buf);
+
+       debug!("Se050 crate: SE050 GetRandom OK ");
+
+       Ok(())
+   }
+ 
+
  
 
 //###########################################################################
@@ -6106,10 +6105,74 @@ fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se
 
  
 
+//################################################
+//WORK FINSIHED
+
+
+//##############################################################################
+//###########################################################################
+    /* ASSUMPTION: SE050 is provisioned with an instantiated ECC curve object; */
+    
+    //AN12413 //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey    P.58
+    //P1_EC 4.3.19 ECCurve P.42
+
+/* NOTE: hardcoded Object ID 0x20e8a002! &[0x20, 0xe8, 0xa0, 0x02]*/
 
 
 
+#[inline(never)]
 
+fn generate_ed255_key_pair(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
+   // let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa0, 0x02]);
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa0, 0x02]);
+   
+    debug!("Se050 crate: SE050 Gened255 DEBUG  tlv1");
+   
+    let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x40]);	// Se050ECCurveconstants //ED255
+   
+    debug!("Se050 crate: SE050 Gened255 DEBUG  tlv2");
+   
+    let mut capdu = CApdu::new(
+
+        ApduClass::ProprietaryPlain,
+       
+        Into::<u8>::into(Se050ApduInstruction::Write),
+
+        Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
+      
+        Se050ApduP2::Default.into(),
+       
+        None
+    );
+
+    capdu.push(tlv1);
+
+    debug!("Se050 crate: SE050 Gened255 DEBUG pushtlv1");
+
+    capdu.push(tlv2);
+
+    debug!("Se050 crate: SE050 Gened255 DEBUG pushtlv2");
+
+    self.t1_proto
+        .send_apdu(&capdu, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    let mut rapdu_buf: [u8; 16] = [0; 16];
+
+    let rapdu = self.t1_proto
+        .receive_apdu(&mut rapdu_buf, delay)
+        .map_err(|_| Se050Error::UnknownError)?;
+
+    if rapdu.sw != 0x9000 {
+        error!("Se050 crate: SE050 ED255 Failed: {:x}", rapdu.sw);
+        return Err(Se050Error::UnknownError);
+    }
+
+    debug!("Se050 crate: SE050 ED255 OK");
+    
+    Ok(ObjectId([0x20, 0xe8, 0xa0, 0x02]))
+
+}
 
 
 
