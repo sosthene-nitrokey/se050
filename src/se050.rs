@@ -5910,10 +5910,11 @@ fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se
     //let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x59, 0xae, 0x59]);
     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa0, 0x01]);
   
-    debug!("Se050 crate: SE050 GenP256 DEBUG  tlv1");
+    debug!("Se050 crate: SE050 GenP256 DEBUG  tlv2");
     let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x03]);	// NIST P-256
     let mut capdu = CApdu::new(
         ApduClass::ProprietaryPlain,
+       // Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
         Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
         Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
         Se050ApduP2::Default.into(),
