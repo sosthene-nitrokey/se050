@@ -5905,6 +5905,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
     see NXP AN12413 -> Secure Objects -> Default Configuration */
 /* NOTE: hardcoded Object ID 0xae51ae51! */
 fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
+    debug!("Se050 crate: SE050 GenP256 DEBUG pushtlv1");
     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0xae, 0x59, 0xae, 0x59]);
     let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &[0x03]);	// NIST P-256
     let mut capdu = CApdu::new(
@@ -5917,7 +5918,7 @@ fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se
     capdu.push(tlv1);
 
     debug!("Se050 crate: SE050 GenP256 DEBUG pushtlv1");
-    
+
     capdu.push(tlv2);
     debug!("Se050 crate: SE050 GenP256 DEBUG pushtlv2");
 
