@@ -5915,7 +5915,10 @@ fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se
         None
     );
     capdu.push(tlv1);
+    debug!("Se050 crate: SE050 GenP256 pushtlv1");
     capdu.push(tlv2);
+    debug!("Se050 crate: SE050 GenP256 pushtlv2");
+    
     self.t1_proto
         .send_apdu(&capdu, delay)
         .map_err(|_| Se050Error::UnknownError)?;
