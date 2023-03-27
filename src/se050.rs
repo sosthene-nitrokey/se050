@@ -25,12 +25,7 @@ pub enum Se050ApduError {
     
     }
     
-
-
-
-
-
-
+ 
 
 
 //SEE AN12413 P. 34 - Table 17. Instruction mask constants
@@ -49,7 +44,7 @@ pub const APDU_INSTRUCTION_AUTH_OBJECT: u8 = 0x40;
 pub const APDU_INSTRUCTION_ATTEST: u8 = 0x20;
 
 
-
+vvv
 
 
 //See AN12413,- 4.3.3 Instruction - Table 19. Instruction constants P. 35 
