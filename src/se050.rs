@@ -5863,7 +5863,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
     fn delete_secure_object(&mut self,objectidentifier: &[u8;4] ,  delay: &mut DelayWrapper) -> Result< (), Se050Error>
     {   
 
-    debug!("Se050 crate: SE050 delete_secure_object DEBUG  tlv1");
+    debug!("Se050 crate: SE050 delete_secure_object DEBUG  ");
 
     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectidentifier);  
     
@@ -6052,7 +6052,7 @@ fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se
     
     debug!("Se050 crate: SE050 GenP256 DEBUG  tlv1");
      
-    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa0, 0x01]);
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa0, 0x99]);
   
     debug!("Se050 crate: SE050 GenP256 DEBUG  tlv2");
 
