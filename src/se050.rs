@@ -5883,7 +5883,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
 
     );
 
-    debug!("Se050 crate: SE050 GenP256 DEBUG  tlv1");
+    debug!("Se050 crate: SE050 delete_secure_object DEBUG  tlv1");
     capdu.push(tlv1);    
     
     self.t1_proto
