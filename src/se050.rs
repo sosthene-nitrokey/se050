@@ -6052,7 +6052,7 @@ fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se
     
     debug!("Se050 crate: SE050 GenP256 DEBUG  tlv1");
      
-    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa0, 0x99]);
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa1, 0x01]);
   
     debug!("Se050 crate: SE050 GenP256 DEBUG  tlv2");
 
@@ -6099,7 +6099,7 @@ fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se
     debug!("Se050 crate: SE050 GenP256 OK");
 
     
-    Ok(ObjectId([0x20, 0xe8, 0xa0, 0x99]))
+    Ok(ObjectId([0x20, 0xe8, 0xa1, 0x01]))
 
 }
 
@@ -6124,7 +6124,7 @@ fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se
 
 fn generate_ed255_key_pair(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
    // let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa0, 0x02]);
-    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa0, 0x02]);
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa1, 0x02]);
    
     debug!("Se050 crate: SE050 Gened255 DEBUG  tlv1");
    
@@ -6170,7 +6170,7 @@ fn generate_ed255_key_pair(&mut self, delay: &mut DelayWrapper) -> Result<Object
 
     debug!("Se050 crate: SE050 ED255 OK");
     
-    Ok(ObjectId([0x20, 0xe8, 0xa0, 0x02]))
+    Ok(ObjectId([0x20, 0xe8, 0xa1, 0x02]))
 
 }
 
