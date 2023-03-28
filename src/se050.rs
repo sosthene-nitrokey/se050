@@ -736,13 +736,14 @@ pub trait Se050Device {
     //OLD VERSION
     fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> ;
     //DEFAULT CONFIGURATION OF SE050   
-
+   
     //NEW VERSION
    // fn generate_p256_key(&mut self,policy: &[u8],  objectid: &[u8;4],  private_key_value: &[u8],  delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
 
-   fn generate_ed255_key_pair(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>;
+  // fn generate_ed255_key_pair(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>;
 
-
+  fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> ;
+ 
 
 
     //AN12413 //4.7 Secure Object management //4.7.1 WriteSecureObject// 4.7.1.2 WriteRSAKey //P.59-60  
@@ -5853,7 +5854,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
   
 
 
-
+/*  
 //#######################################################################################
 
 
@@ -5907,7 +5908,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
     Ok(())
 
     }
-
+*/
  
 
 //################################################
@@ -6122,9 +6123,10 @@ fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se
 
 #[inline(never)]
 
-fn generate_ed255_key_pair(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
+fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
    // let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa0, 0x02]);
-    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa1, 0x02]);
+  //  let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa1, 0x02]);
+      let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectidentifier);
    
     debug!("Se050 crate: SE050 Gened255 DEBUG  tlv1");
    
@@ -6164,7 +6166,7 @@ fn generate_ed255_key_pair(&mut self, delay: &mut DelayWrapper) -> Result<Object
         .map_err(|_| Se050Error::UnknownError)?;
 
     if rapdu.sw != 0x9000 {
-        error!("Se050 crate: SE050 ED255 Failed: {:x}", rapdu.sw);
+        error!("Se050 crate: Generation ED255 Failed: {:x}", rapdu.sw);
         return Err(Se050Error::UnknownError);
     }
 
@@ -6174,6 +6176,59 @@ fn generate_ed255_key_pair(&mut self, delay: &mut DelayWrapper) -> Result<Object
 
 }
 
+
+//###########################################################################
+    // See AN12413// 4.7 Secure Object management  //4.7.4 ManageSecureObject // 4.7.4.5 DeleteSecureObject P.70 
+    #[inline(never)]
+    fn delete_secure_object(&mut self,objectidentifier: &[u8;4] ,  delay: &mut DelayWrapper) -> Result< (), Se050Error>
+    {   
+
+    debug!("Se050 crate: SE050 delete_secure_object DEBUG  ");
+
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectidentifier);  
+    
+    let mut capdu = CApdu::new(
+
+    ApduClass::ProprietaryPlain,
+
+   // Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
+
+    Into::<u8>::into(Se050ApduInstruction::Mgmt) ,
+
+    Se050ApduP1CredType::Default.into(),
+
+    Se050ApduP2::DeleteObject.into(),
+
+    None
+
+    );
+
+    debug!("Se050 crate: SE050 delete_secure_object DEBUG  tlv1");
+    capdu.push(tlv1);    
+    
+    self.t1_proto
+    .send_apdu(&capdu, delay)
+    .map_err(|_| Se050Error::UnknownError)?;
+
+    let mut rapdu_buf: [u8; 260] = [0; 260];
+
+    let rapdu = self.t1_proto
+    .receive_apdu(&mut rapdu_buf, delay)
+    .map_err(|_| Se050Error::UnknownError)?;
+
+    if rapdu.sw != 0x9000 {
+    error!("SE050 delete_secure_object Failed: {:x}", rapdu.sw);
+    return Err(Se050Error::UnknownError);
+    }
+
+
+    debug!("Se050 crate: SE050 delete secure object OK");
+
+    Ok(())
+
+    }
+ 
+ 
 
 
 
