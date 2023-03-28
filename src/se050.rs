@@ -6099,7 +6099,7 @@ fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se
     debug!("Se050 crate: SE050 GenP256 OK");
 
     
-    Ok(ObjectId([0x20, 0xe8, 0xa0, 0x01]))
+    Ok(ObjectId([0x20, 0xe8, 0xa0, 0x99]))
 
 }
 
