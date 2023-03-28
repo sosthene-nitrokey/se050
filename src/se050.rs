@@ -6298,12 +6298,12 @@ fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut Del
     let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or_else(|| {
         error!("Se050 crate: SE050 Check object exist TLV Missing");
         Se050Error::UnknownError })?;
-
+/*  
     if tlv1_ret.get_data().len() != buf.len() {
         error!("Se050 crate:  SE050 Check object exist TLV Length Mismatch");
         return Err(Se050Error::UnknownError);
     }
-
+*/
     buf.copy_from_slice(tlv1_ret.get_data());
 
 
