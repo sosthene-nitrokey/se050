@@ -6263,18 +6263,11 @@ fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut Del
     {   
         debug!("Se050 crate: SE050 check_object_exist DEBUG  ");
 
-        //let mut buflen: [u8; 2] = [0, 0];
-
-        let mut buflen: [u8; 1] = [0];
-
-       // BE::write_u16(&mut buflen, buf.len() as u16);
-
-
     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectidentifier);  
     
     let mut capdu = CApdu::new(
     ApduClass::ProprietaryPlain,
-  //  Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,    
+    //Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,    
     Into::<u8>::into(Se050ApduInstruction::Mgmt) ,
     Se050ApduP1CredType::Default.into(),
     Se050ApduP2::Exist.into(),
@@ -6289,6 +6282,7 @@ fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut Del
     .map_err(|_| Se050Error::UnknownError)?;
 
     let mut rapdu_buf: [u8; 260] = [0; 260];
+
     let rapdu = self.t1_proto
     .receive_apdu(&mut rapdu_buf, delay)
     .map_err(|_| Se050Error::UnknownError)?;
@@ -6301,24 +6295,16 @@ fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut Del
     let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or_else(|| {
         error!("Se050 crate: SE050 Check object exist TLV Missing");
         Se050Error::UnknownError })?;
- /*  
-    if tlv1_ret.get_data().len() != buf.len() {
-        error!("Se050 crate:  SE050 Check object exist TLV Length Mismatch");
-        return Err(Se050Error::UnknownError);
-    }
- */
+ 
+ 
+
     buf.copy_from_slice(tlv1_ret.get_data());
 
-
     debug!("Se050 crate: buf {:#?}", buf);
+
+
     debug!("Se050 crate: SE050 Check Object Exist OK ");
-
-
-
-
-
-    
-
+ 
     Ok(())
     }
 
