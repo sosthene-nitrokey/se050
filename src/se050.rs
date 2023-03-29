@@ -731,8 +731,8 @@ pub trait Se050Device {
 
     // See AN12413,  4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey //P1_EC ///P.58-59 
     // fn generate_eccurve_key(&mut self, eccurve: &[u8], delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>; //ERWEITERT      
-    fn write_ec_key(&mut self,policy: &[u8],  objectid: &[u8;4], eccurve: &[u8], private_key_value: &[u8],  delay: &mut DelayWrapper) -> Result<(), Se050Error>  ;
-    
+    //fn write_ec_key(&mut self,policy: &[u8],  objectid: &[u8;4], eccurve: &[u8], private_key_value: &[u8],  delay: &mut DelayWrapper) -> Result<(), Se050Error>  ;
+    fn write_ec_key(&mut self,   objectid: &[u8;4], eccurve: &[u8],    delay: &mut DelayWrapper) -> Result<(), Se050Error>  ;
     //OLD VERSION
    // fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> ;
     //DEFAULT CONFIGURATION OF SE050   
@@ -1701,6 +1701,7 @@ where
     /* NOTE: hardcoded Object ID 0xae51ae51! */
     //AN12413 //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey    P.58
     //P1_EC 4.3.19 ECCurve P.42
+    /*  
     #[inline(never)]
     fn write_ec_key(&mut self,policy: &[u8],  objectid: &[u8;4], eccurve: &[u8], private_key_value: &[u8],  delay: &mut DelayWrapper) -> Result<(), Se050Error>  
         
@@ -1747,7 +1748,8 @@ where
 
         Ok(())
     }
-    
+
+   */ 
     //###########################################################################
     //OLD VERSION
    // #[inline(never)]
@@ -6149,7 +6151,7 @@ see NXP AN12413 -> Secure Objects -> Default Configuration */
     //AN12413 //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey    P.58
     //P1_EC 4.3.19 ECCurve P.42
 
-/* NOTE: hardcoded Object ID 0x20e8a002! &[0x20, 0xe8, 0xa0, 0x02]*/
+ 
 
 
 
@@ -6215,7 +6217,7 @@ fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut Del
     fn delete_secure_object(&mut self,objectidentifier: &[u8;4] ,  delay: &mut DelayWrapper) -> Result< (), Se050Error>
     {   
 
-    debug!("Se050 crate: SE050 delete_secure_object DEBUG  ");
+    debug!("Se050 crate: SE050 delete_secure_object DEBUG\n ");
 
     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectidentifier);  
     
@@ -6235,7 +6237,7 @@ fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut Del
 
     );
 
-    debug!("Se050 crate: SE050 delete_secure_object DEBUG  tlv1");
+    debug!("Se050 crate: SE050 delete_secure_object DEBUG  tlv1 \n");
     capdu.push(tlv1);    
     
     self.t1_proto
@@ -6254,7 +6256,7 @@ fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut Del
     }
 
 
-    debug!("Se050 crate: SE050 delete secure object OK");
+    debug!("Se050 crate: SE050 delete secure object OK\n");
 
     Ok(())
 
@@ -6266,7 +6268,7 @@ fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut Del
     #[inline(never)]
     fn check_object_exists(&mut self,buf: &mut [u8], objectidentifier: &[u8;4] ,  delay: &mut DelayWrapper) -> Result<(), Se050Error>
     {   
-        debug!("Se050 crate: SE050 check_object_exist DEBUG  ");
+        debug!("Se050 crate: SE050 check_object_exist DEBUG \n");
 
     let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectidentifier);  
     
@@ -6293,12 +6295,12 @@ fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut Del
     .map_err(|_| Se050Error::UnknownError)?;
 
     if rapdu.sw != 0x9000 {
-    error!("SE050 check_object_exists Failed: {:x}", rapdu.sw);
+    error!("SE050 check_object_exists Failed: {:x}\n", rapdu.sw);
     return Err(Se050Error::UnknownError);
     }
 
     let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or_else(|| {
-        error!("Se050 crate: SE050 Check object exist TLV Missing");
+        error!("Se050 crate: SE050 Check object exist TLV Missing\n");
         Se050Error::UnknownError })?;
  
  
@@ -6311,9 +6313,7 @@ fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut Del
     debug!("Se050 crate Check Object Exist tlv1_ret : {:#?} \n", tlv1_ret);
 
     debug!("Se050 crate Check Object Exist tlv1_ret.get_data() : {:#?}\n",tlv1_ret.get_data());
-
-
-    debug!("Se050 crate: SE050 Check Object Exist OK ");
+ 
 
     if  buf.contains(&1) {
 
@@ -6332,14 +6332,73 @@ fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut Del
 
     }
 
-
+    debug!("Se050 crate: SE050 Check Object Exist OK \n ");
  
     Ok(())
 
 
     }
 
+ //###########################################################################
+    /* ASSUMPTION: SE050 is provisioned with an instantiated ECC curve object; */
+    /* NOTE: hardcoded Object ID 0xae51ae51! */
+    //AN12413 //4.7 Secure Object management //4.7.1 WriteSecureObject //4.7.1.1 WriteECKey    P.58
+    //P1_EC 4.3.19 ECCurve P.42
+    #[inline(never)]
+    //fn write_ec_key(&mut self,policy: &[u8],  objectid: &[u8;4], eccurve: &[u8], private_key_value: &[u8],  delay: &mut DelayWrapper) -> Result<(), Se050Error>  
+    fn write_ec_key(&mut self,   objectid: &[u8;4], eccurve: &[u8],    delay: &mut DelayWrapper) -> Result<(), Se050Error>  
+         
+    { 
+       // let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), &policy);        
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectid);        
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), & eccurve);	// Se050ECCurveconstants
+      //  let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &private_key_value );	 
 
+        let mut capdu = CApdu::new(
+            ApduClass::ProprietaryPlain,
+            //Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
+            Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
+            Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
+            Se050ApduP2::Default.into(),
+            None
+        );
+
+    //    capdu.push(tlvp);
+        
+        capdu.push(tlv1);
+        debug!("Se050 crate: WRITE ECKEY DEBUG pushtlv1");
+
+        capdu.push(tlv2);
+        debug!("Se050 crate: WRITE ECKEY DEBUG pushtlv2");
+        
+      //  capdu.push(tlv3);
+
+        self.t1_proto
+            .send_apdu(&capdu, delay)
+            .map_err(|_| Se050Error::UnknownError)?;
+
+        let mut rapdu_buf: [u8; 16] = [0; 16];
+        
+        let rapdu = self.t1_proto
+            .receive_apdu(&mut rapdu_buf, delay)
+            .map_err(|_| Se050Error::UnknownError)?;
+
+        if rapdu.sw != 0x9000 {
+          //  error!("SE050 write_ec_key {:x} Failed: {:x}", eccurve, rapdu.sw);
+          //error!("SE050 write_ec_key   Failed: {:x}",  rapdu.sw);
+            error!("SE050 write_ec_key {:x?} Failed: {:x}", eccurve, rapdu.sw);
+            
+            return Err(Se050Error::UnknownError);
+        }
+
+        //debug!("SE050 write_ec_key {:x} : OK",eccurve);
+
+        //debug!("SE050 write_ec_key   : OK" );
+        
+        debug!("SE050 write_ec_key {:#?} : OK",eccurve);
+
+        Ok(())
+    }
 
 
 
