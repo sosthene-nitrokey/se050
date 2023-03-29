@@ -6314,8 +6314,29 @@ fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut Del
 
 
     debug!("Se050 crate: SE050 Check Object Exist OK ");
+
+    if  buf.contains(&1) {
+
+        debug!("Object: {:#?} exist \n",objectidentifier);
+
+    }
+
+    else if  buf.contains(&2) {
+
+        debug!("Object: {:#?} does not exist \n",objectidentifier);
+
+    }
+
+    else {
+        debug!("Object: {:#?} UnknownError \n",objectidentifier);
+
+    }
+
+
  
     Ok(())
+
+
     }
 
 
