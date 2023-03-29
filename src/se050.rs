@@ -6302,10 +6302,13 @@ fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut Del
         Se050Error::UnknownError })?;
  
  
-
+/* 
     buf.copy_from_slice(tlv1_ret.get_data());
 
     debug!("Se050 crate: buf {:#?}", buf);
+*/
+
+debug!("Se050 crate: buf {:#?}", tlv1_ret);
 
 
     debug!("Se050 crate: SE050 Check Object Exist OK ");
