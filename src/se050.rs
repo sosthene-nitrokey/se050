@@ -734,18 +734,19 @@ pub trait Se050Device {
     fn write_ec_key(&mut self,policy: &[u8],  objectid: &[u8;4], eccurve: &[u8], private_key_value: &[u8],  delay: &mut DelayWrapper) -> Result<(), Se050Error>  ;
     
     //OLD VERSION
-    fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> ;
+   // fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> ;
     //DEFAULT CONFIGURATION OF SE050   
    
     //NEW VERSION
    // fn generate_p256_key(&mut self,policy: &[u8],  objectid: &[u8;4],  private_key_value: &[u8],  delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
+   fn generate_p256_key(&mut self,objectidentifier: &[u8;4] , delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> ;
+  
 
   // fn generate_ed255_key_pair(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error>;
 
-  fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> ;
+   fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> ;
  
-
-
+  
     //AN12413 //4.7 Secure Object management //4.7.1 WriteSecureObject// 4.7.1.2 WriteRSAKey //P.59-60  
     fn write_rsa_key(&mut self,policy: &[u8],  objectid: &[u8;4], keysize: &[u8;2],   delay: &mut DelayWrapper) -> Result<(), Se050Error> ;
     
@@ -6076,11 +6077,15 @@ see NXP AN12413 -> Secure Objects -> Default Configuration */
 
 
 #[inline(never)]
-fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
-    
+//fn generate_p256_key(&mut self, delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
+   
+   fn generate_p256_key(&mut self,objectidentifier: &[u8;4] , delay: &mut DelayWrapper) -> Result<ObjectId, Se050Error> {
+  
     debug!("Se050 crate: SE050 GenP256 DEBUG  tlv1");
      
-    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa1, 0x01]);
+   // let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &[0x20, 0xe8, 0xa1, 0x01]);
+
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectidentifier);
   
     debug!("Se050 crate: SE050 GenP256 DEBUG  tlv2");
 
