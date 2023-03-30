@@ -6358,7 +6358,7 @@ fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut Del
             ApduClass::ProprietaryPlain,
             //Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
           //  Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
-            Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
+            Into::<u8>::into(Se050ApduInstruction::Write),
             Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
             Se050ApduP2::Default.into(),
             None
