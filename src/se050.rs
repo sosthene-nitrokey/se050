@@ -2740,9 +2740,9 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
        
     {   
     
-        debug!("Se050 crate: SE050 read_secure_object DEBUG \n");
+    debug!("Se050 crate: SE050 read_secure_object DEBUG \n");
 
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectidentifier);
+    let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectidentifier);
        
     let mut capdu = CApdu::new(
     ApduClass::ProprietaryPlain,
@@ -2776,12 +2776,12 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
         error!("Se050 crate: SE050 Read_secure_object TLV Missing\n");
         Se050Error::UnknownError })?;
  
- /*
-
+ 
+/*  
     buf.copy_from_slice(tlv1_ret.get_data());
 
     debug!("Se050 crate: SE050 read_secure_object buf : {:#?}\n", buf);
-*/
+ */
 
     debug!("Se050 crate: SE050 read_secure_object tlv1_ret : {:#?} \n", tlv1_ret);
 
