@@ -2750,7 +2750,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
     Into::<u8>::into(Se050ApduInstruction::Read),
     Se050ApduP1CredType::Default.into(),
     Se050ApduP2::Default.into(),
-    Some(0x00)
+    Some(0)
     );
 
     capdu.push(tlv1);
