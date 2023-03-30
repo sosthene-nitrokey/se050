@@ -6357,6 +6357,7 @@ fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut Del
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             //Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
+          //  Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
             Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
             Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
             Se050ApduP2::Default.into(),
