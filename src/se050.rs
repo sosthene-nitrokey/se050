@@ -788,7 +788,10 @@ pub trait Se050Device {
     fn import_external_object(&mut self,authdata: &[u8],  hostpublickeyidentifier: &[u8],writesecureobjectcommand: &[u8],delay: &mut DelayWrapper) -> Result<(), Se050Error>;
     
     // See AN12413 // 4.7 Secure Object management // 4.7.3 ReadSecureObject //4.7.3.1 ReadObject // P.65-66
-    fn read_secure_object(&mut self,objectidentifier: &[u8;4], offset: &[u8;2],length: &[u8;2], rsakeycomponent : &[u8],  attobjectidentifier: &[u8;4],  attlogo: &[u8],   freshnessrandom: &[u8;16],     delay: &mut DelayWrapper) -> Result<(), Se050Error>;
+    //fn read_secure_object(&mut self,objectidentifier: &[u8;4], offset: &[u8;2],length: &[u8;2], rsakeycomponent : &[u8],  attobjectidentifier: &[u8;4],  attlogo: &[u8],   freshnessrandom: &[u8;16],     delay: &mut DelayWrapper) -> Result<(), Se050Error>;
+
+    fn read_secure_object(&mut self, buf: &mut [u8], objectidentifier: &[u8;4], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
+    
 
     // See AN12413 // 4.7 Secure Object management // 4.7.3 ReadSecureObject //4.7.3.2 ExportObject // P.67
     fn export_secure_object(&mut self,objectidentifier: &[u8;4] , rsakeycomponent : &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error>;
@@ -2679,6 +2682,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
     */
 
     //###########################################################################
+    /* 
     // See AN12413 // 4.7 Secure Object management // 4.7.3 ReadSecureObject //4.7.3.1 ReadObject // P.65-66
     #[inline(never)]
     fn read_secure_object(&mut self,objectidentifier: &[u8;4], offset: &[u8;2],length: &[u8;2], rsakeycomponent : &[u8],  attobjectidentifier: &[u8;4],  attlogo: &[u8],   freshnessrandom: &[u8;16],     delay: &mut DelayWrapper) -> Result<(), Se050Error>
@@ -2725,6 +2729,84 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
 
     Ok(())
     }
+
+*/
+
+ //###########################################################################
+    // See AN12413 // 4.7 Secure Object management // 4.7.3 ReadSecureObject //4.7.3.1 ReadObject // P.65-66
+    #[inline(never)]
+    //fn read_secure_object(&mut self,objectidentifier: &[u8;4], offset: &[u8;2],length: &[u8;2], rsakeycomponent : &[u8],  attobjectidentifier: &[u8;4],  attlogo: &[u8],   freshnessrandom: &[u8;16],     delay: &mut DelayWrapper) -> Result<(), Se050Error>
+    fn read_secure_object(&mut self, buf: &mut [u8], objectidentifier: &[u8;4], delay: &mut DelayWrapper) -> Result<(), Se050Error>
+       
+    {   
+    
+        debug!("Se050 crate: SE050 read_secure_object DEBUG \n");
+
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectidentifier);
+       
+    let mut capdu = CApdu::new(
+    ApduClass::ProprietaryPlain,
+    Into::<u8>::into(Se050ApduInstruction::Read),    
+    Se050ApduP1CredType::Default.into(),
+    Se050ApduP2::Default.into(),
+    Some(0x00)
+    );
+
+    capdu.push(tlv1);
+    
+
+    self.t1_proto
+    .send_apdu(&capdu, delay)
+    .map_err(|_| Se050Error::UnknownError)?;
+
+    let mut rapdu_buf: [u8; 260] = [0; 260];
+
+    let rapdu = self.t1_proto
+    .receive_apdu(&mut rapdu_buf, delay)
+    .map_err(|_| Se050Error::UnknownError)?;
+
+    if rapdu.sw != 0x9000 {
+    error!("SE050 read_secure_object Failed: {:x}", rapdu.sw);
+    return Err(Se050Error::UnknownError);
+    }
+
+
+    let tlv1_ret = rapdu.get_tlv(Se050TlvTag::Tag1.into()).ok_or_else(|| {
+        error!("Se050 crate: SE050 Check object exist TLV Missing\n");
+        Se050Error::UnknownError })?;
+ 
+ 
+
+    buf.copy_from_slice(tlv1_ret.get_data());
+
+    debug!("Se050 crate: SE050 read_secure_object buf : {:#?}\n", buf);
+
+    debug!("Se050 crate: SE050 read_secure_object tlv1_ret : {:#?} \n", tlv1_ret);
+
+    debug!("Se050 crate: SE050 read_secure_object tlv1_ret.get_data() : {:#?}\n",tlv1_ret.get_data());
+  
+    debug!("Se050 crate:  SE050 read_secure_object OK \n ");
+ 
+
+
+
+
+    Ok(())
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     //###########################################################################
@@ -6306,6 +6388,8 @@ fn generate_ed255_key_pair(&mut self, objectidentifier: &[u8;4] ,delay: &mut Del
  
 
     buf.copy_from_slice(tlv1_ret.get_data());
+
+//buf.clone_from_slice(tlv1_ret.get_data());
 
     debug!("Se050 crate  buf : {:#?}\n", buf);
 
