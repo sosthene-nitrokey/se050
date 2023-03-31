@@ -2746,8 +2746,8 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
        
     let mut capdu = CApdu::new(
     ApduClass::ProprietaryPlain,
-    //Into::<u8>::into(Se050ApduInstruction::Read)| APDU_INSTRUCTION_ATTEST  ,
-    Into::<u8>::into(Se050ApduInstruction::Read),
+    Into::<u8>::into(Se050ApduInstruction::Read)| APDU_INSTRUCTION_ATTEST  ,
+    //Into::<u8>::into(Se050ApduInstruction::Read),
     Se050ApduP1CredType::Default.into(),
     Se050ApduP2::Default.into(),
     Some(0x00)
