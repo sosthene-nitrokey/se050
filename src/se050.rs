@@ -2778,7 +2778,7 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
         Se050Error::UnknownError })?;
  
  
-    buf.copy_from_slice(tlv1_ret.get_data());
+    //buf.copy_from_slice(tlv1_ret.get_data());
 
      
 
@@ -2786,11 +2786,11 @@ fn write_aes_key(&mut self, key: &[u8], delay: &mut DelayWrapper) -> Result<(), 
    debug!("Se050 crate: SE050 read_secure_object buf : {:#?}\n", buf);
  
 
-    debug!("Se050 crate: SE050 read_secure_object tlv1_ret : {:#?} \n", tlv1_ret);
+   // debug!("Se050 crate: SE050 read_secure_object tlv1_ret : {:#?} \n", tlv1_ret);
 
     debug!("Se050 crate: SE050 read_secure_object tlv1_ret.get_data() : {:#?}\n",tlv1_ret.get_data());
   
-    debug!("Se050 crate:  SE050 read_secure_object OK \n ");
+   // debug!("Se050 crate:  SE050 read_secure_object OK \n ");
  
 
 
