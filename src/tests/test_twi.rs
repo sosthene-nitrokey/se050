@@ -12,7 +12,11 @@ pub struct TWI {
 
 impl TWI {
     pub fn new() -> Self {
-        Self { next_in: Deque::new(), next_out: Deque::new(), seen_in: Deque::new() }
+        Self {
+            next_in: Deque::new(),
+            next_out: Deque::new(),
+            seen_in: Deque::new(),
+        }
     }
 
     pub fn push_in(&mut self, slice: &[u8]) {
@@ -39,7 +43,8 @@ impl embedded_hal::blocking::i2c::Read for TWI {
     fn read(&mut self, _addr: u8, buf: &mut [u8]) -> Result<(), Self::Error> {
         let output = self.next_out.pop_front().ok_or_else(|| {
             std::println!("READ: Empty");
-            TestError::DequeUnderflow })?;
+            TestError::DequeUnderflow
+        })?;
 
         if output.len() > buf.len() {
             std::println!("READ: Size Overflow ({} > {})", output.len(), buf.len());
@@ -56,15 +61,21 @@ impl embedded_hal::blocking::i2c::Write for TWI {
     fn write(&mut self, _addr: u8, buf: &[u8]) -> Result<(), Self::Error> {
         let expected = self.next_in.pop_front().ok_or_else(|| {
             std::println!("WRITE: Empty");
-            TestError::DequeUnderflow })?;
+            TestError::DequeUnderflow
+        })?;
 
         if expected.as_slice() != buf {
-            std::println!("WRITE: Expectation Mismatch ({:?} != {:?})", expected.as_slice(), buf);
+            std::println!(
+                "WRITE: Expectation Mismatch ({:?} != {:?})",
+                expected.as_slice(),
+                buf
+            );
             return Err(TestError::Mismatch);
         }
         self.seen_in.push_back(expected).map_err(|_| {
             std::println!("WRITE: Log Deque Full");
-            TestError::DequeOverflow })?;
+            TestError::DequeOverflow
+        })?;
         Ok(())
     }
 }
@@ -80,5 +91,7 @@ impl embedded_hal::blocking::delay::DelayMs<u32> for DummyDelay {
 }
 
 pub fn get_delay_wrapper() -> crate::types::DelayWrapper {
-    crate::types::DelayWrapper { inner: unsafe { GLOBAL_DUMMY_DELAY.as_mut().unwrap() } }
+    crate::types::DelayWrapper {
+        inner: unsafe { GLOBAL_DUMMY_DELAY.as_mut().unwrap() },
+    }
 }

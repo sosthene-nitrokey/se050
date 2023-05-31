@@ -1,6 +1,6 @@
 use crate::types::*;
+use byteorder::{ByteOrder, BE, LE};
 use core::convert::{Into, TryInto};
-use byteorder::{ByteOrder, LE, BE};
 
 pub struct T1overI2C<TWI>
 where
@@ -21,7 +21,7 @@ const TWI_RETRY_DELAY_MS: u32 = 2;
 fn maybe_debug(label: &str, data: &[u8]) {
     if data.len() > 32 {
         let (dh, dt) = data.split_at(16);
-        debug!("{} {:?}...{:?}", label, dh, &dt[dt.len()-16..dt.len()]);
+        debug!("{} {:?}...{:?}", label, dh, &dt[dt.len() - 16..dt.len()]);
     } else {
         debug!("{} {:?}", label, data);
     }
@@ -87,13 +87,18 @@ where
         // read T1 frame header
         self.twi_read(&mut buf[0..3], delay)?;
         let pcb = buf[1].try_into().map_err(|_| T1Error::ProtocolError)?;
-        let mut header = T1Header { nad: buf[0], pcb, len: buf[2], crc: 0 };
+        let mut header = T1Header {
+            nad: buf[0],
+            pcb,
+            len: buf[2],
+            crc: 0,
+        };
         if header.nad != self.nad_se2hd {
             return Err(T1Error::ProtocolError);
         }
         let dlen = header.len as usize;
         if dlen + 2 > buf.len() {
-            return Err(T1Error::BufferOverrunError(dlen+2));
+            return Err(T1Error::BufferOverrunError(dlen + 2));
         }
         let mut crc_state = Se050CRC::new();
         crc_state.update(&buf[0..3]);
@@ -113,13 +118,19 @@ where
     }
 
     #[inline(never)]
-    fn send_frame(&mut self, pcb: T1PCB, data: &[u8], delay: &mut DelayWrapper) -> Result<(), T1Error> {
+    fn send_frame(
+        &mut self,
+        pcb: T1PCB,
+        data: &[u8],
+        delay: &mut DelayWrapper,
+    ) -> Result<(), T1Error> {
         if data.len() > MAX_IFSC {
             return Err(T1Error::BufferOverrunError(data.len()));
         }
 
         let mut buf = heapless::Vec::<u8, MAX_T1_FRAME_SIZE>::new();
-        buf.extend_from_slice(&[self.nad_hd2se, pcb.into(), data.len() as u8]).unwrap();
+        buf.extend_from_slice(&[self.nad_hd2se, pcb.into(), data.len() as u8])
+            .unwrap();
         buf.extend_from_slice(data).unwrap();
         let crc = Se050CRC::calculate(buf.as_slice());
         let mut crcbuf: [u8; 2] = [0, 0];
@@ -145,14 +156,18 @@ where
     ) -> Result<(), T1Error> {
         let header = self.receive_frame(data, delay)?;
         match header.pcb {
-        T1PCB::S(scode, true) if code == scode => { Ok(()) },
-        T1PCB::S(_, _) => { Err(T1Error::ProtocolError) },
-        T1PCB::R(_, r) => { Err(T1Error::RCodeReceived(r)) },
-        _ => { Err(T1Error::ProtocolError) }
+            T1PCB::S(scode, true) if code == scode => Ok(()),
+            T1PCB::S(_, _) => Err(T1Error::ProtocolError),
+            T1PCB::R(_, r) => Err(T1Error::RCodeReceived(r)),
+            _ => Err(T1Error::ProtocolError),
         }
     }
 
-    fn send_apdu_from_iter(&mut self, apdu_iter: &mut CApduByteIterator, delay: &mut DelayWrapper) -> Result<(), T1Error> {
+    fn send_apdu_from_iter(
+        &mut self,
+        apdu_iter: &mut CApduByteIterator,
+        delay: &mut DelayWrapper,
+    ) -> Result<(), T1Error> {
         let mut peek: Option<u8> = None;
         let mut buf: heapless::Vec<u8, MAX_IFSC> = heapless::Vec::new();
 
@@ -160,16 +175,24 @@ where
             buf.clear();
             loop {
                 let v = apdu_iter.next();
-                if v.is_none() { break; }
+                if v.is_none() {
+                    break;
+                }
                 buf.push(v.unwrap()).ok();
                 if buf.len() == MAX_IFSC {
                     peek = apdu_iter.next();
                     break;
                 }
             }
-            self.send_frame(T1PCB::I(self.iseq_snd, peek.is_some()), buf.as_slice(), delay)?;
+            self.send_frame(
+                T1PCB::I(self.iseq_snd, peek.is_some()),
+                buf.as_slice(),
+                delay,
+            )?;
             self.iseq_snd ^= 1;
-            if peek.is_none() { break; }
+            if peek.is_none() {
+                break;
+            }
             // receive R(N(R))
             todo!();
         }
@@ -204,20 +227,38 @@ where
         let mut buf_offset: usize = 0;
 
         loop {
-            if buf_offset == rapdu.data.len() { break; }
+            if buf_offset == rapdu.data.len() {
+                break;
+            }
             let tag = rapdu.data[buf_offset];
             let len: usize;
-            if buf_offset+1 >= rapdu.data.len() { return Err(T1Error::TlvParseError); }
-            if rapdu.data[buf_offset+1] == 0x82 {
-                if buf_offset+4 > rapdu.data.len() { return Err(T1Error::TlvParseError); }
-                len = BE::read_u16(&rapdu.data[buf_offset+2..buf_offset+4]) as usize;
-                if buf_offset+4+len > rapdu.data.len() { return Err(T1Error::TlvParseError); }
-                tlvs.push(SimpleTlv::new(tag, &rapdu.data[buf_offset+4..buf_offset+4+len])).map_err(|_| T1Error::TlvParseError)?;
+            if buf_offset + 1 >= rapdu.data.len() {
+                return Err(T1Error::TlvParseError);
+            }
+            if rapdu.data[buf_offset + 1] == 0x82 {
+                if buf_offset + 4 > rapdu.data.len() {
+                    return Err(T1Error::TlvParseError);
+                }
+                len = BE::read_u16(&rapdu.data[buf_offset + 2..buf_offset + 4]) as usize;
+                if buf_offset + 4 + len > rapdu.data.len() {
+                    return Err(T1Error::TlvParseError);
+                }
+                tlvs.push(SimpleTlv::new(
+                    tag,
+                    &rapdu.data[buf_offset + 4..buf_offset + 4 + len],
+                ))
+                .map_err(|_| T1Error::TlvParseError)?;
                 buf_offset += 4 + len;
-            } else if rapdu.data[buf_offset+1] < 0x80 {
-                len = rapdu.data[buf_offset+1] as usize;
-                if buf_offset+2+len > rapdu.data.len() { return Err(T1Error::TlvParseError); }
-                tlvs.push(SimpleTlv::new(tag, &rapdu.data[buf_offset+2..buf_offset+2+len])).map_err(|_| T1Error::TlvParseError)?;
+            } else if rapdu.data[buf_offset + 1] < 0x80 {
+                len = rapdu.data[buf_offset + 1] as usize;
+                if buf_offset + 2 + len > rapdu.data.len() {
+                    return Err(T1Error::TlvParseError);
+                }
+                tlvs.push(SimpleTlv::new(
+                    tag,
+                    &rapdu.data[buf_offset + 2..buf_offset + 2 + len],
+                ))
+                .map_err(|_| T1Error::TlvParseError)?;
                 buf_offset += 2 + len;
             }
         }
@@ -241,14 +282,21 @@ where
                 }
                 self.iseq_rcv ^= 1;
                 buf_offset += header.len as usize;
-                if !multi { break; }
+                if !multi {
+                    break;
+                }
                 self.send_frame(T1PCB::R(self.iseq_rcv, 0), &[], delay)?;
             }
         }
 
-        if buf_offset < 2 { return Err(T1Error::ProtocolError); }
-        let sw = BE::read_u16(&buf[buf_offset-2..buf_offset]);
-        Ok(RawRApdu { sw, data: &buf[0..buf_offset-2] })
+        if buf_offset < 2 {
+            return Err(T1Error::ProtocolError);
+        }
+        let sw = BE::read_u16(&buf[buf_offset - 2..buf_offset]);
+        Ok(RawRApdu {
+            sw,
+            data: &buf[0..buf_offset - 2],
+        })
     }
 
     #[inline(never)]
