@@ -23,9 +23,9 @@ pub enum Se050ApduError {
 }
 
 //SEE AN12413 P. 34 - Table 17. Instruction mask constants
-#[allow(dead_code)]
+#[allow(unused)]
 pub const INS_MASK_INS_CHAR: u8 = 0xE0;
-#[allow(dead_code)]
+#[allow(unused)]
 pub const INS_MASK_INSTRUCTION: u8 = 0x1F;
 
 //SEE AN12413 P. 34 - Table 18. Instruction characteristics constants
@@ -89,7 +89,7 @@ enum_u8! {
         Signature = 0x0c,
         MAC = 0x0d,
         Cipher = 0x0e,
-        TLS = 0x0f,
+        Tls = 0x0f,
         CryptoObj = 0x10,
         EcksgeckapkP1 = 0xBF,
     }
@@ -156,17 +156,17 @@ enum_u8! {
         ValidateOneshot = 0x46,
         CryptoList = 0x47,
         Random = 0x49,
-        TLS_PMS = 0x4a,
-        TLS_PRF_CLI_Hello = 0x4b,
-        TLS_PRF_SRV_Hello = 0x4c,
-        TLS_PRF_CLI_RND = 0x4d,
-        TLS_PRF_SRV_RND = 0x4e,
+        TlsPms = 0x4a,
+        TlsPrfCliHello = 0x4b,
+        TlsPrfSrvHello = 0x4c,
+        TlsPrfCliRnd = 0x4d,
+        TlsPrfSrvRnd = 0x4e,
         RAW = 0x4f,
         ImportExt = 0x51,
         SCP = 0x52,
         AuthFirstPart1 = 0x53,
         AuthNonfirstPart1 = 0x54,
-        ECKSGECKAPK_P2 = 0x21,
+        EcksgeckapkP2 = 0x21,
     }
 }
 
@@ -284,6 +284,7 @@ enum_u8! {
     }
 }
 
+#[allow(unused)]
 // See AN12413, 4.3.15 RSABitLength Table 33. RSABitLength P.40
 pub enum Se050RsaBitLength {
     Rsa512 = 512,
@@ -404,6 +405,7 @@ enum_u8! {
 // See AN12413,4.3.23 // 4.3.22 AttestationAlgo // AttestationAlgo is either ECSignatureAlgo or RSASignatureAlgo.
 
 // See AN12413,4.3.23 AppletConfig Table 40. Applet configurations   P.43-44
+#[allow(unused)]
 #[repr(u16)]
 pub enum Se050AppletConfig {
     ConfigEcdaa = 0x0001,
@@ -506,6 +508,7 @@ enum_u8! {
 //B1b2 = 0000 0010 = 0x02 ;
 //B1b1 = 0000 0001 = 0x01;
 
+#[allow(unused)]
 #[repr(u32)]
 pub enum Se050Sessionpolicies {
     //RFU = 0x80 ,
@@ -1806,7 +1809,7 @@ where
             Into::<u8>::into(Se050ApduInstruction::InstructECKSGECKAPK)
                 | APDU_INSTRUCTION_TRANSIENT,
             Se050ApduP1CredType::EcksgeckapkP1.into(),
-            Se050ApduP2::ECKSGECKAPK_P2.into(),
+            Se050ApduP2::EcksgeckapkP2.into(),
             Some(0),
         );
 
@@ -5821,7 +5824,7 @@ where
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Crypto) | APDU_INSTRUCTION_TRANSIENT,
-            Se050ApduP1CredType::TLS.into(),
+            Se050ApduP1CredType::Tls.into(),
             Se050ApduP2::Random.into(),
             Some(0x24),
         );
@@ -5883,8 +5886,8 @@ where
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Crypto) | APDU_INSTRUCTION_TRANSIENT,
-            Se050ApduP1CredType::TLS.into(),
-            Se050ApduP2::TLS_PMS.into(),
+            Se050ApduP1CredType::Tls.into(),
+            Se050ApduP2::TlsPms.into(),
             None,
         );
 
@@ -5965,8 +5968,8 @@ where
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Crypto) | APDU_INSTRUCTION_TRANSIENT,
-            Se050ApduP1CredType::TLS.into(),
-            Se050ApduP2::TLS_PRF_CLI_Hello.into(),
+            Se050ApduP1CredType::Tls.into(),
+            Se050ApduP2::TlsPrfCliHello.into(),
             Some(0x00),
         );
 
