@@ -1,3 +1,4 @@
+use crate::macros::enum_u8;
 use crate::types::*;
 use byteorder::{ByteOrder, BE};
 use core::convert::{From, TryFrom};
@@ -37,256 +38,254 @@ pub const APDU_INSTRUCTION_AUTH_OBJECT: u8 = 0x40;
 pub const APDU_INSTRUCTION_ATTEST: u8 = 0x20;
 
 //See AN12413,- 4.3.3 Instruction - Table 19. Instruction constants P. 35
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050ApduInstruction {
-    /* mask:0x1f */
-    Write = 0x01,
-    Read = 0x02,
-    Crypto = 0x03,
-    Mgmt = 0x04,
-    Process = 0x05,
-    ImportExternal = 0x06,
-    InstructECKSIA = 0x88,
-    InstructECKSGECKAPK = 0xCA,
-    InstructApplet = 0xA4,
+enum_u8! {
+    pub enum Se050ApduInstruction {
+        #![mask(0x1F)]
+        Write = 0x01,
+        Read = 0x02,
+        Crypto = 0x03,
+        Mgmt = 0x04,
+        Process = 0x05,
+        ImportExternal = 0x06,
+        InstructECKSIA = 0x88,
+        InstructECKSGECKAPK = 0xCA,
+        InstructApplet = 0xA4,
+    }
 }
 
 // See AN12413,  Table 20. P1Mask constants P. 35
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050ApduP1Maskconstants {
-    P1Unused = 0x80,
-    P1MaskKeyType = 0x60,
-    P1MaskCredType = 0x1F,
+enum_u8! {
+    pub enum Se050ApduP1Maskconstants {
+        P1Unused = 0x80,
+        P1MaskKeyType = 0x60,
+        P1MaskCredType = 0x1F,
+    }
 }
 
 // See AN12413,  Table 21. P1KeyType constants P. 35
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050ApduP1KeyType {
-    /* mask:0x60 */
-    KeyPair = 0x60,
-    PrivateKey = 0x40,
-    PublicKey = 0x20,
+enum_u8! {
+    pub enum Se050ApduP1KeyType {
+        #![mask(0x60)]
+        KeyPair = 0x60,
+        PrivateKey = 0x40,
+        PublicKey = 0x20,
+    }
 }
 
 // See  AN12413, Table 22. P1Cred constants P. 35 - 36
-#[allow(dead_code, clippy::upper_case_acronyms)]
-#[repr(u8)]
-pub enum Se050ApduP1CredType {
-    Default = 0x00,
-    EC = 0x01,
-    RSA = 0x02,
-    AES = 0x03,
-    DES = 0x04,
-    HMAC = 0x05,
-    Binary = 0x06,
-    UserID = 0x07,
-    Counter = 0x08,
-    PCR = 0x09,
-    Curve = 0x0b,
-    Signature = 0x0c,
-    MAC = 0x0d,
-    Cipher = 0x0e,
-    TLS = 0x0f,
-    CryptoObj = 0x10,
-    EcksgeckapkP1 = 0xBF,
+enum_u8! {
+    pub enum Se050ApduP1CredType {
+        Default = 0x00,
+        EC = 0x01,
+        RSA = 0x02,
+        AES = 0x03,
+        DES = 0x04,
+        HMAC = 0x05,
+        Binary = 0x06,
+        UserID = 0x07,
+        Counter = 0x08,
+        PCR = 0x09,
+        Curve = 0x0b,
+        Signature = 0x0c,
+        MAC = 0x0d,
+        Cipher = 0x0e,
+        TLS = 0x0f,
+        CryptoObj = 0x10,
+        EcksgeckapkP1 = 0xBF,
+    }
 }
 
 // See AN12413, 4.3.5 P2 parameter Table 23. P2 constants -P. 36 - 37
-#[allow(dead_code, non_camel_case_types, clippy::upper_case_acronyms)]
-#[repr(u8)]
-pub enum Se050ApduP2 {
-    Default = 0x00,
-    Generate = 0x03,
-    Create = 0x04,
-    Size = 0x07,
-    Sign = 0x09,
-    Verify = 0x0a,
-    Init = 0x0b,
-    Update = 0x0c,
-    Final = 0x0d,
-    Oneshot = 0x0e,
-    DH = 0x0f,
-    Diversify = 0x10,
-    AuthFirstPart2 = 0x12,
-    AuthNonfirstPart2 = 0x13,
-    DumpKey = 0x14,
-    ChangeKeyPart1 = 0x15,
-    ChangeKeyPart2 = 0x16,
-    KillAuth = 0x17,
-    Import = 0x18,
-    Export = 0x19,
-    SessionCreate = 0x1b,
-    SessionClose = 0x1c,
-    SessionRefresh = 0x1e,
-    SessionPolicy = 0x1f,
-    Version = 0x20,
-    Memory = 0x22,
-    List = 0x25,
-    Type = 0x26,
-    Exist = 0x27,
-    DeleteObject = 0x28,
-    DeleteAll = 0x2a,
-    SessionUserID = 0x2c,
-    HKDF = 0x2d,
-    PBKDF = 0x2e,
-    I2CM = 0x30,
-    I2CMAttested = 0x31,
-    MAC = 0x32,
-    UnlockChallenge = 0x33,
-    CurveList = 0x34,
-    SignECDAA = 0x35,
-    ID = 0x36,
-    EncryptOneshot = 0x37,
-    DecryptOneshot = 0x38,
-    Attest = 0x3a,
-    Attributes = 0x3b,
-    CPLC = 0x3c,
-    Time = 0x3d,
-    Transport = 0x3e,
-    Variant = 0x3f,
-    Param = 0x40,
-    DeleteCurve = 0x41,
-    Encrypt = 0x42,
-    Decrypt = 0x43,
-    Validate = 0x44,
-    GenerateOneshot = 0x45,
-    ValidateOneshot = 0x46,
-    CryptoList = 0x47,
-    Random = 0x49,
-    TLS_PMS = 0x4a,
-    TLS_PRF_CLI_Hello = 0x4b,
-    TLS_PRF_SRV_Hello = 0x4c,
-    TLS_PRF_CLI_RND = 0x4d,
-    TLS_PRF_SRV_RND = 0x4e,
-    RAW = 0x4f,
-    ImportExt = 0x51,
-    SCP = 0x52,
-    AuthFirstPart1 = 0x53,
-    AuthNonfirstPart1 = 0x54,
-    ECKSGECKAPK_P2 = 0x21,
+enum_u8! {
+    pub enum Se050ApduP2 {
+        Default = 0x00,
+        Generate = 0x03,
+        Create = 0x04,
+        Size = 0x07,
+        Sign = 0x09,
+        Verify = 0x0a,
+        Init = 0x0b,
+        Update = 0x0c,
+        Final = 0x0d,
+        Oneshot = 0x0e,
+        DH = 0x0f,
+        Diversify = 0x10,
+        AuthFirstPart2 = 0x12,
+        AuthNonfirstPart2 = 0x13,
+        DumpKey = 0x14,
+        ChangeKeyPart1 = 0x15,
+        ChangeKeyPart2 = 0x16,
+        KillAuth = 0x17,
+        Import = 0x18,
+        Export = 0x19,
+        SessionCreate = 0x1b,
+        SessionClose = 0x1c,
+        SessionRefresh = 0x1e,
+        SessionPolicy = 0x1f,
+        Version = 0x20,
+        Memory = 0x22,
+        List = 0x25,
+        Type = 0x26,
+        Exist = 0x27,
+        DeleteObject = 0x28,
+        DeleteAll = 0x2a,
+        SessionUserID = 0x2c,
+        HKDF = 0x2d,
+        PBKDF = 0x2e,
+        I2CM = 0x30,
+        I2CMAttested = 0x31,
+        MAC = 0x32,
+        UnlockChallenge = 0x33,
+        CurveList = 0x34,
+        SignECDAA = 0x35,
+        ID = 0x36,
+        EncryptOneshot = 0x37,
+        DecryptOneshot = 0x38,
+        Attest = 0x3a,
+        Attributes = 0x3b,
+        CPLC = 0x3c,
+        Time = 0x3d,
+        Transport = 0x3e,
+        Variant = 0x3f,
+        Param = 0x40,
+        DeleteCurve = 0x41,
+        Encrypt = 0x42,
+        Decrypt = 0x43,
+        Validate = 0x44,
+        GenerateOneshot = 0x45,
+        ValidateOneshot = 0x46,
+        CryptoList = 0x47,
+        Random = 0x49,
+        TLS_PMS = 0x4a,
+        TLS_PRF_CLI_Hello = 0x4b,
+        TLS_PRF_SRV_Hello = 0x4c,
+        TLS_PRF_CLI_RND = 0x4d,
+        TLS_PRF_SRV_RND = 0x4e,
+        RAW = 0x4f,
+        ImportExt = 0x51,
+        SCP = 0x52,
+        AuthFirstPart1 = 0x53,
+        AuthNonfirstPart1 = 0x54,
+        ECKSGECKAPK_P2 = 0x21,
+    }
 }
 
 // See AN12413, 4.3.6 SecureObject type Table 24. SecureObjectType constants   P. 38
-#[allow(dead_code, clippy::upper_case_acronyms)]
-#[repr(u8)]
-pub enum Se050ApduSecObjType {
-    ECKeyPair = 0x01,
-    ECPrivKey = 0x02,
-    ECPubKey = 0x03,
-    RSAKeyPair = 0x04,
-    RSAKeyPairCRT = 0x05,
-    RSAPrivKey = 0x06,
-    RSAPrivKeyCRT = 0x07,
-    RSAPubKey = 0x08,
-    AESKey = 0x09,
-    DESKey = 0x0a,
-    BinaryFile = 0x0b,
-    UserID = 0x0c,
-    Counter = 0x0d,
-    PCR = 0x0f,
-    Curve = 0x10,
-    HMACKey = 0x11,
+enum_u8! {
+    pub enum Se050ApduSecObjType {
+        ECKeyPair = 0x01,
+        ECPrivKey = 0x02,
+        ECPubKey = 0x03,
+        RSAKeyPair = 0x04,
+        RSAKeyPairCRT = 0x05,
+        RSAPrivKey = 0x06,
+        RSAPrivKeyCRT = 0x07,
+        RSAPubKey = 0x08,
+        AESKey = 0x09,
+        DESKey = 0x0a,
+        BinaryFile = 0x0b,
+        UserID = 0x0c,
+        Counter = 0x0d,
+        PCR = 0x0f,
+        Curve = 0x10,
+        HMACKey = 0x11,
+    }
 }
 
 // See AN12413,  4.3.7 Memory Table 25. Memory constants  P.38
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050ApduMemoryType {
-    Persistent = 1,
-    TransientReset = 2,
-    TransientDeselect = 3,
+enum_u8! {
+    pub enum Se050ApduMemoryType {
+        Persistent = 1,
+        TransientReset = 2,
+        TransientDeselect = 3,
+    }
 }
 
 // See AN12413, 4.3.8 Origin Table 26. Origin constants  P. 38
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050ApduObjectOrigin {
-    External = 1,
-    Internal = 2,
-    Provisioned = 3,
+enum_u8! {
+    pub enum Se050ApduObjectOrigin {
+        External = 1,
+        Internal = 2,
+        Provisioned = 3,
+    }
 }
 
 // See AN12413,4.3.9 TLV tags Table 27. Tags P.39
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050TlvTag {
-    SessionID = 0x10,
-    Policy = 0x11,
-    MaxAttempts = 0x12,
-    ImportAuthData = 0x13,
-    ImportAuthKeyID = 0x14,
-    Tag1 = 0x41,
-    Tag2 = 0x42,
-    Tag3 = 0x43,
-    Tag4 = 0x44,
-    Tag5 = 0x45,
-    Tag6 = 0x46,
-    Tag7 = 0x47,
-    Tag8 = 0x48,
-    Tag9 = 0x49,
-    Tag10 = 0x4a,
+enum_u8! {
+    pub enum Se050TlvTag {
+        SessionID = 0x10,
+        Policy = 0x11,
+        MaxAttempts = 0x12,
+        ImportAuthData = 0x13,
+        ImportAuthKeyID = 0x14,
+        Tag1 = 0x41,
+        Tag2 = 0x42,
+        Tag3 = 0x43,
+        Tag4 = 0x44,
+        Tag5 = 0x45,
+        Tag6 = 0x46,
+        Tag7 = 0x47,
+        Tag8 = 0x48,
+        Tag9 = 0x49,
+        Tag10 = 0x4a,
+    }
 }
 
 // See AN12413,4.3.10 ECSignatureAlgo Table 28. ECSignatureAlgo P.39
 //(See AN12413, 4.3.22 AttestationAlgo AttestationAlgo is either ECSignatureAlgo or RSASignatureAlgo. P.43)
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050ECSignatureAlgo {
-    SigEcdsaPlain = 0x09,
-    SigEcdsaSha = 0x11,
-    SigEcdsaSha224 = 0x25,
-    SigEcdsaSha256 = 0x21,
-    SigEcdsaSha384 = 0x22,
-    SigEcdsaSha512 = 0x26,
+enum_u8! {
+    pub enum Se050ECSignatureAlgo {
+        SigEcdsaPlain = 0x09,
+        SigEcdsaSha = 0x11,
+        SigEcdsaSha224 = 0x25,
+        SigEcdsaSha256 = 0x21,
+        SigEcdsaSha384 = 0x22,
+        SigEcdsaSha512 = 0x26,
+    }
 }
 
 // See AN12413, 4.3.11 EDSignatureAlgo Table 29. EDSignatureAlgo P.39
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050EDSignatureAlgo {
-    SigEd25519pure = 0xA3,
+enum_u8! {
+    pub enum Se050EDSignatureAlgo {
+        SigEd25519pure = 0xA3,
+    }
 }
 
 // See AN12413, 4.3.12 ECDAASignatureAlgo Table 30. ECDAASignatureAlgo P.40
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050ECDAASignatureAlgo {
-    SigEcdaa = 0xF4,
+enum_u8! {
+    pub enum Se050ECDAASignatureAlgo {
+        SigEcdaa = 0xF4,
+    }
 }
 
 // See AN12413, 4.3.13 RSASignatureAlgo Table 31. RSASignatureAlgo P.40
 //See AN12413, 4.3.22 AttestationAlgo AttestationAlgo is either ECSignatureAlgo or RSASignatureAlgo. P.43
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050RSASignatureAlgo {
-    RsaSha1Pkcs1Pss = 0x15,
-    RsaSha224Pkcs1Pss = 0x2B,
-    RsaSha256Pkcs1Pss = 0x2C,
-    RsaSha384Pkcs1Pss = 0x2D,
-    RsaSha512Pkcs1Pss = 0x2E,
-    RsaSha1Pkcs1 = 0x0A,
-    RsaSha224Pkcs1 = 0x27,
-    RsaSha256Pkcs1 = 0x28,
-    RsaSha384Pkcs1 = 0x29,
-    RsaSha512Pkcs1 = 0x2A,
+enum_u8! {
+    pub enum Se050RSASignatureAlgo {
+        RsaSha1Pkcs1Pss = 0x15,
+        RsaSha224Pkcs1Pss = 0x2B,
+        RsaSha256Pkcs1Pss = 0x2C,
+        RsaSha384Pkcs1Pss = 0x2D,
+        RsaSha512Pkcs1Pss = 0x2E,
+        RsaSha1Pkcs1 = 0x0A,
+        RsaSha224Pkcs1 = 0x27,
+        RsaSha256Pkcs1 = 0x28,
+        RsaSha384Pkcs1 = 0x29,
+        RsaSha512Pkcs1 = 0x2A,
+    }
 }
 
 // See AN12413, 4.3.14 RSAEncryptionAlgo Table 32. RSAEncryptionAlgo P.40
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050RSAEncryptionAlgo {
-    RsaNoPad = 0x0C,
-    RsaPkcs1 = 0x0A,
-    RsaPkcs10aep = 0x0F,
+enum_u8! {
+    pub enum Se050RSAEncryptionAlgo {
+        RsaNoPad = 0x0C,
+        RsaPkcs1 = 0x0A,
+        RsaPkcs10aep = 0x0F,
+    }
 }
 
 // See AN12413, 4.3.15 RSABitLength Table 33. RSABitLength P.40
-#[allow(dead_code)]
-#[repr(u16)]
-pub enum Se050RSABitLength {
+pub enum Se050RsaBitLength {
     Rsa512 = 512,
     Rsa1024 = 1024,
     Rsa1152 = 1152,
@@ -296,116 +295,115 @@ pub enum Se050RSABitLength {
 }
 
 // See AN12413, 4.3.16 RSAKeyComponent Table 34. RSAKeyComponentP.41
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050RSAKeyComponent {
-    RsaCompMod = 0x00,
-    RsaCompPubExp = 0x01,
-    RsaCompPrivExp = 0x02,
-    RsaCompP = 0x03,
-    RsaCompQ = 0x04,
-    RsaCompDp = 0x05,
-    RsaCompDq = 0x06,
-    RsaCompInvq = 0x07,
+enum_u8! {
+    pub enum Se050RsaKeyComponent {
+        RsaCompMod = 0x00,
+        RsaCompPubExp = 0x01,
+        RsaCompPrivExp = 0x02,
+        RsaCompP = 0x03,
+        RsaCompQ = 0x04,
+        RsaCompDp = 0x05,
+        RsaCompDq = 0x06,
+        RsaCompInvq = 0x07,
+    }
 }
 
 // See AN12413, 4.3.17 DigestMode Table 35. DigestMode constants P.41
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050DigestModeconstants {
-    DigestNoHash = 0x00,
-    DigestSha = 0x01,
-    DigestSha224 = 0x07,
-    DigestSha256 = 0x04,
-    DigestSha384 = 0x05,
-    DigestSha512 = 0x06,
+enum_u8! {
+    pub enum Se050DigestModeconstants {
+        DigestNoHash = 0x00,
+        DigestSha = 0x01,
+        DigestSha224 = 0x07,
+        DigestSha256 = 0x04,
+        DigestSha384 = 0x05,
+        DigestSha512 = 0x06,
+    }
 }
 
 // See AN12413, 4.3.18 MACAlgo Table 36. MACAlgo constants P.41- 42
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050MACAlgoconstants {
-    HmacSha = 0x18,
-    HmacSha256 = 0x19,
-    HmacSha384 = 0x1A,
-    HmacSha512 = 0x1B,
-    Cmac128 = 0x31,
-    DesMac4Iso9797M2 = 0x05,
-    DesMac4Iso9797_1M2Alg3 = 0x13,
-    DesMac4Iso9797M1 = 0x03,
-    DesMac4Iso9797_1M1Alg3 = 0x2F,
-    DesMac8Iso9797M2 = 0x06,
-    DesMac8Iso9797_1M2Alg3 = 0x14,
-    DesMac8Iso9797_1M1Alg3 = 0x04,
-    // DES_MAC8_ISO9797_1_M1_ALG3 = 0x30,
-    //CMAC128 = 0x31,
-    DesCmac8 = 0x7A,
-    AesCmac16 = 0x66,
+enum_u8! {
+    pub enum Se050MACAlgoconstants {
+        HmacSha = 0x18,
+        HmacSha256 = 0x19,
+        HmacSha384 = 0x1A,
+        HmacSha512 = 0x1B,
+        Cmac128 = 0x31,
+        DesMac4Iso9797M2 = 0x05,
+        DesMac4Iso9797_1M2Alg3 = 0x13,
+        DesMac4Iso9797M1 = 0x03,
+        DesMac4Iso9797_1M1Alg3 = 0x2F,
+        DesMac8Iso9797M2 = 0x06,
+        DesMac8Iso9797_1M2Alg3 = 0x14,
+        DesMac8Iso9797_1M1Alg3 = 0x04,
+        // DES_MAC8_ISO9797_1_M1_ALG3 = 0x30,
+        //CMAC128 = 0x31,
+        DesCmac8 = 0x7A,
+        AesCmac16 = 0x66,
+    }
 }
 
 // See AN12413,4.3.19 ECCurve Table 37. ECCurve constants   P.42
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050ECCurveconstants {
-    NistP192 = 0x01,
-    NistP224 = 0x02,
-    NistP256 = 0x03,
-    NistP384 = 0x04,
-    NistP521 = 0x05,
+enum_u8! {
+    pub enum Se050ECCurveconstants {
+        NistP192 = 0x01,
+        NistP224 = 0x02,
+        NistP256 = 0x03,
+        NistP384 = 0x04,
+        NistP521 = 0x05,
 
-    Brainpool160 = 0x06,
-    Brainpool192 = 0x07,
-    Brainpool224 = 0x08,
-    Brainpool256 = 0x09,
-    Brainpool320 = 0x0A,
-    Brainpool384 = 0x0B,
-    Brainpool512 = 0x0C,
+        Brainpool160 = 0x06,
+        Brainpool192 = 0x07,
+        Brainpool224 = 0x08,
+        Brainpool256 = 0x09,
+        Brainpool320 = 0x0A,
+        Brainpool384 = 0x0B,
+        Brainpool512 = 0x0C,
 
-    Secp160k1 = 0x0D,
-    Secp192k1 = 0x0E,
-    Secp224k1 = 0x0F,
-    Secp256k1 = 0x10,
+        Secp160k1 = 0x0D,
+        Secp192k1 = 0x0E,
+        Secp224k1 = 0x0F,
+        Secp256k1 = 0x10,
 
-    TpmEccBnP256 = 0x11,
-    IdEccEd25519 = 0x40,
-    IdEccMontDh25519 = 0x41,
+        TpmEccBnP256 = 0x11,
+        IdEccEd25519 = 0x40,
+        IdEccMontDh25519 = 0x41,
+    }
 }
 
 // See AN12413, 4.3.20 ECCurveParam  Table 38. ECCurveParam constants P 42
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050ECCurveParamconstants {
-    CurveParamA = 0x01,
-    CurveParamB = 0x02,
-    CurveParamG = 0x04,
-    CurveParamN = 0x08,
-    CurveParamPrime = 0x10,
+enum_u8! {
+    pub enum Se050ECCurveParamconstants {
+        CurveParamA = 0x01,
+        CurveParamB = 0x02,
+        CurveParamG = 0x04,
+        CurveParamN = 0x08,
+        CurveParamPrime = 0x10,
+    }
 }
 
 // See AN12413,4.3.21 CipherMode Table 39. CipherMode constants   P.43
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050CipherModeconstants {
-    DesCbcNopad = 0x01,
-    DesCbcIso9797M1 = 0x02,
-    DesCbcIso9797M2 = 0x03,
-    DesCbcPkcs5 = 0x04,
-    DesEcbNopad = 0x05,
-    DesEcbIso9797M1 = 0x06,
-    DesEcbIso9797M2 = 0x07,
-    DesEcbPkcs5 = 0x08,
-    AesEcbNopad = 0x0E,
-    AesCbcNopad = 0x0D,
-    AesCbcIso9797M1 = 0x16,
-    AesCbcIso9797M2 = 0x17,
-    AesCbcPkcs5 = 0x18,
-    AesCtr = 0xF0,
+enum_u8! {
+    pub enum Se050CipherModeconstants {
+        DesCbcNopad = 0x01,
+        DesCbcIso9797M1 = 0x02,
+        DesCbcIso9797M2 = 0x03,
+        DesCbcPkcs5 = 0x04,
+        DesEcbNopad = 0x05,
+        DesEcbIso9797M1 = 0x06,
+        DesEcbIso9797M2 = 0x07,
+        DesEcbPkcs5 = 0x08,
+        AesEcbNopad = 0x0E,
+        AesCbcNopad = 0x0D,
+        AesCbcIso9797M1 = 0x16,
+        AesCbcIso9797M2 = 0x17,
+        AesCbcPkcs5 = 0x18,
+        AesCtr = 0xF0,
+    }
 }
 
 // See AN12413,4.3.23 // 4.3.22 AttestationAlgo // AttestationAlgo is either ECSignatureAlgo or RSASignatureAlgo.
 
 // See AN12413,4.3.23 AppletConfig Table 40. Applet configurations   P.43-44
-#[allow(dead_code)]
 #[repr(u16)]
 pub enum Se050AppletConfig {
     ConfigEcdaa = 0x0001,
@@ -430,68 +428,68 @@ pub enum Se050AppletConfig {
 }
 
 // See AN12413, 4.3.24 LockIndicator ,Table 41. LockIndicator constants  P.44
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050LockIndicatorconstants {
-    TransientLock = 0x01,
-    PersistentLock = 0x02,
+enum_u8! {
+    pub enum Se050LockIndicatorconstants {
+        TransientLock = 0x01,
+        PersistentLock = 0x02,
+    }
 }
 
 // See AN12413,  4.3.25 ,   Table 42. LockState constants   P.44
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050LockStateconstants {
-    LOCKED = 0x01,
-    UNLOCKED = 0x02,
+enum_u8! {
+    pub enum Se050LockStateconstants {
+        LOCKED = 0x01,
+        UNLOCKED = 0x02,
+    }
 }
 
 // See AN12413,   4.3.26 CryptoContext , Table 43. P.44
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050CryptoContextconstants {
-    CcDigest = 0x01,
-    CcCipher = 0x02,
-    CcSignature = 0x03,
+enum_u8! {
+    pub enum Se050CryptoContextconstants {
+        CcDigest = 0x01,
+        CcCipher = 0x02,
+        CcSignature = 0x03,
+    }
 }
 
 // See AN12413,  4.3.27 Result  Table 44. Result constants P.44
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050Resultconstants {
-    ResultSuccess = 0x01,
-    ResultFailure = 0x02,
+enum_u8! {
+    pub enum Se050Resultconstants {
+        ResultSuccess = 0x01,
+        ResultFailure = 0x02,
+    }
 }
 
 // See AN12413,4.3.28  TransientIndicator, Table 45. TransientIndicator constants P.44
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050TransientIndicatorconstants {
-    PERSISTENT = 0x01,
-    TRANSIENT = 0x02,
+enum_u8! {
+    pub enum Se050TransientIndicatorconstants {
+        PERSISTENT = 0x01,
+        TRANSIENT = 0x02,
+    }
 }
 
 // See AN12413,4.3.28, 4.3.29 SetIndicator  Table 46. SetIndicator constants P.45
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050SetIndicatorconstants {
-    NotSet = 0x01,
-    SET = 0x02,
+enum_u8! {
+    pub enum Se050SetIndicatorconstants {
+        NotSet = 0x01,
+        SET = 0x02,
+    }
 }
 
 // See AN12413,4.3.28, 4.3.30 MoreIndicator   Table 47. MoreIndicator constants   P.45
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050MoreIndicatorconstants {
-    NoMore = 0x01,
-    MORE = 0x02,
+enum_u8! {
+    pub enum Se050MoreIndicatorconstants {
+        NoMore = 0x01,
+        MORE = 0x02,
+    }
 }
 
 // See AN12413,4.3.28, 4.3.31 PlatformSCPRequest , Table 48. PlatformSCPRequest constants P.45
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050PlatformSCPRequestconstants {
-    ScpRequired = 0x01,
-    ScpNotRequired = 0x02,
+enum_u8! {
+    pub enum Se050PlatformSCPRequestconstants {
+        ScpRequired = 0x01,
+        ScpNotRequired = 0x02,
+    }
 }
 
 // See AN12413,// 4.3.34 Policy constants // 4.3.34.1 Session policy P.46
@@ -508,7 +506,6 @@ pub enum Se050PlatformSCPRequestconstants {
 //B1b2 = 0000 0010 = 0x02 ;
 //B1b1 = 0000 0001 = 0x01;
 
-#[allow(dead_code)]
 #[repr(u32)]
 pub enum Se050Sessionpolicies {
     //RFU = 0x80 ,
@@ -582,13 +579,11 @@ pub enum Se050Objectpolicies {
     //RFU = 0x010000 ,
 }
 
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum Se050keyversionnumber {
-    KeyVersionNumber00 = 0x00,
+enum_u8! {
+    pub enum Se050keyversionnumber {
+        KeyVersionNumber00 = 0x00,
+    }
 }
-
-include!("se050_convs.rs");
 
 //////////////////////////////////////////////////////////////////////////////
 //trait-Se050Device ->  struct Se050

@@ -1,3 +1,4 @@
+use crate::macros::enum_u8;
 use core::convert::{From, Into, TryFrom};
 use embedded_hal::blocking::delay::DelayMs;
 
@@ -28,37 +29,37 @@ pub enum Iso7816Error {
     ValueError,
 }
 
-#[derive(Copy, Clone)]
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum ApduClass {
-    StandardPlain = 0b0000_0000,
-    ProprietaryPlain = 0b1000_0000,
-    ProprietarySecure = 0b1000_0100,
+enum_u8! {
+    #[derive(Copy, Clone)]
+    pub enum ApduClass {
+        StandardPlain = 0b0000_0000,
+        ProprietaryPlain = 0b1000_0000,
+        ProprietarySecure = 0b1000_0100,
+    }
 }
 
-#[derive(Copy, Clone)]
-#[allow(dead_code)]
-#[repr(u8)]
-pub enum ApduStandardInstruction {
-    EraseBinary = 0x0e,
-    Verify = 0x20,
-    ManageChannel = 0x70,
-    ExternalAuthenticate = 0x82,
-    GetChallenge = 0x84,
-    InternalAuthenticate = 0x88,
-    SelectFile = 0xa4,
-    ReadBinary = 0xb0,
-    ReadRecords = 0xb2,
-    GetResponse = 0xc0,
-    Envelope = 0xc2,
-    GetData = 0xca,
-    WriteBinary = 0xd0,
-    WriteRecord = 0xd2,
-    UpdateBinary = 0xd6,
-    PutData = 0xda,
-    UpdateData = 0xdc,
-    AppendRecord = 0xe2,
+enum_u8! {
+    #[derive(Copy, Clone)]
+    pub enum ApduStandardInstruction {
+        EraseBinary = 0x0e,
+        Verify = 0x20,
+        ManageChannel = 0x70,
+        ExternalAuthenticate = 0x82,
+        GetChallenge = 0x84,
+        InternalAuthenticate = 0x88,
+        SelectFile = 0xa4,
+        ReadBinary = 0xb0,
+        ReadRecords = 0xb2,
+        GetResponse = 0xc0,
+        Envelope = 0xc2,
+        GetData = 0xca,
+        WriteBinary = 0xd0,
+        WriteRecord = 0xd2,
+        UpdateBinary = 0xd6,
+        PutData = 0xda,
+        UpdateData = 0xdc,
+        AppendRecord = 0xe2,
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -368,17 +369,18 @@ impl core::convert::From<T1PCB> for u8 {
     }
 }
 
-#[allow(clippy::upper_case_acronyms)]
-#[derive(PartialEq, Eq)]
-pub enum T1SCode {
-    Resync = 0,
-    IFS = 1,
-    Abort = 2,
-    WTX = 3,
-    EndApduSession = 5,
-    ChipReset = 6,
-    GetATR = 7,
-    InterfaceSoftReset = 15,
+enum_u8! {
+    #[derive(PartialEq, Eq)]
+    pub enum T1SCode {
+        Resync = 0,
+        IFS = 1,
+        Abort = 2,
+        WTX = 3,
+        EndApduSession = 5,
+        ChipReset = 6,
+        GetATR = 7,
+        InterfaceSoftReset = 15,
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -450,5 +452,3 @@ pub type Se050CRC = crc16::State<crc16::X_25>;
 //////////////////////////////////////////////////////////////////////////////
 
 pub struct ObjectId(pub [u8; 4]);
-
-include!("types_convs.rs");

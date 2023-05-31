@@ -11,5 +11,7 @@ pub use crate::se050::{Se050, Se050Device};
 pub use t1::T1overI2C;
 pub use types::{DelayWrapper, ObjectId};
 
+pub(crate) mod macros;
+
 #[cfg(test)]
 mod tests;
