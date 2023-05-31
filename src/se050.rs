@@ -1507,7 +1507,7 @@ where
         session_policies: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &session_policies);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), session_policies);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -1549,8 +1549,8 @@ where
         session_id: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlvtgsid = SimpleTlv::new(Se050TlvTag::SessionID.into(), &session_id);
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &apducommand);
+        let tlvtgsid = SimpleTlv::new(Se050TlvTag::SessionID.into(), session_id);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), apducommand);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -1591,7 +1591,7 @@ where
         policy: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlvtgsid = SimpleTlv::new(Se050TlvTag::Policy.into(), &policy);
+        let tlvtgsid = SimpleTlv::new(Se050TlvTag::Policy.into(), policy);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -1668,7 +1668,7 @@ where
         user_idvalue: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &user_idvalue);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), user_idvalue);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -1866,8 +1866,8 @@ where
         lockstate: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &lockindicator);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &lockstate);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), lockindicator);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag1.into(), lockstate);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -1958,7 +1958,7 @@ where
         applet_config: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &applet_config);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), applet_config);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -2334,7 +2334,7 @@ where
         keysize: &[u8; 2],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), &policy);
+        let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), policy);
 
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectid);
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), keysize);
@@ -2533,7 +2533,7 @@ where
             todo!();
         }
 
-        let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), &policy);
+        let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), policy);
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectid);
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), kekid);
         let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), key);
@@ -2588,7 +2588,7 @@ where
             todo!();
         }
 
-        let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), &policy);
+        let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), policy);
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectid);
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), kekid);
         let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), key);
@@ -2633,11 +2633,11 @@ where
         data1: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), &policy);
+        let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), policy);
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectid);
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), file_offset);
         let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), file_length);
-        let tlv4 = SimpleTlv::new(Se050TlvTag::Tag4.into(), &data1);
+        let tlv4 = SimpleTlv::new(Se050TlvTag::Tag4.into(), data1);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -2745,7 +2745,7 @@ where
         user_identifier_value: &[u8; 16],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), &policy);
+        let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), policy);
 
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectid);
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), user_identifier_value);
@@ -2801,10 +2801,10 @@ where
         counterfile: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), &policy);
+        let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), policy);
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), counterid);
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), countersize);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &counterfile);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), counterfile);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -2860,10 +2860,10 @@ where
         ext: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), &policy);
+        let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), policy);
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), pcrid);
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), initial_hash_value);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &ext);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), ext);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -2920,8 +2920,8 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), identifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &rsakeycomponent);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &serializedobjectencrypted);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), rsakeycomponent);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), serializedobjectencrypted);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -2981,12 +2981,12 @@ where
         writesecureobjectcommand: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlva = SimpleTlv::new(Se050TlvTag::ImportAuthData.into(), &authdata);
+        let tlva = SimpleTlv::new(Se050TlvTag::ImportAuthData.into(), authdata);
         let tlvb = SimpleTlv::new(
             Se050TlvTag::ImportAuthKeyID.into(),
-            &hostpublickeyidentifier,
+            hostpublickeyidentifier,
         );
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &writesecureobjectcommand);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), writesecureobjectcommand);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -3154,7 +3154,7 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectidentifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &rsakeycomponent);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), rsakeycomponent);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -3484,7 +3484,7 @@ where
         eccurve: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &eccurve);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), eccurve);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -3528,9 +3528,9 @@ where
         curveparametervalue: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &eccurve);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &eccurveparam);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &curveparametervalue);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), eccurve);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag1.into(), eccurveparam);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), curveparametervalue);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -3647,7 +3647,7 @@ where
         eccurve: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &eccurve);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), eccurve);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -3704,8 +3704,8 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), cryptoobjectidentifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &cryptocontext);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &cryptoobjectsubtype);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), cryptocontext);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag2.into(), cryptoobjectsubtype);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -3848,7 +3848,7 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), eckeyidentifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &ecsignaturealgo);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), ecsignaturealgo);
         let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), inputdata);
 
         let mut capdu = CApdu::new(
@@ -3899,7 +3899,7 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), eckeyidentifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &edsignaturealgo);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), edsignaturealgo);
         let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), inputdata);
 
         let mut capdu = CApdu::new(
@@ -3953,7 +3953,7 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), eckeyidentifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &ecdaasignaturealgo);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), ecdaasignaturealgo);
         let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), hashedinputdata);
         let tlv4 = SimpleTlv::new(Se050TlvTag::Tag4.into(), randomdata);
 
@@ -4008,9 +4008,9 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), eckeyidentifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &ecsignaturealgo);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &hashedcomparedata);
-        let tlv5 = SimpleTlv::new(Se050TlvTag::Tag5.into(), &asn1signaturedata);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), ecsignaturealgo);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), hashedcomparedata);
+        let tlv5 = SimpleTlv::new(Se050TlvTag::Tag5.into(), asn1signaturedata);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -4068,8 +4068,8 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), eckeyidentifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &edsignaturealgo);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &plaincomparedata);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), edsignaturealgo);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), plaincomparedata);
         let tlv5 = SimpleTlv::new(Se050TlvTag::Tag5.into(), signaturedata);
 
         let mut capdu = CApdu::new(
@@ -4125,7 +4125,7 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), eckeyidentifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &eckey);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), eckey);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -4189,8 +4189,8 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), rsakeyidentifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &rsasignaturealgo);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &inputdata);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), rsasignaturealgo);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), inputdata);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -4241,9 +4241,9 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), rsakeyidentifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &rsasignaturealgo);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &datatobeverified);
-        let tlv4 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &asn1signature);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), rsasignaturealgo);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), datatobeverified);
+        let tlv4 = SimpleTlv::new(Se050TlvTag::Tag3.into(), asn1signature);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -4291,8 +4291,8 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), rsakeyidentifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &rsaencryptionalgo);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &datatobeencrypted);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), rsaencryptionalgo);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), datatobeencrypted);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -4339,8 +4339,8 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), rsakeyidentifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &rsaencryptionalgo);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &datatobedecrypted);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), rsaencryptionalgo);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), datatobedecrypted);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -4418,7 +4418,7 @@ where
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), keyobjectidentifier);
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), cryptoobjectidentifier);
-        let tlv4 = SimpleTlv::new(Se050TlvTag::Tag4.into(), &initializationvector);
+        let tlv4 = SimpleTlv::new(Se050TlvTag::Tag4.into(), initializationvector);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -4460,7 +4460,7 @@ where
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), keyobjectidentifier);
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), cryptoobjectidentifier);
-        let tlv4 = SimpleTlv::new(Se050TlvTag::Tag4.into(), &initializationvector);
+        let tlv4 = SimpleTlv::new(Se050TlvTag::Tag4.into(), initializationvector);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -4505,7 +4505,7 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), cryptoobjectidentifier);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &inputdata);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), inputdata);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -4549,7 +4549,7 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), cryptoobjectidentifier);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &inputdata);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), inputdata);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -4602,9 +4602,9 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), keybjectidentifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &ciphermode); // 4.3.21 CipherMode Table 39. CipherMode constants
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &inputdata);
-        let tlv4 = SimpleTlv::new(Se050TlvTag::Tag4.into(), &initializationvector);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), ciphermode); // 4.3.21 CipherMode Table 39. CipherMode constants
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), inputdata);
+        let tlv4 = SimpleTlv::new(Se050TlvTag::Tag4.into(), initializationvector);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -4647,9 +4647,9 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), keybjectidentifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &ciphermode); // 4.3.21 CipherMode Table 39. CipherMode constants
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &inputdata);
-        let tlv4 = SimpleTlv::new(Se050TlvTag::Tag4.into(), &initializationvector);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), ciphermode); // 4.3.21 CipherMode Table 39. CipherMode constants
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), inputdata);
+        let tlv4 = SimpleTlv::new(Se050TlvTag::Tag4.into(), initializationvector);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -4768,7 +4768,7 @@ where
             return Err(Se050Error::UnknownError);
         }
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectid);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &cipher_mode); // 4.3.21 CipherMode Table 39. CipherMode constants
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), cipher_mode); // 4.3.21 CipherMode Table 39. CipherMode constants
         let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), data);
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -4848,7 +4848,7 @@ where
             return Err(Se050Error::UnknownError);
         }
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectid);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &cipher_mode); // 4.3.21 CipherMode Table 39. CipherMode constants
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), cipher_mode); // 4.3.21 CipherMode Table 39. CipherMode constants
         let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), data);
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -4921,7 +4921,7 @@ where
             return Err(Se050Error::UnknownError);
         }
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectid);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &cipher_mode); // 4.3.21 CipherMode Table 39. CipherMode constants
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), cipher_mode); // 4.3.21 CipherMode Table 39. CipherMode constants
         let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), data);
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -5058,7 +5058,7 @@ where
         cryptobjectidentifier: &[u8; 2],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &macdatainput);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), macdatainput);
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), cryptobjectidentifier);
 
         let mut capdu = CApdu::new(
@@ -5107,9 +5107,9 @@ where
         mactovalidate: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &macdatainput);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), macdatainput);
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), cryptobjectidentifier);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &mactovalidate);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), mactovalidate);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -5164,9 +5164,9 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), keyobjectidentifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &macalgo);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &datainputtomac);
-        let tlv5 = SimpleTlv::new(Se050TlvTag::Tag5.into(), &mactoverify);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), macalgo);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), datainputtomac);
+        let tlv5 = SimpleTlv::new(Se050TlvTag::Tag5.into(), mactoverify);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -5239,7 +5239,7 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), hmackeyidentifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &digestmode);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), digestmode);
         let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), salt);
         let tlv4 = SimpleTlv::new(Se050TlvTag::Tag4.into(), info);
         let tlv5 = SimpleTlv::new(Se050TlvTag::Tag5.into(), requestedlength);
@@ -5688,9 +5688,9 @@ where
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), oldkey);
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), newkey);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &setnumber);
-        let tlv4 = SimpleTlv::new(Se050TlvTag::Tag4.into(), &desfirekeynumber);
-        let tlv5 = SimpleTlv::new(Se050TlvTag::Tag5.into(), &keyversion);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), setnumber);
+        let tlv4 = SimpleTlv::new(Se050TlvTag::Tag4.into(), desfirekeynumber);
+        let tlv5 = SimpleTlv::new(Se050TlvTag::Tag5.into(), keyversion);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -5737,7 +5737,7 @@ where
 
     #[inline(never)]
     fn dfchangekeypart2(&mut self, mac: &[u8], delay: &mut DelayWrapper) -> Result<(), Se050Error> {
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &mac);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), mac);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -5960,7 +5960,7 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), hmackeyidentifier);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &digestmode);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), digestmode);
         let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), label);
         let tlv4 = SimpleTlv::new(Se050TlvTag::Tag4.into(), random);
         let tlv5 = SimpleTlv::new(Se050TlvTag::Tag5.into(), requestlenght);
@@ -6040,10 +6040,10 @@ where
         freshnessrandom: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &i2ccommand);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &attestationobjectidentifier);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &attestationalgo);
-        let tlv7 = SimpleTlv::new(Se050TlvTag::Tag7.into(), &freshnessrandom);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), i2ccommand);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), attestationobjectidentifier);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), attestationalgo);
+        let tlv7 = SimpleTlv::new(Se050TlvTag::Tag7.into(), freshnessrandom);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -6159,7 +6159,7 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), cryptoobjectidentifier);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &datatobehashed);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), datatobehashed);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -6208,7 +6208,7 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), cryptoobjectidentifier);
-        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &datatobehashed);
+        let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), datatobehashed);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -6256,8 +6256,8 @@ where
         datatobehashed: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &digestmode);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &datatobehashed);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), digestmode);
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), datatobehashed);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -6392,7 +6392,7 @@ where
         memoryconstant: &[u8],
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
-        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), &memoryconstant);
+        let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), memoryconstant);
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
@@ -6909,7 +6909,7 @@ where
     ) -> Result<(), Se050Error> {
         // let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), &policy);
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectid);
-        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), &eccurve); // Se050ECCurveconstants
+        let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), eccurve); // Se050ECCurveconstants
                                                                        //  let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &private_key_value );
 
         let mut capdu = CApdu::new(

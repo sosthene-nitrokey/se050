@@ -109,12 +109,7 @@ pub struct RApdu<'a> {
 
 impl<'a> RApdu<'a> {
     pub fn get_tlv(&self, tag: u8) -> Option<&SimpleTlv<'a>> {
-        for tlv in self.tlvs.iter() {
-            if tlv.tag == tag {
-                return Some(tlv);
-            }
-        }
-        None
+        self.tlvs.iter().find(|&tlv| tlv.tag == tag)
     }
 }
 
@@ -294,7 +289,7 @@ impl<'a> Iterator for CApduByteIterator<'a> {
                 Some(ret)
             }
             2 => {
-                if self.capdu_trailer.len() == 0 {
+                if self.capdu_trailer.is_empty() {
                     None
                 } else {
                     let ret = self.capdu_trailer[self.off];
