@@ -1,0 +1,32 @@
+[package]
+name = "se050-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+arbitrary = { version = "1.3.0", features = ["derive"] }
+iso7816 = { version = "0.1.1", features = ["std"] }
+
+[dependencies.se050]
+path = ".."
+
+# Prevent this from interfering with workspaces
+[workspace]
+members = ["."]
+
+[profile.release]
+debug = 1
+
+[[bin]]
+name = "fuzz_target_1"
+path = "fuzz_targets/fuzz_target_1.rs"
+test = false
+doc = false
+
+[patch.crates-io]
+iso7816 = { git = "https://github.com/sosthene-nitrokey/iso7816.git", rev = "f3725685b59fbdb49650f117496e0926fc74b11e" }

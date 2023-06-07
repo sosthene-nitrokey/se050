@@ -192,7 +192,7 @@ impl<'a> CApduByteIterator<'a> {
         lc: usize,
         le: Option<usize>,
     ) -> Self {
-        let is_extended = lc > 255 || le.map_or(false, |le| le > 255);
+        let is_extended = lc > 255 || le.map_or(false, |le| le > 256);
 
         let mut obj = Self {
             // capdu: capdu,
@@ -214,9 +214,15 @@ impl<'a> CApduByteIterator<'a> {
         }
         if let Some(le) = le {
             if is_extended {
-                obj.capdu_trailer
-                    .extend_from_slice(&[0x00, (le >> 8) as u8, le as u8])
-                    .unwrap();
+                if lc == 0 {
+                    obj.capdu_trailer
+                        .extend_from_slice(&[0x00, (le >> 8) as u8, le as u8])
+                        .unwrap();
+                } else {
+                    obj.capdu_trailer
+                        .extend_from_slice(&[(le >> 8) as u8, le as u8])
+                        .unwrap();
+                }
             } else {
                 obj.capdu_trailer.push(le as u8).unwrap();
             }
@@ -243,7 +249,7 @@ impl<'a> CApduByteIterator<'a> {
         obj
     }
 
-    fn from_capdu_raw(capdu: &'a RawCApdu<'a>) -> Self {
+    pub fn from_capdu_raw(capdu: &'a RawCApdu<'a>) -> Self {
         let mut obj = Self::from_capdu_common(
             capdu.cla,
             capdu.ins,
@@ -270,7 +276,7 @@ impl<'a> Iterator for CApduByteIterator<'a> {
                 let ret = self.capdu_header[self.off];
                 self.off += 1;
                 if self.off == self.capdu_header.len() {
-                    self.area = 1;
+                    self.area = if self.body.is_empty() { 2 } else { 1 };
                     self.off = 0;
                 }
                 Some(ret)
