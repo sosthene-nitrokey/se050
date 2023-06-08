@@ -9,19 +9,6 @@ pub enum Se050Error {
     T1Error(T1Error),
 }
 
-//SEE AN12413 P. 34 - Table 15. Error codes
-#[allow(dead_code)]
-#[repr(u16)]
-
-pub enum Se050ApduError {
-    SwNoError = 0x9000,
-    SwConditionsNotSatisfied = 0x6985,
-    SwSecurityStatus = 0x6982,
-    SwWrongData = 0x6A80,
-    SwDataInvalid = 0x6984,
-    SwCommandNotAllowed = 0x6986,
-}
-
 //SEE AN12413 P. 34 - Table 17. Instruction mask constants
 #[allow(unused)]
 pub const INS_MASK_INS_CHAR: u8 = 0xE0;
@@ -56,9 +43,9 @@ enum_u8! {
 // See AN12413,  Table 20. P1Mask constants P. 35
 enum_u8! {
     pub enum Se050ApduP1Maskconstants {
-        P1Unused = 0x80,
-        P1MaskKeyType = 0x60,
-        P1MaskCredType = 0x1F,
+        Unused = 0x80,
+        MaskKeyType = 0x60,
+        MaskCredType = 0x1F,
     }
 }
 
@@ -76,18 +63,18 @@ enum_u8! {
 enum_u8! {
     pub enum Se050ApduP1CredType {
         Default = 0x00,
-        EC = 0x01,
-        RSA = 0x02,
-        AES = 0x03,
-        DES = 0x04,
-        HMAC = 0x05,
+        Ec = 0x01,
+        Rsa = 0x02,
+        Aes = 0x03,
+        Des = 0x04,
+        Hmac = 0x05,
         Binary = 0x06,
         UserID = 0x07,
         Counter = 0x08,
-        PCR = 0x09,
+        Pcr = 0x09,
         Curve = 0x0b,
         Signature = 0x0c,
-        MAC = 0x0d,
+        Mac = 0x0d,
         Cipher = 0x0e,
         Tls = 0x0f,
         CryptoObj = 0x10,
@@ -130,11 +117,11 @@ enum_u8! {
         DeleteObject = 0x28,
         DeleteAll = 0x2a,
         SessionUserID = 0x2c,
-        HKDF = 0x2d,
-        PBKDF = 0x2e,
+        Hkdf = 0x2d,
+        Pbkdf = 0x2e,
         I2CM = 0x30,
         I2CMAttested = 0x31,
-        MAC = 0x32,
+        Mac = 0x32,
         UnlockChallenge = 0x33,
         CurveList = 0x34,
         SignECDAA = 0x35,
@@ -143,7 +130,7 @@ enum_u8! {
         DecryptOneshot = 0x38,
         Attest = 0x3a,
         Attributes = 0x3b,
-        CPLC = 0x3c,
+        Cplc = 0x3c,
         Time = 0x3d,
         Transport = 0x3e,
         Variant = 0x3f,
@@ -161,9 +148,9 @@ enum_u8! {
         TlsPrfSrvHello = 0x4c,
         TlsPrfCliRnd = 0x4d,
         TlsPrfSrvRnd = 0x4e,
-        RAW = 0x4f,
+        Raw = 0x4f,
         ImportExt = 0x51,
-        SCP = 0x52,
+        Scp = 0x52,
         AuthFirstPart1 = 0x53,
         AuthNonfirstPart1 = 0x54,
         EcksgeckapkP2 = 0x21,
@@ -173,22 +160,22 @@ enum_u8! {
 // See AN12413, 4.3.6 SecureObject type Table 24. SecureObjectType constants   P. 38
 enum_u8! {
     pub enum Se050ApduSecObjType {
-        ECKeyPair = 0x01,
-        ECPrivKey = 0x02,
-        ECPubKey = 0x03,
-        RSAKeyPair = 0x04,
-        RSAKeyPairCRT = 0x05,
-        RSAPrivKey = 0x06,
-        RSAPrivKeyCRT = 0x07,
-        RSAPubKey = 0x08,
-        AESKey = 0x09,
-        DESKey = 0x0a,
+        EcKeyPair = 0x01,
+        EcPrivKey = 0x02,
+        EcPubKey = 0x03,
+        RsaKeyPair = 0x04,
+        RsaKeyPairCRT = 0x05,
+        RsaPrivKey = 0x06,
+        RsaPrivKeyCRT = 0x07,
+        RsaPubKey = 0x08,
+        AesKey = 0x09,
+        DesKey = 0x0a,
         BinaryFile = 0x0b,
         UserID = 0x0c,
         Counter = 0x0d,
-        PCR = 0x0f,
+        Pcr = 0x0f,
         Curve = 0x10,
-        HMACKey = 0x11,
+        HmacKey = 0x11,
     }
 }
 
@@ -408,25 +395,25 @@ enum_u8! {
 #[allow(unused)]
 #[repr(u16)]
 pub enum Se050AppletConfig {
-    ConfigEcdaa = 0x0001,
-    ConfigEcdsaEcdhEcdhe = 0x0002,
-    ConfigEddsaA = 0x0004,
-    ConfigDhMont = 0x0008,
-    ConfigHmac = 0x0010,
-    ConfigRsaPlain = 0x0020,
-    ConfigRsaCrt = 0x0040,
-    ConfigAes = 0x0080,
+    Ecdaa = 0x0001,
+    EcdsaEcdhEcdhe = 0x0002,
+    EddsaA = 0x0004,
+    DhMont = 0x0008,
+    Hmac = 0x0010,
+    RsaPlain = 0x0020,
+    RsaCrt = 0x0040,
+    Aes = 0x0080,
 
-    ConfigDes = 0x0100,
-    ConfigPbkdf = 0x0200,
-    ConfigTls = 0x0400,
-    ConfigMifare = 0x0800,
-    ConfigFipsModeDisabled = 0x1000,
-    ConfigI2cm = 0x2000,
+    Des = 0x0100,
+    Pbkdf = 0x0200,
+    Tls = 0x0400,
+    Mifare = 0x0800,
+    FipsModeDisabled = 0x1000,
+    I2cm = 0x2000,
 
-    ConfigEccAll = 0x000F,
-    ConfigRsaAll = 0x0060,
-    ConfigAll = 0x3FFF,
+    EccAll = 0x000F,
+    RsaAll = 0x0060,
+    All = 0x3FFF,
 }
 
 // See AN12413, 4.3.24 LockIndicator ,Table 41. LockIndicator constants  P.44
@@ -440,33 +427,33 @@ enum_u8! {
 // See AN12413,  4.3.25 ,   Table 42. LockState constants   P.44
 enum_u8! {
     pub enum Se050LockStateconstants {
-        LOCKED = 0x01,
-        UNLOCKED = 0x02,
+        Locked = 0x01,
+        Unlocked = 0x02,
     }
 }
 
 // See AN12413,   4.3.26 CryptoContext , Table 43. P.44
 enum_u8! {
     pub enum Se050CryptoContextconstants {
-        CcDigest = 0x01,
-        CcCipher = 0x02,
-        CcSignature = 0x03,
+        Digest = 0x01,
+        Cipher = 0x02,
+        Signature = 0x03,
     }
 }
 
 // See AN12413,  4.3.27 Result  Table 44. Result constants P.44
 enum_u8! {
     pub enum Se050Resultconstants {
-        ResultSuccess = 0x01,
-        ResultFailure = 0x02,
+        Success = 0x01,
+        Failure = 0x02,
     }
 }
 
 // See AN12413,4.3.28  TransientIndicator, Table 45. TransientIndicator constants P.44
 enum_u8! {
     pub enum Se050TransientIndicatorconstants {
-        PERSISTENT = 0x01,
-        TRANSIENT = 0x02,
+        Persistent = 0x01,
+        Transient = 0x02,
     }
 }
 
@@ -474,7 +461,7 @@ enum_u8! {
 enum_u8! {
     pub enum Se050SetIndicatorconstants {
         NotSet = 0x01,
-        SET = 0x02,
+        Set = 0x02,
     }
 }
 
@@ -482,7 +469,7 @@ enum_u8! {
 enum_u8! {
     pub enum Se050MoreIndicatorconstants {
         NoMore = 0x01,
-        MORE = 0x02,
+        More = 0x02,
     }
 }
 
@@ -554,28 +541,28 @@ pub enum Se050Sessionpolicies {
 pub enum Se050Objectpolicies {
     //RFU = 0x80 ,
     //RFU = 0x40 ,
-    PolicyObjForbidAll = 0x20,
-    PolicyObjAllowSign = 0x10,
+    ForbidAll = 0x20,
+    AllowSign = 0x10,
 
-    PolicyObjAllowVerify = 0x08,
-    PolicyObjAllowKa = 0x04,
-    PolicyObjAllowEnc = 0x02,
-    PolicyObjAllowDec = 0x01,
+    AllowVerify = 0x08,
+    AllowKa = 0x04,
+    AllowEnc = 0x02,
+    AllowDec = 0x01,
 
-    PolicyObjAllowKdf = 0x8000,
-    PolicyObjAllowWrap = 0x4000,
-    PolicyObjAllowRead = 0x2000,
-    PolicyObjAllowWrite = 0x1000,
+    AllowKdf = 0x8000,
+    AllowWrap = 0x4000,
+    AllowRead = 0x2000,
+    AllowWrite = 0x1000,
 
-    PolicyObjAllowGen = 0x0800,
-    PolicyObjAllowDelete = 0x0400,
-    PolicyObjRequireSm = 0x0200,
-    PolicyObjRequirePcrValue = 0x0100,
+    AllowGen = 0x0800,
+    AllowDelete = 0x0400,
+    RequireSm = 0x0200,
+    RequirePcrValue = 0x0100,
 
-    PolicyObjAllowAttestation = 0x800000,
-    PolicyObjAllowDesfireAuthentication = 0x400000,
-    PolicyObjAllowDesfireDumpSessionKeys = 0x200000,
-    PolicyObjAllowImportExport = 0x100000,
+    AllowAttestation = 0x800000,
+    AllowDesfireAuthentication = 0x400000,
+    AllowDesfireDumpSessionKeys = 0x200000,
+    AllowImportExport = 0x100000,
     //RFU = 0x080000 ,
     //RFU = 0x040000 ,
     //RFU = 0x020000 ,
@@ -1923,7 +1910,7 @@ where
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Mgmt) | APDU_INSTRUCTION_TRANSIENT,
             Se050ApduP1CredType::Default.into(),
-            Se050ApduP2::SCP.into(),
+            Se050ApduP2::Scp.into(),
             None,
         );
 
@@ -2342,8 +2329,8 @@ where
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
-            Se050ApduP1CredType::RSA | Se050ApduP1KeyType::KeyPair,
-            Se050ApduP2::RAW.into(),
+            Se050ApduP1CredType::Rsa | Se050ApduP1KeyType::KeyPair,
+            Se050ApduP2::Raw.into(),
             None,
         );
 
@@ -2434,7 +2421,7 @@ where
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
-            Se050ApduP1CredType::AES.into(),
+            Se050ApduP1CredType::Aes.into(),
             Se050ApduP2::Default.into(),
             Some(0),
         );
@@ -2483,7 +2470,7 @@ where
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
-            Se050ApduP1CredType::AES.into(),
+            Se050ApduP1CredType::Aes.into(),
             Se050ApduP2::Default.into(),
             Some(0),
         );
@@ -2541,7 +2528,7 @@ where
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
-            Se050ApduP1CredType::DES.into(),
+            Se050ApduP1CredType::Des.into(),
             Se050ApduP2::Default.into(),
             Some(0),
         );
@@ -2596,7 +2583,7 @@ where
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
-            Se050ApduP1CredType::HMAC.into(),
+            Se050ApduP1CredType::Hmac.into(),
             Se050ApduP2::Default.into(),
             Some(0),
         );
@@ -2982,10 +2969,7 @@ where
         delay: &mut DelayWrapper,
     ) -> Result<(), Se050Error> {
         let tlva = SimpleTlv::new(Se050TlvTag::ImportAuthData.into(), authdata);
-        let tlvb = SimpleTlv::new(
-            Se050TlvTag::ImportAuthKeyID.into(),
-            hostpublickeyidentifier,
-        );
+        let tlvb = SimpleTlv::new(Se050TlvTag::ImportAuthKeyID.into(), hostpublickeyidentifier);
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), writesecureobjectcommand);
 
         let mut capdu = CApdu::new(
@@ -4130,7 +4114,7 @@ where
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Crypto) | APDU_INSTRUCTION_TRANSIENT,
-            Se050ApduP1CredType::EC.into(),
+            Se050ApduP1CredType::Ec.into(),
             Se050ApduP2::DH.into(),
             Some(0x00),
         );
@@ -4297,7 +4281,7 @@ where
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Crypto) | APDU_INSTRUCTION_TRANSIENT,
-            Se050ApduP1CredType::RSA.into(),
+            Se050ApduP1CredType::Rsa.into(),
             Se050ApduP2::EncryptOneshot.into(),
             Some(0x00),
         );
@@ -4345,7 +4329,7 @@ where
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Crypto) | APDU_INSTRUCTION_TRANSIENT,
-            Se050ApduP1CredType::RSA.into(),
+            Se050ApduP1CredType::Rsa.into(),
             Se050ApduP2::DecryptOneshot.into(),
             Some(0x00),
         );
@@ -5018,7 +5002,7 @@ where
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Crypto) | APDU_INSTRUCTION_TRANSIENT,
-            Se050ApduP1CredType::MAC.into(),
+            Se050ApduP1CredType::Mac.into(),
             Se050ApduP2::Generate.into(),
             Some(0x00),
         );
@@ -5064,7 +5048,7 @@ where
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Crypto) | APDU_INSTRUCTION_TRANSIENT,
-            Se050ApduP1CredType::MAC.into(),
+            Se050ApduP1CredType::Mac.into(),
             Se050ApduP2::Update.into(),
             None,
         );
@@ -5114,7 +5098,7 @@ where
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Crypto) | APDU_INSTRUCTION_TRANSIENT,
-            Se050ApduP1CredType::MAC.into(),
+            Se050ApduP1CredType::Mac.into(),
             Se050ApduP2::Final.into(),
             Some(0x00),
         );
@@ -5171,7 +5155,7 @@ where
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Crypto) | APDU_INSTRUCTION_TRANSIENT,
-            Se050ApduP1CredType::MAC.into(),
+            Se050ApduP1CredType::Mac.into(),
             Se050ApduP2::GenerateOneshot.into(),
             Some(0x00),
         );
@@ -5248,7 +5232,7 @@ where
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Crypto) | APDU_INSTRUCTION_TRANSIENT,
             Se050ApduP1CredType::Default.into(),
-            Se050ApduP2::HKDF.into(),
+            Se050ApduP2::Hkdf.into(),
             Some(0x00),
         );
 
@@ -5310,7 +5294,7 @@ where
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Crypto) | APDU_INSTRUCTION_TRANSIENT,
             Se050ApduP1CredType::Default.into(),
-            Se050ApduP2::PBKDF.into(),
+            Se050ApduP2::Pbkdf.into(),
             Some(0x00),
         );
 
@@ -6677,7 +6661,7 @@ where
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Write),
-            Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
+            Se050ApduP1CredType::Ec | Se050ApduP1KeyType::KeyPair,
             Se050ApduP2::Default.into(),
             None,
         );
@@ -6741,7 +6725,7 @@ where
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             Into::<u8>::into(Se050ApduInstruction::Write),
-            Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
+            Se050ApduP1CredType::Ec | Se050ApduP1KeyType::KeyPair,
             Se050ApduP2::Default.into(),
             None,
         );
@@ -6910,14 +6894,14 @@ where
         // let tlvp = SimpleTlv::new(Se050TlvTag::Policy.into(), &policy);
         let tlv1 = SimpleTlv::new(Se050TlvTag::Tag1.into(), objectid);
         let tlv2 = SimpleTlv::new(Se050TlvTag::Tag2.into(), eccurve); // Se050ECCurveconstants
-                                                                       //  let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &private_key_value );
+                                                                      //  let tlv3 = SimpleTlv::new(Se050TlvTag::Tag3.into(), &private_key_value );
 
         let mut capdu = CApdu::new(
             ApduClass::ProprietaryPlain,
             //Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
             //  Into::<u8>::into(Se050ApduInstruction::Write) | APDU_INSTRUCTION_TRANSIENT,
             Into::<u8>::into(Se050ApduInstruction::Write),
-            Se050ApduP1CredType::EC | Se050ApduP1KeyType::KeyPair,
+            Se050ApduP1CredType::Ec | Se050ApduP1KeyType::KeyPair,
             Se050ApduP2::Default.into(),
             None,
         );

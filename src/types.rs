@@ -374,9 +374,9 @@ enum_u8! {
     #[derive(PartialEq, Eq)]
     pub enum T1SCode {
         Resync = 0,
-        IFS = 1,
+        Ifs = 1,
         Abort = 2,
-        WTX = 3,
+        Wtx = 3,
         EndApduSession = 5,
         ChipReset = 6,
         GetATR = 7,

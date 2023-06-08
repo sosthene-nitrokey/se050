@@ -48,7 +48,7 @@ where
         for _i in 0..TWI_RETRIES {
             let e = self.twi.write(self.se_address as u8, data);
             if e.is_ok() {
-                trace!("t1w ok({})", i);
+                trace!("t1w ok({})", _i);
                 return Ok(());
             }
             delay.inner.delay_ms(TWI_RETRY_DELAY_MS);
@@ -64,7 +64,7 @@ where
             let e = self.twi.read(self.se_address as u8, data);
             if e.is_ok() {
                 maybe_debug("T1 R", data);
-                trace!("t1r ok({})", i);
+                trace!("t1r ok({})", _i);
                 return Ok(());
             }
             delay.inner.delay_ms(TWI_RETRY_DELAY_MS);
