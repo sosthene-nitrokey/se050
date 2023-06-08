@@ -44,8 +44,7 @@ checksum = "6548a0ad5d2549e111e1f6a11a6c2e2d00ce6a3dafe22948d67c2b443f775e52"
 [[package]]
 name = "delog"
 version = "0.1.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4cd67f90cc14e0a91cf693141453cccf2b74db9d59c40f6be18b79169fe77dfd"
+source = "git+https://github.com/sosthene-nitrokey/delog.git?rev=41901aa4d44e64f729a4d5ec5638c3911b8184a9#41901aa4d44e64f729a4d5ec5638c3911b8184a9"
 dependencies = [
  "log",
 ]
